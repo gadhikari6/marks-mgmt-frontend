@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import { useState } from "react"
 import { useFormik } from "formik"
 import * as yup from "yup"
 import {
@@ -17,7 +17,7 @@ const LoginForm = () => {
   const initialValues = {
     email: "",
     password: "",
-    rememberMe: true,
+   
   }
 
   const [loginError, setLoginError] = useState("")
@@ -40,6 +40,8 @@ const LoginForm = () => {
       console.log(values)
 
       const data = await response.json()
+
+      console.log(data)
 
       if (response.ok) {
         // Login success
@@ -110,7 +112,7 @@ const LoginForm = () => {
             margin="normal"
           />
 
-          <FormControlLabel
+          {/* <FormControlLabel
             control={
               <Checkbox
                 id="rememberMe"
@@ -120,7 +122,7 @@ const LoginForm = () => {
               />
             }
             label="Remember me"
-          />
+          /> */}
 
           <Button
             type="submit"
