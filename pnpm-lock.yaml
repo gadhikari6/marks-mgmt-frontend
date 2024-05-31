@@ -10,6 +10,9 @@ dependencies:
   '@mui/material':
     specifier: ^5.13.2
     version: 5.13.2(@emotion/react@11.11.0)(@emotion/styled@11.11.0)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+  Sheet:
+    specifier: link:@mui/joy/Sheet
+    version: link:@mui/joy/Sheet
   formik:
     specifier: ^2.3.2
     version: 2.3.2(react@18.2.0)
