@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useFormik } from "formik"
 import * as yup from "yup"
-import { TextField, Button, Box, Typography, Paper } from "@mui/material"
+import { TextField, Button, Box, Typography, Paper, Link } from "@mui/material"
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 
 /**
@@ -165,7 +165,12 @@ const LoginForm = () => {
             )}
 
             {/*
-            TODO: Add forgot password link */}
+            TODO: Add forgot password link logic */}
+            <Box sx={{ paddingTop: 2 }}>
+              <Link href="#" underline="hover">
+                Forgot Password?
+              </Link>
+            </Box>
           </Box>
         </form>
       </Paper>
