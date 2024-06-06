@@ -71,109 +71,135 @@ const LoginForm = () => {
   })
 
   return (
-    <Box
+    <Box //main container-outer
       display="flex"
+      flexDirection="column"
       justifyContent="center"
       alignItems="center"
-      height="100vh"
     >
-      {/* TODO: Add banner or text mentioning IMMS , also some logo/icon for login */}
-      <Paper
-        variant="elevation"
-        elevation={2}
-        sx={{
-          padding: 2,
-          borderRadius: 1,
-          paddingBottom: 1,
+      {/* TODO: Add FAQ related to registration and other details */}
+      <Box
+        color="black" //box component inside outer container
+        width="100%"
+        textAlign="center"
+        fontFamily={{
+          fontFamily: [
+            "-apple-system",
+            "BlinkMacSystemFont",
+            '"Segoe UI"',
+            "Roboto",
+            '"Helvetica Neue"',
+            "Arial",
+            "sans-serif",
+            '"Apple Color Emoji"',
+            '"Segoe UI Emoji"',
+            '"Segoe UI Symbol"',
+          ].join(","),
         }}
+        marginTop={2}
+        marginBottom={10}
       >
-        <form onSubmit={formik.handleSubmit}>
-          <Box maxWidth={400} width="100%" padding={2}>
-            <Typography variant="h4" align="center" gutterBottom>
-              Login
-            </Typography>
+        <Typography variant="h3">Welcome to IMMS</Typography>
+        <Box marginTop={1}>
+          <Typography variant="h8">
+            Sign in with your email and password
+          </Typography>
+        </Box>
+      </Box>
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        flexGrow={1}
+        width="100%"
+      >
+        <Paper
+          variant="elevation"
+          elevation={2}
+          sx={{
+            padding: 5,
+            borderRadius: 1,
+            paddingBottom: 3,
+            boxShadow: 5,
+          }}
+        >
+          <form onSubmit={formik.handleSubmit}>
+            <Box maxWidth={400} width="100%">
+              <Typography variant="h4" align="center" gutterBottom>
+                Login {/* Add Login icon here*/}
+              </Typography>
 
-            <TextField
-              id="email"
-              name="email"
-              label="Email *"
-              type="email"
-              variant="outlined"
-              {...formik.getFieldProps("email")}
-              error={formik.touched.email && formik.errors.email}
-              helperText={formik.touched.email && formik.errors.email}
-              fullWidth
-              margin="normal"
-            />
-
-            <TextField
-              id="password"
-              name="password"
-              label="Password *"
-              type="password"
-              variant="outlined"
-              {...formik.getFieldProps("password")}
-              error={formik.touched.password && formik.errors.password}
-              helperText={formik.touched.password && formik.errors.password}
-              fullWidth
-              margin="normal"
-            />
-
-            {/* <FormControlLabel
-            control={
-              <Checkbox
-                id="rememberMe"
-                name="rememberMe"
-                checked={formik.values.rememberMe}
-                {...formik.getFieldProps("rememberMe")}
+              <TextField
+                id="email"
+                name="email"
+                label="Email *"
+                type="email"
+                variant="outlined"
+                {...formik.getFieldProps("email")}
+                error={formik.touched.email && formik.errors.email}
+                helperText={formik.touched.email && formik.errors.email}
+                fullWidth
+                margin="normal"
+                marginBottom={6}
               />
-            }
-            label="Remember me"
-          /> */}
 
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              fullWidth
-              disabled={loading}
-              sx={{ marginTop: 2 }}
-            >
-              {loading ? "Logging in..." : "Submit"}
-            </Button>
+              <TextField
+                id="password"
+                name="password"
+                label="Password *"
+                type="password"
+                variant="outlined"
+                {...formik.getFieldProps("password")}
+                error={formik.touched.password && formik.errors.password}
+                helperText={formik.touched.password && formik.errors.password}
+                fullWidth
+                margin="normal"
+              />
 
-            {loginError && (
-              <Typography
-                sx={{ marginTop: 1 }}
-                color="error"
-                align="center"
-                paragraph
-              >
-                {loginError}
-              </Typography>
-            )}
-
-            {loginSuccess && (
-              <Typography
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+                disabled={loading}
                 sx={{ marginTop: 2 }}
-                color="green"
-                align="center"
-                paragraph
               >
-                {loginSuccess}
-              </Typography>
-            )}
+                {loading ? "Logging in..." : "Submit"}
+              </Button>
 
-            {/*
+              {loginError && (
+                <Typography
+                  sx={{ marginTop: 1 }}
+                  color="error"
+                  align="center"
+                  paragraph
+                >
+                  {loginError}
+                </Typography>
+              )}
+
+              {loginSuccess && (
+                <Typography
+                  sx={{ marginTop: 2 }}
+                  color="green"
+                  align="center"
+                  paragraph
+                >
+                  {loginSuccess}
+                </Typography>
+              )}
+
+              {/*
             TODO: Add forgot password link logic */}
-            <Box sx={{ paddingTop: 2 }}>
-              <Link href="#" underline="hover">
-                Forgot Password?
-              </Link>
+              <Box sx={{ paddingTop: 2 }}>
+                <Link href="#" underline="hover">
+                  Forgot Password?
+                </Link>
+              </Box>
             </Box>
-          </Box>
-        </form>
-      </Paper>
+          </form>
+        </Paper>
+      </Box>
     </Box>
   )
 }
