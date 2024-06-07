@@ -29,9 +29,15 @@ dependencies:
   autoprefixer:
     specifier: ^10.4.14
     version: 10.4.14(postcss@8.4.24)
+<<<<<<< HEAD
   axios:
     specifier: ^1.4.0
     version: 1.4.0
+=======
+  core:
+    specifier: link:@material-ui/core
+    version: link:@material-ui/core
+>>>>>>> 2aeff5d (profile on process)
   formik:
     specifier: ^2.3.2
     version: 2.3.2(react@18.2.0)
@@ -71,6 +77,9 @@ dependencies:
   react-router-dom:
     specifier: ^6.11.2
     version: 6.11.2(react-dom@18.2.0)(react@18.2.0)
+  styles:
+    specifier: link:@material-ui/core/styles
+    version: link:@material-ui/core/styles
   tailwindcss:
     specifier: ^3.3.2
     version: 3.3.2
