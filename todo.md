@@ -1,0 +1,2 @@
+- [ ] Add global toast
+- [ ] State management
