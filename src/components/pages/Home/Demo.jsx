@@ -1,5 +1,5 @@
 import { useContext } from "react"
-import { LoginContext } from "../../store/LoginProvider"
+
 import { Link } from "react-router-dom"
 import { toast } from "react-toastify"
 import Select from "@mui/material/Select"
@@ -9,12 +9,17 @@ import MenuItem from "@mui/material/MenuItem"
 import FormControl from "@mui/material/FormControl"
 import { useState } from "react"
 import { useEffect } from "react"
+import { useNavigate } from "react-router-dom"
+import { LoginContext } from "../../../store/LoginProvider"
 /**
  * Demo Component
  */
 const Demo = () => {
   const { loginState, dispatchLoginState } = useContext(LoginContext)
-
+  const navigate = useNavigate()
+  const funcX = () => {
+    navigate("/profile")
+  }
   const [role, setRole] = useState("")
 
   const handleLogout = () => {
@@ -38,6 +43,7 @@ const Demo = () => {
   return (
     <>
       <p>You are logged as {loginState.roles.currentRole} !!!</p>
+      <button onClick={funcX}>To profile</button>
       {loginState.roles.hasMultiRoles ? (
         <>
           <p>You can select between following roles</p>

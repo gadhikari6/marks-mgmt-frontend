@@ -12,15 +12,17 @@ import {
   hasTokenInLocalStorage,
 } from "./store/LoginMethods"
 import { Routes } from "react-router-dom"
-import { Route } from "react-router-dom"
-import LoginForm from "./components/Login/LoginForm"
+import LoginForm from "./components/pages/Login/LoginForm"
 import ProtectedRoute from "./components/ProtectedRoute"
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 const tokenValidationUrl = VITE_BACKEND_URL + "/tokens/validate"
-import Demo from "./components/Home/Demo"
-import { Link } from "react-router-dom"
+import Demo from "./components/pages/Home/Demo"
+import { Link, Route } from "react-router-dom"
 import ResponsiveDrawer from "./components/sidebar/ResponsiveDrawer"
-
+import DashboardPage from "./components/pages/dashboard/DashboardPage"
+import Profile from "./components/pages/Profile/Profile"
+import Marks from "./components/pages/marks/Marks"
+import Settings from "./components/pages/settings/Settings"
 export default function App() {
   const { loginState, dispatchLoginState } = useContext(LoginContext)
 
@@ -106,6 +108,36 @@ export default function App() {
             }
           />
 
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ResponsiveDrawer>
+                  <Profile />
+                </ResponsiveDrawer>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/marks"
+            element={
+              <ProtectedRoute>
+                <ResponsiveDrawer>
+                  <Marks />
+                </ResponsiveDrawer>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <ResponsiveDrawer>
+                  <Settings />
+                </ResponsiveDrawer>
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="*"
             element={
