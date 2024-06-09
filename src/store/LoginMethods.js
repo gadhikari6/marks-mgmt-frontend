@@ -52,6 +52,18 @@ export const decodeToken = (token) => {
 }
 
 /**
+ * Check if the roles array has a specific role
+ */
+export const hasRole = (role, rolesArr) => {
+  for (const r of rolesArr) {
+    if (r === role) {
+      return true
+    }
+  }
+  return false
+}
+
+/**
  * Checks the expiry  of token
  * @param {String} decodedToken
  * @returns null if no expired key found, true or false for token expiry
@@ -70,13 +82,13 @@ export const checkTokenExpiry = (decodedToken) => {
 export const LoginReducer = (state, action) => {
   switch (action.type) {
     case "LOGIN":
-      // TODO: add logic for setting roles , working role, multiRole
       setToken(action.payload.token)
       return {
         ...state,
         isLogged: true,
         token: action.payload.token,
         decodedToken: decodeToken(action.payload.token),
+        roles: action.payload.roles,
       }
 
     case "LOGOUT":
@@ -88,7 +100,22 @@ export const LoginReducer = (state, action) => {
         isLogged: false,
         token: null,
         decodedToken: null,
+        roles: {
+          hasMultiRoles: false,
+          currentRole: null,
+          allRoles: [],
+        },
       }
+
+    case "CHANGE_ROLE":
+      if (hasRole(action.payload.role, state.roles.allRoles)) {
+        return {
+          ...state,
+          roles: { ...state.roles, currentRole: action.payload.role },
+        }
+      }
+      return { ...state }
+
     default:
       return state
   }

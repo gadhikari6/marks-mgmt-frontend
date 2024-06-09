@@ -12,6 +12,11 @@ const initialLoginState = {
   isLogged: false,
   token: null,
   decodedToken: null,
+  roles: {
+    hasMultiRoles: false,
+    currentRole: null,
+    allRoles: [],
+  },
 }
 
 const LoginProvider = ({ children }) => {

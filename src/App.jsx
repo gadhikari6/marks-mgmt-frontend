@@ -40,18 +40,33 @@ export default function App() {
           // check if expiry time is within next few mins
           // if so then remove it and ask for fresh login
           if (!checkTokenExpiry(decodedToken)) {
-            dispatchLoginState({ type: "LOGIN", payload: { token: token } })
+            // loop through roles
+            const roles = decodedToken.UserRoles.map((item) => {
+              return item.role.name
+            })
+            dispatchLoginState({
+              type: "LOGIN",
+              payload: {
+                token: token,
+                roles: {
+                  hasMultiRoles: roles.length > 1,
+                  allRoles: roles,
+                  currentRole: roles[0],
+                },
+              },
+            })
             return
           }
+        } else {
+          console.log("Unexpected response code: ", resp.status)
+          dispatchLoginState({ type: "LOGOUT" })
         }
       })
       .catch((err) => {
         console.log("Error during token validation:", err.message) // TODO: log error
+        dispatchLoginState({ type: "LOGOUT" })
       })
-
     // incase of error or expired token, logout action is dispatched
-    dispatchLoginState({ type: "LOGOUT" })
-    return
   }
 
   useEffect(() => {
@@ -102,7 +117,7 @@ export default function App() {
       {/* Global toast element*/}
       <ToastContainer
         position="bottom-right"
-        autoClose={3000}
+        autoClose={2000}
         hideProgressBar={false}
         newestOnTop={false}
         closeOnClick

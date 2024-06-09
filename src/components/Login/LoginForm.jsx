@@ -48,6 +48,14 @@ const LoginForm = () => {
       if (response.ok) {
         // Login success
         const data = await response.json()
+
+        // loop through roles
+        const roles = data.user.UserRoles.map((item) => {
+          return item.role.name
+        })
+
+        // dispatch multi role login
+
         setLoginSuccess("Login successful!")
 
         toast.success("Login successful!")
@@ -57,6 +65,11 @@ const LoginForm = () => {
           type: "LOGIN",
           payload: {
             token: data.token,
+            roles: {
+              hasMultiRoles: roles.length > 1,
+              allRoles: roles,
+              currentRole: roles[0],
+            },
           },
         })
       } else if (response.status === 401) {
