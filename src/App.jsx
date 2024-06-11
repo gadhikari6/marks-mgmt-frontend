@@ -19,6 +19,7 @@ const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env 
 const tokenValidationUrl = VITE_BACKEND_URL + "/tokens/validate"
 import Demo from "./components/Home/Demo"
 import { Link } from "react-router-dom"
+import ResponsiveDrawer from "./components/sidebar/ResponsiveDrawer"
 
 export default function App() {
   const { loginState, dispatchLoginState } = useContext(LoginContext)
@@ -98,10 +99,13 @@ export default function App() {
             path="/home"
             element={
               <ProtectedRoute>
-                <Demo />
+                <ResponsiveDrawer>
+                  <Demo />
+                </ResponsiveDrawer>
               </ProtectedRoute>
             }
           />
+
           <Route
             path="*"
             element={
