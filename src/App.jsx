@@ -21,6 +21,7 @@ import ResponsiveDrawer from "./components/sidebar/ResponsiveDrawer"
 import Profile from "./components/pages/Profile/Profile"
 import Marks from "./components/pages/marks/Marks"
 import Settings from "./components/pages/settings/Settings"
+import Dashboard from "./components/pages/dashboard/Dashboard"
 
 export default function App() {
   const { loginState, dispatchLoginState } = useContext(LoginContext)
@@ -140,6 +141,16 @@ export default function App() {
               <ProtectedRoute>
                 <ResponsiveDrawer>
                   <Settings />
+                </ResponsiveDrawer>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <ResponsiveDrawer>
+                  <Dashboard />
                 </ResponsiveDrawer>
               </ProtectedRoute>
             }
