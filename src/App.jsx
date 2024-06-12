@@ -4,7 +4,6 @@ import { ToastContainer, toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { LoginContext } from "./store/LoginProvider"
 import { useEffect } from "react"
-import axios from "axios"
 import {
   checkTokenExpiry,
   decodeToken,
@@ -19,7 +18,6 @@ const tokenValidationUrl = VITE_BACKEND_URL + "/tokens/validate"
 import Demo from "./components/pages/Home/Demo"
 import { Link, Route } from "react-router-dom"
 import ResponsiveDrawer from "./components/sidebar/ResponsiveDrawer"
-import DashboardPage from "./components/pages/dashboard/DashboardPage"
 import Profile from "./components/pages/Profile/Profile"
 import Marks from "./components/pages/marks/Marks"
 import Settings from "./components/pages/settings/Settings"
@@ -36,62 +34,48 @@ export default function App() {
     const headers = {
       Authorization: `Bearer ${token}`,
     }
-    axios
-      .post(tokenValidationUrl, null, {
-        headers: headers,
-      })
-      .then((resp) => {
-        const decodedToken = decodeToken(token)
-        // 200 OK = token is valid
-        if (resp.status === 200) {
-          // check if expiry time is within next few mins
-          // if so then remove it and ask for fresh login
-          if (!checkTokenExpiry(decodedToken)) {
-            // loop through roles
-            const roles = decodedToken.UserRoles.map((item) => {
-              return item.role.name
-            })
-            dispatchLoginState({
-              type: "LOGIN",
-              payload: {
-                token: token,
-                roles: {
-                  hasMultiRoles: roles.length > 1,
-                  allRoles: roles,
-                  currentRole: roles[0],
-                },
-              },
-            })
-            return
-          }
-        } else {
-          console.log("Unexpected response code: ", resp.status)
-          dispatchLoginState({ type: "LOGOUT" })
-        }
-      })
-      .catch((error) => {
-        // incase of error, user is logged out but token is kept in localStorage
-        // such that when user refreshes the user maybe logged back with the token alone
 
-        if (error.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          if (error.response.status >= 400 && error.response.status <= 599) {
-            toast.warn("Your session has expired!")
-            dispatchLoginState({ type: "LOGOUT" })
-          } else {
-            toast.warn(
-              "Your session could not be validated. Please refresh the page."
-            )
-            dispatchLoginState({ type: "LOGOUT_NETWORK_ISSUE" })
-          }
-        } else {
-          toast.warn(
-            "Your session could not be validated. Please refresh the page."
-          )
-          dispatchLoginState({ type: "LOGOUT_NETWORK_ISSUE" })
-        }
-      })
+    const response = await fetch(tokenValidationUrl, {
+      method: "POST",
+      headers: headers,
+    }).catch((error) => {
+      toast.warn(
+        "Your session could not be validated. Please refresh the page."
+      )
+      console.log(error)
+      dispatchLoginState({ type: "LOGOUT_NETWORK_ISSUE" })
+      return
+    })
+
+    // status code of response
+    const status = await response.status
+
+    if (status === 200) {
+      const decodedToken = decodeToken(token)
+      // check if expiry time is within next few mins
+      // if so then remove it and ask for fresh login
+      if (!checkTokenExpiry(decodedToken)) {
+        // loop through roles
+        const roles = decodedToken.UserRoles.map((item) => {
+          return item.role.name
+        })
+        dispatchLoginState({
+          type: "LOGIN",
+          payload: {
+            token: token,
+            roles: {
+              hasMultiRoles: roles.length > 1,
+              allRoles: roles,
+              currentRole: roles[0],
+            },
+          },
+        })
+        return
+      }
+    } else if (status >= 400 && status <= 599) {
+      toast.warn("Your session has expired!")
+      dispatchLoginState({ type: "LOGOUT" })
+    }
   }
 
   useEffect(() => {
