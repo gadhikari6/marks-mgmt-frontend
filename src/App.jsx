@@ -1,6 +1,6 @@
 import { useContext } from "react"
 import "./App.css"
-import { ToastContainer } from "react-toastify"
+import { ToastContainer, toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { LoginContext } from "./store/LoginProvider"
 import { useEffect } from "react"
@@ -23,6 +23,7 @@ import DashboardPage from "./components/pages/dashboard/DashboardPage"
 import Profile from "./components/pages/Profile/Profile"
 import Marks from "./components/pages/marks/Marks"
 import Settings from "./components/pages/settings/Settings"
+
 export default function App() {
   const { loginState, dispatchLoginState } = useContext(LoginContext)
 
@@ -32,9 +33,12 @@ export default function App() {
    * @returns boolean
    */
   async function validateToken(token) {
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    }
     axios
       .post(tokenValidationUrl, null, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: headers,
       })
       .then((resp) => {
         const decodedToken = decodeToken(token)
@@ -65,11 +69,29 @@ export default function App() {
           dispatchLoginState({ type: "LOGOUT" })
         }
       })
-      .catch((err) => {
-        console.log("Error during token validation:", err.message) // TODO: log error
-        dispatchLoginState({ type: "LOGOUT" })
+      .catch((error) => {
+        // incase of error, user is logged out but token is kept in localStorage
+        // such that when user refreshes the user maybe logged back with the token alone
+
+        if (error.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          if (error.response.status >= 400 && error.response.status <= 599) {
+            toast.warn("Your session has expired!")
+            dispatchLoginState({ type: "LOGOUT" })
+          } else {
+            toast.warn(
+              "Your session could not be validated. Please refresh the page."
+            )
+            dispatchLoginState({ type: "LOGOUT_NETWORK_ISSUE" })
+          }
+        } else {
+          toast.warn(
+            "Your session could not be validated. Please refresh the page."
+          )
+          dispatchLoginState({ type: "LOGOUT_NETWORK_ISSUE" })
+        }
       })
-    // incase of error or expired token, logout action is dispatched
   }
 
   useEffect(() => {

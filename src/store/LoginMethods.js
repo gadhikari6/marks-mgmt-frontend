@@ -92,9 +92,22 @@ export const LoginReducer = (state, action) => {
       }
 
     case "LOGOUT":
-      // add snackbar for saying that user session has expired or smth similar
       sessionStorage.removeItem(TOKEN_KEY)
       localStorage.removeItem(TOKEN_KEY)
+      return {
+        ...state,
+        isLogged: false,
+        token: null,
+        decodedToken: null,
+        roles: {
+          hasMultiRoles: false,
+          currentRole: null,
+          allRoles: [],
+        },
+      }
+
+    case "LOGOUT_NETWORK_ISSUE":
+      // this logs out user but does not remove the token.
       return {
         ...state,
         isLogged: false,
