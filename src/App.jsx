@@ -88,7 +88,7 @@ export default function App() {
     // Set up interval to check token validation every 5 minutes
     const intervalId = setInterval(() => {
       if (hasTokenInLocalStorage()) {
-        validateToken(fetchTokenFromLocalStorage)
+        validateToken(fetchTokenFromLocalStorage())
       }
     }, 5 * 60 * 1000) // 5 minutes in milliseconds
 
