@@ -11,7 +11,8 @@ import {
   TableHead,
   TableRow,
   Paper,
-} from "@material-ui/core"
+} from "@mui/material"
+import { toast } from "react-toastify"
 
 const Marks = () => {
   const [semester, setSemester] = useState("")
@@ -39,6 +40,8 @@ const Marks = () => {
       const data = await response.json()
       setMarksData(data)
     } catch (error) {
+      toast.error(error)
+
       console.error("An error has occurred: " + error.message)
     }
   }
@@ -61,7 +64,12 @@ const Marks = () => {
         value={courseCode}
         onChange={(e) => setCourseCode(e.target.value)}
       />
-      <Button variant="contained" color="primary" onClick={fetchMarks}>
+      <Button
+        variant="contained"
+        sx={{ height: "40px", margin: "0 5px" }}
+        color="primary"
+        onClick={fetchMarks}
+      >
         Filter
       </Button>
 
