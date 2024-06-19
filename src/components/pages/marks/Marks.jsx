@@ -1,8 +1,5 @@
-import { useState, useEffect, useContext } from "react"
-import { LoginContext } from "../../../store/LoginProvider"
+import React, { useState } from "react"
 import {
-  TextField,
-  Button,
   Typography,
   Table,
   TableBody,
@@ -11,97 +8,103 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Select,
+  MenuItem,
 } from "@mui/material"
 import { toast } from "react-toastify"
+import useMarks from "../../../hooks/useMarks"
 
 const Marks = () => {
-  const [semester, setSemester] = useState("")
-  const [courseName, setCourseName] = useState("")
-  const [courseCode, setCourseCode] = useState("")
-  const [marksData, setMarksData] = useState(null)
-  const { loginState } = useContext(LoginContext)
-  const token = loginState.token
+  const [selectedSemester, setSelectedSemester] = useState("")
+  const { isLoading, error, data } = useMarks()
 
-  useEffect(() => {
-    fetchMarks()
-  }, [])
+  if (isLoading) {
+    return <Typography>Loading marks...</Typography>
+  }
 
-  const fetchMarks = async () => {
-    try {
-      let url = "http://localhost:9000/api/v1/students/marks"
-      if (semester || courseName || courseCode) {
-        url += `?course_name=${courseName}&course_code=${courseCode}&semester=${semester}`
-      }
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      const data = await response.json()
-      setMarksData(data)
-    } catch (error) {
-      toast.error(error)
+  if (error) {
+    return <Typography>Error: {error.message}</Typography>
+  }
 
-      console.error("An error has occurred: " + error.message)
+  const handleSemesterChange = (event) => {
+    setSelectedSemester(event.target.value)
+  }
+
+  const filterMarksBySemester = (marksData, selectedSemester) => {
+    if (selectedSemester === "") {
+      return marksData.semesters
+    } else {
+      return marksData.semesters.filter(
+        (semester) => semester.semester === selectedSemester
+      )
     }
   }
 
   return (
     <div>
-      <h1>Student Marks Page</h1>
-      <TextField
-        label="Semester"
-        value={semester}
-        onChange={(e) => setSemester(e.target.value)}
-      />
-      <TextField
-        label="Course Name"
-        value={courseName}
-        onChange={(e) => setCourseName(e.target.value)}
-      />
-      <TextField
-        label="Course Code"
-        value={courseCode}
-        onChange={(e) => setCourseCode(e.target.value)}
-      />
-      <Button
-        variant="contained"
-        sx={{ height: "40px", margin: "0 5px" }}
-        color="primary"
-        onClick={fetchMarks}
-      >
-        Filter
-      </Button>
+      <div>
+        {/* <Select value={selectedSemester || ""} onChange={handleSemesterChange}>
+          <MenuItem value="">All Semesters</MenuItem>
+          {data &&
+            data.semesters &&
+            data.semesters.length > 0 &&
+            data.semesters.map((semester) => (
+              <MenuItem value={semester.semester} key={semester.semester}>
+                Semester {semester.semester}
+              </MenuItem>
+            ))}
+        </Select> */}
+        <Select value={selectedSemester || ""} onChange={handleSemesterChange}>
+          <MenuItem value="">All Semesters</MenuItem>
+          {data &&
+            data.semesters &&
+            data.semesters.length > 0 &&
+            data.semesters.map((semester) => (
+              <MenuItem value={semester.semester} key={semester.semester}>
+                Semester {semester.semester}
+              </MenuItem>
+            ))}
+        </Select>
+      </div>
 
-      {marksData && marksData.semesters && marksData.semesters.length > 0 ? (
-        <div>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Course ID</TableCell>
-                  <TableCell>Course Code</TableCell>
-                  <TableCell>Course Name</TableCell>
-                  <TableCell>Theory Marks</TableCell>
-                  <TableCell>Practical Marks</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {marksData.semesters.map((semester) =>
-                  semester.courses.map((course) => (
+      {data && data.semesters && data.semesters.length > 0 ? (
+        filterMarksBySemester(data, selectedSemester).map((semester) => (
+          <div key={semester.semester}>
+            <Typography variant="h5" align="center" gutterBottom>
+              Semester {semester.semester}
+            </Typography>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Course Name</TableCell>
+                    <TableCell>Course Code</TableCell>
+
+                    <TableCell>Theory</TableCell>
+                    <TableCell>Practical</TableCell>
+                    <TableCell>Total</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {semester.courses.map((course) => (
                     <TableRow key={course.courseId}>
-                      <TableCell>{course.courseId}</TableCell>
-                      <TableCell>{course.course.code}</TableCell>
-                      <TableCell>{course.course.name}</TableCell>
-                      <TableCell>{course.marks.theory}</TableCell>
-                      <TableCell>{course.marks.practical}</TableCell>
+                      <TableCell>{course.course.name || "-"}</TableCell>
+                      <TableCell>{course.course.code || "-"}</TableCell>
+                      <TableCell>{course.marks.theory || "-"}</TableCell>
+                      <TableCell>{course.marks.practical || "-"}</TableCell>
+                      <TableCell>
+                        {course.marks.NotQualified
+                          ? "NQ"
+                          : course.marks.practical + course.marks.theory || "-"}
+                      </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </div>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <div style={{ margin: "30px" }}></div> {/* Adding a gap */}
+          </div>
+        ))
       ) : (
         <Typography>No data available.</Typography>
       )}
