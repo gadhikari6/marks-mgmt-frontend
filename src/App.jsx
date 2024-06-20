@@ -22,6 +22,7 @@ import Profile from "./components/pages/Profile/Profile"
 import Marks from "./components/pages/marks/Marks"
 import Settings from "./components/pages/settings/Settings"
 import Dashboard from "./components/pages/dashboard/Dashboard"
+import Syllabus from "./components/pages/Syllabus/Syllabus"
 
 export default function App() {
   const { loginState, dispatchLoginState } = useContext(LoginContext)
@@ -151,6 +152,16 @@ export default function App() {
               <ProtectedRoute>
                 <ResponsiveDrawer>
                   <Dashboard />
+                </ResponsiveDrawer>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/syllabus"
+            element={
+              <ProtectedRoute>
+                <ResponsiveDrawer>
+                  <Syllabus />
                 </ResponsiveDrawer>
               </ProtectedRoute>
             }

@@ -6,8 +6,10 @@ import ListItemButton from "@mui/material/ListItemButton"
 import ListItemIcon from "@mui/material/ListItemIcon"
 import ListItemText from "@mui/material/ListItemText"
 import Toolbar from "@mui/material/Toolbar"
+import MenuBookIcon from "@mui/icons-material/MenuBook"
 import DashboardIcon from "@mui/icons-material/Dashboard"
 import AccountBoxIcon from "@mui/icons-material/AccountBox"
+import SettingsIcon from "@mui/icons-material/Settings"
 import BookmarkIcon from "@mui/icons-material/Bookmark"
 
 export default function StudentDrawer() {
@@ -21,6 +23,9 @@ export default function StudentDrawer() {
           { text: "Marks", icon: <BookmarkIcon />, link: "/marks" },
 
           { text: "Profile", icon: <AccountBoxIcon />, link: "/profile" },
+          { text: "Syllabus", icon: <MenuBookIcon />, link: "/syllabus" },
+
+          { text: "Settings", icon: <SettingsIcon />, link: "/settings" },
         ].map((item) => (
           <ListItem
             key={item.text}
