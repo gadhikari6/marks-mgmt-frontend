@@ -20,6 +20,7 @@ import { LoginContext } from "../../store/LoginProvider"
 import StudentDrawer from "./StudentDrawer"
 import AdminDrawer from "./AdminDrawer"
 import TeacherDrawer from "./TeacherDrawer"
+import SettingsIcon from "@mui/icons-material/Settings"
 
 import { toast } from "react-toastify"
 
@@ -107,7 +108,22 @@ function ResponsiveDrawer(props) {
           {loginState.roles.currentRole === "admin" && <AdminDrawer />}
           {loginState.roles.currentRole === "teacher" && <TeacherDrawer />}
 
-          {/* Permanent logout button */}
+          {/* Permanent settings and logout button */}
+          <ListItem
+            key="Settings"
+            disablePadding
+            component={Link}
+            button
+            to={"/settings"}
+          >
+            <ListItemButton>
+              <ListItemIcon>
+                <SettingsIcon />
+              </ListItemIcon>
+              <ListItemText primary="Settings" />
+            </ListItemButton>
+          </ListItem>
+
           <ListItem
             key="Logout"
             disablePadding
