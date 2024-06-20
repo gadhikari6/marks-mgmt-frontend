@@ -22,14 +22,29 @@ import AdminDrawer from "./AdminDrawer"
 import TeacherDrawer from "./TeacherDrawer"
 import SettingsIcon from "@mui/icons-material/Settings"
 
+import Select from "@mui/material/Select"
+import MenuItem from "@mui/material/MenuItem"
+import { useState } from "react"
+import { useEffect } from "react"
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from "@mui/material"
+
 import { toast } from "react-toastify"
+import { Divider } from "@mui/material"
 
 const drawerWidth = 240
 
 function ResponsiveDrawer(props) {
   const { loginState, dispatchLoginState } = useContext(LoginContext)
+  const [role, setRole] = useState("")
   const { window } = props
   const [mobileOpen, setMobileOpen] = React.useState(false)
+  const [selectedRole, setSelectedRole] = useState(loginState.roles.currentRole)
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
@@ -39,10 +54,37 @@ function ResponsiveDrawer(props) {
     dispatchLoginState({ type: "LOGOUT" })
     toast.warn("You have been logged out!")
   }
+  //here
+  useEffect(() => {
+    setRole(loginState.roles.currentRole)
+  }, [loginState])
+
+  const handleRoleChange = (event) => {
+    const newRole = event.target.value
+    setSelectedRole(newRole)
+    setOpenDialog(true)
+  }
+
+  const handleConfirmRoleChange = () => {
+    dispatchLoginState({
+      type: "CHANGE_ROLE",
+      payload: {
+        role: selectedRole,
+      },
+    })
+    setOpenDialog(false)
+  }
+
+  const handleCancelRoleChange = () => {
+    setOpenDialog(false)
+  }
 
   // what does this do ?? need comment here!
   const container =
     window !== undefined ? () => window().document.body : undefined
+
+  // Dialog state
+  const [openDialog, setOpenDialog] = useState(false)
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -51,6 +93,8 @@ function ResponsiveDrawer(props) {
         position="fixed"
         sx={{ width: { sm: `calc(100% - ${drawerWidth}px)` } }}
       >
+        {/* role selector */}
+
         <Toolbar>
           <IconButton
             color="inherit"
@@ -64,9 +108,41 @@ function ResponsiveDrawer(props) {
           <Typography variant="h6" noWrap component="div">
             Internal Marks Management System
           </Typography>
-          <Typography sx={{ marginLeft: 10, border: 1 }}>
-            Current Role: {loginState.roles.currentRole} | Add a option to
-            change role heres
+          <Typography
+            sx={{
+              marginLeft: 40,
+              // border: 1,
+            }}
+          >
+            Role:{" "}
+            <span style={{ marginRight: "1.5rem" }}>
+              {loginState.roles.currentRole}
+            </span>
+            {loginState.roles.allRoles.length > 1 ? (
+              <>
+                Change Role:
+                <Select
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  value={role}
+                  label="Role"
+                  onChange={handleRoleChange}
+                  sx={{
+                    color: "white",
+                    border: "1px solid white",
+                    marginLeft: 1,
+                  }}
+                >
+                  {loginState.roles.allRoles.map((role) => {
+                    return (
+                      <MenuItem key={role} value={role}>
+                        {role}
+                      </MenuItem>
+                    )
+                  })}
+                </Select>
+              </>
+            ) : null}
           </Typography>
         </Toolbar>
       </AppBar>
@@ -151,6 +227,30 @@ function ResponsiveDrawer(props) {
         <Toolbar />
         {props.children}
       </Box>
+
+      <Dialog open={openDialog} onClose={handleCancelRoleChange}>
+        <DialogTitle>Confirm Role Change</DialogTitle>
+        <Divider />
+        <DialogContent>
+          Do you want to switch to the role: {selectedRole}?
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleConfirmRoleChange}
+            color="primary"
+            variant="outlined"
+          >
+            Confirm
+          </Button>
+          <Button
+            onClick={handleCancelRoleChange}
+            color="secondary"
+            variant="outlined"
+          >
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }
