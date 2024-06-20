@@ -23,6 +23,7 @@ export default function AdminDrawer() {
 
           { text: "Profile", icon: <AccountBoxIcon />, link: "/profile" },
           { text: "Add Teacher", icon: <PersonAddIcon />, link: "/addTeacher" },
+          { text: "Add Student", link: "/addStudent" },
         ].map((item) => (
           <ListItem
             key={item.text}

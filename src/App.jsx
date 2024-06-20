@@ -23,6 +23,7 @@ import Marks from "./components/pages/marks/Marks"
 import Settings from "./components/pages/settings/Settings"
 import Dashboard from "./components/pages/dashboard/Dashboard"
 import Syllabus from "./components/pages/Syllabus/Syllabus"
+import AddStudent from "./components/pages/addStudent/AddStudentForm"
 import AddTeacher from "./components/pages/addTeacher/AddTeacherForm"
 
 export default function App() {
@@ -163,16 +164,6 @@ export default function App() {
               <ProtectedRoute>
                 <ResponsiveDrawer>
                   <Syllabus />
-                </ResponsiveDrawer>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/addTeacher"
-            element={
-              <ProtectedRoute>
-                <ResponsiveDrawer>
-                  <AddTeacher />
                 </ResponsiveDrawer>
               </ProtectedRoute>
             }
