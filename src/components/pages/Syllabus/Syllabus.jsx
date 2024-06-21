@@ -10,6 +10,7 @@ import {
   Box,
   Divider,
   styled,
+  Stack,
 } from "@mui/material"
 import useSyllabus from "../../../hooks/useSyllabus"
 const Root = styled("div")(({ theme }) => ({
@@ -75,39 +76,40 @@ const SyllabusPage = () => {
         </Divider>
       </Root>
 
-      {Object.entries(coursesBySemester).map(([semesterId, courses]) => (
-        <div key={semesterId}>
-          <Typography
-            sx={{ fontSize: 18 }}
-            color="text.secondary"
-            gutterBottom
-            style={{ marginBottom: "20px" }}
-          >
-            Semester {semesterId}
-          </Typography>
-
-          <TableContainer component={Paper} style={{ marginBottom: "20px" }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Course Code</TableCell>
-                  <TableCell>Course Name</TableCell>
-                  <TableCell>Credit</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {courses.map((course) => (
-                  <TableRow key={course.courseId}>
-                    <TableCell>{course.course.code}</TableCell>
-                    <TableCell>{course.course.name}</TableCell>
-                    <TableCell>{course.course.credit}</TableCell>
+      <Stack direction="column" gap={1.5}>
+        {Object.entries(coursesBySemester).map(([semesterId, courses]) => (
+          <Paper key={semesterId} variant="outlined" square sx={{ padding: 2 }}>
+            <Typography
+              sx={{ fontSize: 18 }}
+              color="text.secondary"
+              gutterBottom
+              style={{ marginBottom: "20px" }}
+            >
+              Semester {semesterId}
+            </Typography>
+            <TableContainer component={Paper} style={{ marginBottom: "20px" }}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Course Code</TableCell>
+                    <TableCell>Course Name</TableCell>
+                    <TableCell>Credit</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </div>
-      ))}
+                </TableHead>
+                <TableBody>
+                  {courses.map((course) => (
+                    <TableRow key={course.courseId}>
+                      <TableCell>{course.course.code}</TableCell>
+                      <TableCell>{course.course.name}</TableCell>
+                      <TableCell>{course.course.credit}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+        ))}
+      </Stack>
     </Box>
   )
 }
