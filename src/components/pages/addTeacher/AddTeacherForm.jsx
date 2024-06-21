@@ -1,57 +1,74 @@
 import { useState } from "react"
 import { useFormik } from "formik"
 import * as yup from "yup"
-import {
-  TextField,
-  Button,
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-} from "@mui/material"
-
-//import { toast } from "react-toastify"
+import { TextField, Button, Box, Typography, Paper } from "@mui/material"
+import { toast } from "react-toastify"
+import axios from "axios"
+import { useContext } from "react"
+import { LoginContext } from "../../../store/LoginProvider"
+const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 
 const validationSchema = yup.object({
-  syllabus: yup.string().required("Syllabus is required"),
-  department: yup.string().required("Department is required"),
   name: yup.string().required("Name is required"),
-  program: yup.string().required("Program is required"),
-  semester: yup.string().required("Semester is required"),
-  faculty: yup.string().required("Faculty is required"),
   email: yup
     .string()
     .email("Please enter a valid email address")
     .required("Email is required"),
   address: yup.string().required("Address is required"),
-  contactNo: yup.string().required("Contact number is required"),
-  courses: yup.string().required("Course is required"),
-  level: yup.string().required("Level is required"),
+  contactNo: yup.string().min(6).max(20).required("Contact number is required"),
+  password: yup
+    .string()
+    .min(5, "The minimum length of Password is 5 characters")
+    .required("Password field is required"),
 })
 
 const AddTeacherForm = () => {
   const initialValues = {
-    syllabus: "",
-    department: "",
     name: "",
-    program: "",
-    semester: "",
-    faculty: "",
     email: "",
     address: "",
     contactNo: "",
-    courses: "",
-    level: "",
+    password: "",
   }
-
+  const { loginState } = useContext(LoginContext)
   const [loading, setLoading] = useState(false)
 
-  const onSubmit = async (values) => {
-    // Form submission logic can be added here
+  const onSubmit = async (values, { resetForm }) => {
+    setLoading(true)
+    const contactNo = Number(values.contactNo)
+    if (isNaN(contactNo)) {
+      toast.warn("Please provide a valid contact number")
+      setLoading(false)
+      return
+    }
+
+    // network call to create teacher
+
+    await axios
+      .post(
+        `${VITE_BACKEND_URL}/admin/teachers`,
+        {
+          ...values,
+          contactNo: String(contactNo),
+        },
+        { headers: { Authorization: `Bearer ${loginState.token}` } }
+      )
+      .then((response) => {
+        if (response.status === 201) {
+          toast.success("Techer created successfully!")
+          resetForm()
+        }
+      })
+      .catch((err) => {
+        if (err.response.status === 409) {
+          toast.warn("A teacher with provided already exists!")
+        } else {
+          toast.warn("Something wrong went with request")
+          console.log(err) // remove later
+        }
+      })
+
+    setLoading(false)
   }
 
   const formik = useFormik({
@@ -64,12 +81,27 @@ const AddTeacherForm = () => {
     <Box
       display="flex"
       flexDirection="column"
-      justifyContent="center"
-      alignItems="center"
+      // justifyContent="flex-start"
+      // alignItems="flex-start"
+      fontFamily={{
+        fontFamily: [
+          "-apple-system",
+          "BlinkMacSystemFont",
+          '"Segoe UI"',
+          "Roboto",
+          '"Helvetica Neue"',
+          "Arial",
+          "sans-serif",
+          '"Apple Color Emoji"',
+          '"Segoe UI Emoji"',
+          '"Segoe UI Symbol"',
+        ].join(","),
+      }}
+      sx={{ marginLeft: 10 }}
     >
       <Paper
         elevation={2}
-        sx={{ padding: 5, borderRadius: 1, maxwidth: "100%" }}
+        sx={{ padding: 5, paddingTop: 2, borderRadius: 1, width: "30rem" }}
       >
         <form onSubmit={formik.handleSubmit}>
           <Box display="flex" flexDirection="column" alignItems="center">
@@ -144,7 +176,7 @@ const AddTeacherForm = () => {
               disabled={loading}
               sx={{ marginTop: 2 }}
             >
-              Add Teacher
+              {loading ? "Adding Teacher..." : "Add Teacher"}
             </Button>
           </Box>
         </form>
