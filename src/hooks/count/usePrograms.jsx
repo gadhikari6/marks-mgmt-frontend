@@ -7,8 +7,7 @@ const usePrograms = () => {
   const { isLoading, error, data } = useQuery({
     queryKey: ["programs"],
     queryFn: async () => {
-      const response = await axios.get(`${VITE_BACKEND_URL}public/programs`)
-      console.log("hii")
+      const response = await axios.get(`${VITE_BACKEND_URL}/public/programs`)
       return response.data
     },
   })

@@ -1,5 +1,5 @@
 import { useFormik } from "formik"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Box,
   Button,
@@ -16,6 +16,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Divider,
 } from "@mui/material"
 import { toast } from "react-toastify"
 import usePrograms from "../../../hooks/count/usePrograms"
@@ -24,11 +25,19 @@ import { LoginContext } from "../../../store/LoginProvider"
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 
 const AddStudentForm = () => {
+  const { data } = usePrograms()
+
   const [isDialogOpen, setDialogOpen] = useState(false)
   const { loginState } = useContext(LoginContext)
   const token = loginState.token
-  const { data } = usePrograms()
-  console.log(data)
+  const [programs, setPrograms] = useState([])
+  const [selectedProgaram, setSelectedProgram] = useState(null)
+
+  useEffect(() => {
+    // console.log(JSON.stringify(data))
+
+    setPrograms(data)
+  }, [data])
 
   const formik = useFormik({
     initialValues: {
@@ -54,11 +63,14 @@ const AddStudentForm = () => {
       })
         .then((response) => response.json())
         .then((data) => {
-          console.log(data)
-          setDialogOpen(true) // Open the dialog
-          formik.resetForm()
-          toast.success("The user has been created successfully")
+          if (data.id) {
+            formik.resetForm()
+            toast.success("Form submitted successfully!")
+          } else {
+            toast.error(data.error.message)
+          }
         })
+
         .catch((error) => {
           console.error(error)
           toast.error(error)
@@ -68,30 +80,13 @@ const AddStudentForm = () => {
   const handleDialogClose = () => {
     setDialogOpen(false)
   }
-  //detele later
-  //Helper function to get the label for Program ID
-  // const getProgramLabel = (programId) => {
-  //   switch (programId) {
-  //     case 1:
-  //       return "Computer Engineering"
-  //     case 2:
-  //       return "Software Engineering"
-  //     default:
-  //       return ""
-  //   }
-  // }
+  const handleProgramChange = (event) => {
+    const id = event.target.value
+    programs.length > 0
+      ? setSelectedProgram(programs.filter((item) => id === item.id)[0])
+      : setSelectedProgram(null)
+  }
 
-  // // Helper function to get the label for Syllabus ID
-  // const getSyllabusLabel = (syllabusId) => {
-  //   switch (syllabusId) {
-  //     case 1:
-  //       return "Old Syllabus"
-  //     case 2:
-  //       return "New Syllabus"
-  //     default:
-  //       return ""
-  //   }
-  // }
   const handleSubmit = () => {
     formik.submitForm()
     setDialogOpen(false)
@@ -101,14 +96,35 @@ const AddStudentForm = () => {
   return (
     <Box sx={{ p: 2 }}>
       <Paper sx={{ p: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          Add Student
+        <Typography
+          variant="h6"
+          gutterBottom
+          style={{ marginBottom: "5px", textAlign: "center" }}
+        >
+          Add Student Details
         </Typography>
+        <Divider
+          style={{ marginBottom: "10px", textAlign: "center" }}
+        ></Divider>
 
         {/* <form onSubmit={formik.handleSubmit}> */}
         <form>
           <Box sx={{ mt: 2 }}>
             <Grid container spacing={2}>
+              {/* Name field */}
+              <Grid item xs={6}>
+                <TextField
+                  id="name"
+                  name="name"
+                  label="Name *"
+                  variant="outlined"
+                  {...formik.getFieldProps("name")}
+                  error={formik.touched.name && formik.errors.name}
+                  helperText={formik.touched.name && formik.errors.name}
+                  fullWidth
+                  margin="normal"
+                />
+              </Grid>
               {/* Email field */}
               <Grid item xs={6}>
                 <TextField
@@ -152,47 +168,24 @@ const AddStudentForm = () => {
                     id="programId"
                     name="programId"
                     value={formik.values.programId}
-                    onChange={formik.handleChange}
+                    onChange={(e) => {
+                      formik.handleChange(e)
+                      handleProgramChange(e)
+                    }}
                     onBlur={formik.handleBlur}
                     label="Program ID *"
                   >
                     {/* <MenuItem value="">Select a program</MenuItem> */}
                     {/* Loop through programData to generate options */}
-                    {data.map((program) => (
-                      <MenuItem key={program.id} value={program.id}>
-                        {program.name}
-                      </MenuItem>
-                    ))}
+                    {programs.length > 0 &&
+                      programs.map((program) => (
+                        <MenuItem key={program.id} value={program.id}>
+                          {program.name}
+                        </MenuItem>
+                      ))}
                   </Select>
                   {formik.touched.programId && formik.errors.programId && (
                     <FormHelperText>{formik.errors.programId}</FormHelperText>
-                  )}
-                </FormControl>
-              </Grid>
-
-              {/* Syllabus ID field */}
-              <Grid item xs={6}>
-                <FormControl
-                  variant="outlined"
-                  fullWidth
-                  margin="normal"
-                  error={formik.touched.syllabusId && formik.errors.syllabusId}
-                >
-                  <InputLabel id="syllabusId-label">Syllabus ID *</InputLabel>
-                  <Select
-                    labelId="syllabusId-label"
-                    id="syllabusId"
-                    name="syllabusId"
-                    value={formik.values.syllabusId}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    label="Syllabus ID *"
-                  >
-                    <MenuItem value={1}>Old Syllabus</MenuItem>
-                    <MenuItem value={2}>New Syllabus</MenuItem>
-                  </Select>
-                  {formik.touched.syllabusId && formik.errors.syllabusId && (
-                    <FormHelperText>{formik.errors.syllabusId}</FormHelperText>
                   )}
                 </FormControl>
               </Grid>
@@ -215,12 +208,12 @@ const AddStudentForm = () => {
                     label="Syllabus ID *"
                   >
                     <MenuItem value="">Select a syllabus</MenuItem>
-                    {/* Loop through syllabusOptions to generate options */}
-                    {data.map((syllabus) => (
-                      <MenuItem key={syllabus.Syllabus.id} value={syllabus.id}>
-                        {syllabus.name}
-                      </MenuItem>
-                    ))}
+                    {selectedProgaram !== null &&
+                      selectedProgaram.Syllabus.map((syllabus) => (
+                        <MenuItem key={syllabus.id} value={syllabus.id}>
+                          {syllabus.name}
+                        </MenuItem>
+                      ))}
                   </Select>
                   {formik.touched.syllabusId && formik.errors.syllabusId && (
                     <FormHelperText>{formik.errors.syllabusId}</FormHelperText>
@@ -228,7 +221,6 @@ const AddStudentForm = () => {
                 </FormControl>
               </Grid>
 
-              {/* Semester field */}
               <Grid item xs={6}>
                 <FormControl
                   variant="outlined"
@@ -246,34 +238,29 @@ const AddStudentForm = () => {
                     onBlur={formik.handleBlur}
                     label="Semester *"
                   >
-                    <MenuItem value={1}>1st Semester</MenuItem>
-                    <MenuItem value={2}>2nd Semester</MenuItem>
-                    <MenuItem value={3}>3rd Semester</MenuItem>
-                    <MenuItem value={4}>4th Semester</MenuItem>
-                    <MenuItem value={5}>5th Semester</MenuItem>
-                    <MenuItem value={6}>6th Semester</MenuItem>
-                    <MenuItem value={7}>7th Semester</MenuItem>
-                    <MenuItem value={8}>8th Semester</MenuItem>
+                    {selectedProgaram !== null &&
+                      Array.from(
+                        Array(
+                          selectedProgaram.ProgramSemesters[0].semesterId
+                        ).keys()
+                      ).map((index) => (
+                        <MenuItem key={index + 1} value={index + 1}>
+                          {`${index + 1}${
+                            index === 0
+                              ? "st"
+                              : index === 1
+                              ? "nd"
+                              : index === 2
+                              ? "rd"
+                              : "th"
+                          } Semester`}
+                        </MenuItem>
+                      ))}
                   </Select>
                   {formik.touched.semester && formik.errors.semester && (
                     <FormHelperText>{formik.errors.semester}</FormHelperText>
                   )}
                 </FormControl>
-              </Grid>
-
-              {/* Name field */}
-              <Grid item xs={6}>
-                <TextField
-                  id="name"
-                  name="name"
-                  label="Name *"
-                  variant="outlined"
-                  {...formik.getFieldProps("name")}
-                  error={formik.touched.name && formik.errors.name}
-                  helperText={formik.touched.name && formik.errors.name}
-                  fullWidth
-                  margin="normal"
-                />
               </Grid>
 
               {/* Address field */}
@@ -355,18 +342,19 @@ const AddStudentForm = () => {
       <Dialog open={isDialogOpen} onClose={handleDialogClose}>
         <DialogTitle>Confirm Entered Data</DialogTitle>
         <DialogContent>
+          <Typography variant="body1">Name: {formik.values.name}</Typography>
+
           <Typography variant="body1">Email: {formik.values.email}</Typography>
-          {/* <Typography variant="body1">
-            Program: {getProgramLabel(formik.values.programId)}
+          <Typography variant="body1">
+            Program: {formik.values.programId}
           </Typography>
           <Typography variant="body1">
-            Syllabus: {getSyllabusLabel(formik.values.syllabusId)}
-          </Typography> */}
+            Syllabus: {formik.values.syllabusId}
+          </Typography>
 
           <Typography variant="body1">
             Semester: {formik.values.semester}
           </Typography>
-          <Typography variant="body1">Name: {formik.values.name}</Typography>
           <Typography variant="body1">
             Address: {formik.values.address}
           </Typography>
