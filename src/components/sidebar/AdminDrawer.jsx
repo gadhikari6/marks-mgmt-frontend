@@ -9,6 +9,7 @@ import Toolbar from "@mui/material/Toolbar"
 import DashboardIcon from "@mui/icons-material/Dashboard"
 import AccountBoxIcon from "@mui/icons-material/AccountBox"
 import BookmarkIcon from "@mui/icons-material/Bookmark"
+import PersonAddIcon from "@mui/icons-material/PersonAdd"
 
 export default function AdminDrawer() {
   return (
@@ -21,6 +22,7 @@ export default function AdminDrawer() {
           { text: "Marks", icon: <BookmarkIcon />, link: "/marks" },
 
           { text: "Profile", icon: <AccountBoxIcon />, link: "/profile" },
+          { text: "Add Teacher", icon: <PersonAddIcon />, link: "/addTeacher" },
         ].map((item) => (
           <ListItem
             key={item.text}
