@@ -1,7 +1,19 @@
 import { useState } from "react"
 import { useFormik } from "formik"
 import * as yup from "yup"
-import { TextField, Button, Box, Typography, Paper } from "@mui/material"
+import {
+  TextField,
+  Button,
+  Box,
+  Typography,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Divider,
+  DialogActions,
+  Stack,
+} from "@mui/material"
 import { toast } from "react-toastify"
 import axios from "axios"
 import { useContext } from "react"
@@ -32,13 +44,26 @@ const AddTeacherForm = () => {
   }
   const { loginState } = useContext(LoginContext)
   const [loading, setLoading] = useState(false)
+  const [openDialog, setOpenDialog] = useState(false)
 
-  const onSubmit = async (values, { resetForm }) => {
+  // dialog close
+  const closeDialog = () => {
+    setOpenDialog(false)
+  }
+
+  const onSubmit = (values) => {
+    setOpenDialog(true)
+  }
+
+  // api call to create teacher
+  const createTeacher = async () => {
     setLoading(true)
-    const contactNo = Number(values.contactNo)
+    const contactNo = Number(formik.values.contactNo)
     if (isNaN(contactNo)) {
       toast.warn("Please provide a valid contact number")
       setLoading(false)
+      setOpenDialog(false)
+
       return
     }
 
@@ -48,7 +73,7 @@ const AddTeacherForm = () => {
       .post(
         `${VITE_BACKEND_URL}/admin/teachers`,
         {
-          ...values,
+          ...formik.values,
           contactNo: String(contactNo),
         },
         { headers: { Authorization: `Bearer ${loginState.token}` } }
@@ -56,7 +81,7 @@ const AddTeacherForm = () => {
       .then((response) => {
         if (response.status === 201) {
           toast.success("Techer created successfully!")
-          resetForm()
+          formik.resetForm()
         }
       })
       .catch((err) => {
@@ -69,6 +94,7 @@ const AddTeacherForm = () => {
       })
 
     setLoading(false)
+    setOpenDialog(false)
   }
 
   const formik = useFormik({
@@ -180,6 +206,40 @@ const AddTeacherForm = () => {
             </Button>
           </Box>
         </form>
+        {/* Dialog to display filled data */}
+        <Dialog open={openDialog} onClose={closeDialog}>
+          <DialogTitle>Confirm Entered Data</DialogTitle>
+          <Divider />
+          <DialogContent>
+            <Stack gap={2} sx={{ padding: 1 }}>
+              {Object.entries(formik.values).map((value) => {
+                return (
+                  <Typography key={value[0]} variant="body1">
+                    {value[0]}: {value[1]}
+                  </Typography>
+                )
+              })}
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => {
+                setOpenDialog(false)
+              }}
+              color="primary"
+              variant="outlined"
+            >
+              Edit
+            </Button>
+            <Button
+              onClick={createTeacher}
+              color="secondary"
+              variant="outlined"
+            >
+              Submit
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Paper>
     </Box>
   )
