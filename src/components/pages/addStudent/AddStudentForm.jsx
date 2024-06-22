@@ -1,97 +1,115 @@
-import { useState } from "react"
 import { useFormik } from "formik"
-import * as yup from "yup"
+import { useState } from "react"
 import {
-  TextField,
-  Button,
   Box,
-  Typography,
-  Paper,
+  Button,
   Grid,
+  Paper,
+  TextField,
+  Typography,
   FormControl,
   InputLabel,
   Select,
+  FormHelperText,
   MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material"
-
-//import { toast } from "react-toastify"
-
-const validationSchema = yup.object({
-  syllabus: yup.string().required("Syllabus is required"),
-  department: yup.string().required("Department is required"),
-  name: yup.string().required("Name is required"),
-  program: yup.string().required("Program is required"),
-  semester: yup.string().required("Semester is required"),
-  faculty: yup.string().required("Faculty is required"),
-  email: yup
-    .string()
-    .email("Please enter a valid email address")
-    .required("Email is required"),
-  address: yup.string().required("Address is required"),
-  contactNo: yup.string().required("Contact number is required"),
-  symbolNo: yup.string().required("Symbol number is required"),
-  PuRegNo: yup.string().required("PU Registration number is required"),
-  level: yup.string().required("Level is required"),
-})
+import { toast } from "react-toastify"
+import usePrograms from "../../../hooks/count/usePrograms"
+import { useContext } from "react"
+import { LoginContext } from "../../../store/LoginProvider"
+const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 
 const AddStudentForm = () => {
-  const initialValues = {
-    syllabus: "",
-    department: "",
-    name: "",
-    program: "",
-    semester: "",
-    faculty: "",
-    email: "",
-    address: "",
-    contactNo: "",
-    symbolNo: "",
-    PuRegNo: "",
-    level: "",
-  }
-
-  const [loading, setLoading] = useState(false)
-
-  const onSubmit = async (values) => {
-    // Form submission logic can be added here
-  }
+  const [isDialogOpen, setDialogOpen] = useState(false)
+  const { loginState } = useContext(LoginContext)
+  const token = loginState.token
+  const { data } = usePrograms()
+  console.log(data)
 
   const formik = useFormik({
-    initialValues,
-    onSubmit,
-    validationSchema,
+    initialValues: {
+      email: "",
+      password: "",
+      programId: "",
+      syllabusId: "",
+      semester: "",
+      name: "",
+      address: "",
+      contactNo: "",
+      symbolNo: "",
+      puRegNo: "",
+    },
+    onSubmit: (values) => {
+      fetch(`${VITE_BACKEND_URL}/admin/students`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(values),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data)
+          setDialogOpen(true) // Open the dialog
+          formik.resetForm()
+          toast.success("The user has been created successfully")
+        })
+        .catch((error) => {
+          console.error(error)
+          toast.error(error)
+        })
+    },
   })
+  const handleDialogClose = () => {
+    setDialogOpen(false)
+  }
+  //detele later
+  //Helper function to get the label for Program ID
+  // const getProgramLabel = (programId) => {
+  //   switch (programId) {
+  //     case 1:
+  //       return "Computer Engineering"
+  //     case 2:
+  //       return "Software Engineering"
+  //     default:
+  //       return ""
+  //   }
+  // }
+
+  // // Helper function to get the label for Syllabus ID
+  // const getSyllabusLabel = (syllabusId) => {
+  //   switch (syllabusId) {
+  //     case 1:
+  //       return "Old Syllabus"
+  //     case 2:
+  //       return "New Syllabus"
+  //     default:
+  //       return ""
+  //   }
+  // }
+  const handleSubmit = () => {
+    formik.submitForm()
+    setDialogOpen(false)
+  }
 
   // TODO: Add fetching academic division from network(hooks) and submission logic
   return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      justifyContent="center"
-      alignItems="center"
-    >
-      <Paper elevation={2} sx={{ padding: 5, borderRadius: 1, width: "80%" }}>
-        <form onSubmit={formik.handleSubmit}>
-          <Box display="flex" flexDirection="column" alignItems="center">
-            <Typography variant="h4" align="center" gutterBottom>
-              Add New Student
-            </Typography>
+    <Box sx={{ p: 2 }}>
+      <Paper sx={{ p: 2 }}>
+        <Typography variant="h6" gutterBottom>
+          Add Student
+        </Typography>
 
+        {/* <form onSubmit={formik.handleSubmit}> */}
+        <form>
+          <Box sx={{ mt: 2 }}>
             <Grid container spacing={2}>
-              <Grid item xs={6}>
-                <TextField
-                  id="name"
-                  name="name"
-                  label="Name *"
-                  variant="outlined"
-                  {...formik.getFieldProps("name")}
-                  error={formik.touched.name && formik.errors.name}
-                  helperText={formik.touched.name && formik.errors.name}
-                  fullWidth
-                  margin="normal"
-                />
-              </Grid>
-
+              {/* Email field */}
               <Grid item xs={6}>
                 <TextField
                   id="email"
@@ -106,6 +124,159 @@ const AddStudentForm = () => {
                 />
               </Grid>
 
+              {/* Password field */}
+              <Grid item xs={6}>
+                <TextField
+                  id="password"
+                  name="password"
+                  label="Password *"
+                  variant="outlined"
+                  type="password"
+                  {...formik.getFieldProps("password")}
+                  error={formik.touched.password && formik.errors.password}
+                  helperText={formik.touched.password && formik.errors.password}
+                  fullWidth
+                  margin="normal"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <FormControl
+                  variant="outlined"
+                  fullWidth
+                  margin="normal"
+                  error={formik.touched.programId && formik.errors.programId}
+                >
+                  <InputLabel id="programId-label">Program *</InputLabel>
+                  <Select
+                    labelId="programId-label"
+                    id="programId"
+                    name="programId"
+                    value={formik.values.programId}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    label="Program ID *"
+                  >
+                    {/* <MenuItem value="">Select a program</MenuItem> */}
+                    {/* Loop through programData to generate options */}
+                    {data.map((program) => (
+                      <MenuItem key={program.id} value={program.id}>
+                        {program.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {formik.touched.programId && formik.errors.programId && (
+                    <FormHelperText>{formik.errors.programId}</FormHelperText>
+                  )}
+                </FormControl>
+              </Grid>
+
+              {/* Syllabus ID field */}
+              <Grid item xs={6}>
+                <FormControl
+                  variant="outlined"
+                  fullWidth
+                  margin="normal"
+                  error={formik.touched.syllabusId && formik.errors.syllabusId}
+                >
+                  <InputLabel id="syllabusId-label">Syllabus ID *</InputLabel>
+                  <Select
+                    labelId="syllabusId-label"
+                    id="syllabusId"
+                    name="syllabusId"
+                    value={formik.values.syllabusId}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    label="Syllabus ID *"
+                  >
+                    <MenuItem value={1}>Old Syllabus</MenuItem>
+                    <MenuItem value={2}>New Syllabus</MenuItem>
+                  </Select>
+                  {formik.touched.syllabusId && formik.errors.syllabusId && (
+                    <FormHelperText>{formik.errors.syllabusId}</FormHelperText>
+                  )}
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={6}>
+                <FormControl
+                  variant="outlined"
+                  fullWidth
+                  margin="normal"
+                  error={formik.touched.syllabusId && formik.errors.syllabusId}
+                >
+                  <InputLabel id="syllabusId-label">Syllabus ID *</InputLabel>
+                  <Select
+                    labelId="syllabusId-label"
+                    id="syllabusId"
+                    name="syllabusId"
+                    value={formik.values.syllabusId}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    label="Syllabus ID *"
+                  >
+                    <MenuItem value="">Select a syllabus</MenuItem>
+                    {/* Loop through syllabusOptions to generate options */}
+                    {data.map((syllabus) => (
+                      <MenuItem key={syllabus.Syllabus.id} value={syllabus.id}>
+                        {syllabus.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {formik.touched.syllabusId && formik.errors.syllabusId && (
+                    <FormHelperText>{formik.errors.syllabusId}</FormHelperText>
+                  )}
+                </FormControl>
+              </Grid>
+
+              {/* Semester field */}
+              <Grid item xs={6}>
+                <FormControl
+                  variant="outlined"
+                  fullWidth
+                  margin="normal"
+                  error={formik.touched.semester && formik.errors.semester}
+                >
+                  <InputLabel id="semester-label">Semester *</InputLabel>
+                  <Select
+                    id="semester"
+                    name="semester"
+                    labelId="semester-label"
+                    value={formik.values.semester}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    label="Semester *"
+                  >
+                    <MenuItem value={1}>1st Semester</MenuItem>
+                    <MenuItem value={2}>2nd Semester</MenuItem>
+                    <MenuItem value={3}>3rd Semester</MenuItem>
+                    <MenuItem value={4}>4th Semester</MenuItem>
+                    <MenuItem value={5}>5th Semester</MenuItem>
+                    <MenuItem value={6}>6th Semester</MenuItem>
+                    <MenuItem value={7}>7th Semester</MenuItem>
+                    <MenuItem value={8}>8th Semester</MenuItem>
+                  </Select>
+                  {formik.touched.semester && formik.errors.semester && (
+                    <FormHelperText>{formik.errors.semester}</FormHelperText>
+                  )}
+                </FormControl>
+              </Grid>
+
+              {/* Name field */}
+              <Grid item xs={6}>
+                <TextField
+                  id="name"
+                  name="name"
+                  label="Name *"
+                  variant="outlined"
+                  {...formik.getFieldProps("name")}
+                  error={formik.touched.name && formik.errors.name}
+                  helperText={formik.touched.name && formik.errors.name}
+                  fullWidth
+                  margin="normal"
+                />
+              </Grid>
+
+              {/* Address field */}
               <Grid item xs={6}>
                 <TextField
                   id="address"
@@ -120,11 +291,12 @@ const AddStudentForm = () => {
                 />
               </Grid>
 
+              {/* Contact Number field */}
               <Grid item xs={6}>
                 <TextField
                   id="contactNo"
                   name="contactNo"
-                  label="Contact No. *"
+                  label="Contact Number *"
                   variant="outlined"
                   {...formik.getFieldProps("contactNo")}
                   error={formik.touched.contactNo && formik.errors.contactNo}
@@ -136,144 +308,12 @@ const AddStudentForm = () => {
                 />
               </Grid>
 
-              <Grid item xs={6}>
-                <FormControl fullWidth variant="outlined">
-                  <InputLabel id="faculty-label">Faculty *</InputLabel>
-                  <Select
-                    id="faculty"
-                    name="faculty"
-                    label="Faculty *"
-                    {...formik.getFieldProps("faculty")}
-                    error={formik.touched.faculty && formik.errors.faculty}
-                  >
-                    <MenuItem value="Faculty of Science and Technology">
-                      Faculty of Science and Technology
-                    </MenuItem>
-                    <MenuItem value="Faculty of Management">
-                      Faculty of Management
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={6}>
-                <FormControl fullWidth variant="outlined">
-                  <InputLabel id="department-label">Department *</InputLabel>
-                  <Select
-                    id="department"
-                    name="department"
-                    label="Department *"
-                    {...formik.getFieldProps("department")}
-                    error={
-                      formik.touched.department && formik.errors.department
-                    }
-                  >
-                    <MenuItem value="Department of Computer and Software Engineering">
-                      Department of Computer and Software Engineering
-                    </MenuItem>
-                    <MenuItem value="Department of Civil Engineering">
-                      Department of Civil Engineering
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={6}>
-                <FormControl fullWidth variant="outlined">
-                  <InputLabel id="level-label">Level *</InputLabel>
-                  <Select
-                    id="level"
-                    name="level"
-                    label="Level *"
-                    {...formik.getFieldProps("level")}
-                    error={formik.touched.level && formik.errors.level}
-                  >
-                    <MenuItem value="Bachelor">Bachelor</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={6}>
-                <FormControl fullWidth variant="outlined">
-                  <InputLabel id="program-label">Program *</InputLabel>
-                  <Select
-                    id="program"
-                    name="program"
-                    label="Program *"
-                    {...formik.getFieldProps("program")}
-                    error={formik.touched.program && formik.errors.program}
-                  >
-                    <MenuItem value="Computer Engineering">
-                      Computer Engineering
-                    </MenuItem>
-                    <MenuItem value="Software Engineering">
-                      Software Engineering
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={6}>
-                <FormControl fullWidth variant="outlined">
-                  <InputLabel id="semester-label">Semester *</InputLabel>
-                  <Select
-                    id="semester"
-                    name="semester"
-                    label="Semester *"
-                    {...formik.getFieldProps("semester")}
-                    error={formik.touched.semester && formik.errors.semester}
-                  >
-                    <MenuItem value="1">1</MenuItem>
-                    <MenuItem value="2">2</MenuItem>
-                    <MenuItem value="3">3</MenuItem>
-                    <MenuItem value="4">4</MenuItem>
-                    <MenuItem value="5">5</MenuItem>
-                    <MenuItem value="6">6</MenuItem>
-                    <MenuItem value="7">7</MenuItem>
-                    <MenuItem value="8">8</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={6}>
-                <FormControl fullWidth variant="outlined">
-                  <InputLabel id="syllabus-label">Syllabus *</InputLabel>
-                  <Select
-                    id="syllabus"
-                    name="syllabus"
-                    label="Syllabus *"
-                    {...formik.getFieldProps("syllabus")}
-                    error={formik.touched.syllabus && formik.errors.syllabus}
-                  >
-                    <MenuItem value="Computer old syllabus">
-                      Computer old syllabus
-                    </MenuItem>
-                    <MenuItem value="Computer new syllabus">
-                      Computer new syllabus
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={6}>
-                <TextField
-                  id="PuRegNo"
-                  name="PuRegNo"
-                  label="PU Regd No. *"
-                  variant="outlined"
-                  {...formik.getFieldProps("PuRegNo")}
-                  error={formik.touched.PuRegNo && formik.errors.PuRegNo}
-                  helperText={formik.touched.PuRegNo && formik.errors.PuRegNo}
-                  fullWidth
-                  margin="normal"
-                />
-              </Grid>
-
+              {/* Symbol Number field */}
               <Grid item xs={6}>
                 <TextField
                   id="symbolNo"
                   name="symbolNo"
-                  label="Symbol No. *"
+                  label="Symbol Number *"
                   variant="outlined"
                   {...formik.getFieldProps("symbolNo")}
                   error={formik.touched.symbolNo && formik.errors.symbolNo}
@@ -282,20 +322,69 @@ const AddStudentForm = () => {
                   margin="normal"
                 />
               </Grid>
+
+              {/* PU Registration Number field */}
+              <Grid item xs={6}>
+                <TextField
+                  id="puRegNo"
+                  name="puRegNo"
+                  label="PU Registration Number *"
+                  variant="outlined"
+                  {...formik.getFieldProps("puRegNo")}
+                  error={formik.touched.puRegNo && formik.errors.puRegNo}
+                  helperText={formik.touched.puRegNo && formik.errors.puRegNo}
+                  fullWidth
+                  margin="normal"
+                />
+              </Grid>
             </Grid>
+
             <Button
-              type="submit"
+              type="button"
               variant="contained"
               color="primary"
-              fullWidth
-              disabled={loading}
-              sx={{ marginTop: 2 }}
+              sx={{ mt: 3 }}
+              onClick={() => setDialogOpen(true)}
             >
-              Add Student
+              Submit
             </Button>
           </Box>
         </form>
       </Paper>
+      {/* Dialog to display filled data */}
+      <Dialog open={isDialogOpen} onClose={handleDialogClose}>
+        <DialogTitle>Confirm Entered Data</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">Email: {formik.values.email}</Typography>
+          {/* <Typography variant="body1">
+            Program: {getProgramLabel(formik.values.programId)}
+          </Typography>
+          <Typography variant="body1">
+            Syllabus: {getSyllabusLabel(formik.values.syllabusId)}
+          </Typography> */}
+
+          <Typography variant="body1">
+            Semester: {formik.values.semester}
+          </Typography>
+          <Typography variant="body1">Name: {formik.values.name}</Typography>
+          <Typography variant="body1">
+            Address: {formik.values.address}
+          </Typography>
+          <Typography variant="body1">
+            Contact Number: {formik.values.contactNo}
+          </Typography>
+          <Typography variant="body1">
+            Symbol Number: {formik.values.symbolNo}
+          </Typography>
+          <Typography variant="body1">
+            PU Registration Number: {formik.values.puRegNo}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose}>Edit</Button>
+          <Button onClick={handleSubmit}>Submit</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }
