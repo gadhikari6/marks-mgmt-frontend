@@ -26,6 +26,7 @@ import Syllabus from "./components/pages/Syllabus/Syllabus"
 import AddStudent from "./components/pages/addStudent/AddStudentForm"
 import AddTeacher from "./components/pages/addTeacher/AddTeacherForm"
 import AddStudentForm from "./components/pages/addStudent/AddStudentForm"
+import ViewTeacherCourses from "./components/pages/teachers/viewCourses/viewTeacherCourses"
 
 export default function App() {
   const { loginState, dispatchLoginState } = useContext(LoginContext)
@@ -188,6 +189,17 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/teacherCourses"
+            element={
+              <ProtectedRoute>
+                <ResponsiveDrawer>
+                  <ViewTeacherCourses />
+                </ResponsiveDrawer>
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="*"
             element={
