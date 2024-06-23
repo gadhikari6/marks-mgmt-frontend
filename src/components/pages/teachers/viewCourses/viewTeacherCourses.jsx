@@ -88,19 +88,15 @@ export default function ViewTeacherCourses() {
                   <TableRow key={index}>
                     <TableCell>{course.course.name}</TableCell>
                     <TableCell>{course.course.credit}</TableCell>
-                    {course.course.ProgramCourses?.map((prog) => {
-                      return (
-                        <>
-                          <TableCell key={prog.program.name}>
-                            {prog.program.name} ({prog?.syllabus?.name})
-                          </TableCell>
 
-                          <TableCell key={prog.semester.id + "sem"}>
-                            {prog.semester.id}
-                          </TableCell>
-                        </>
-                      )
-                    })}
+                    <TableCell key={course.program.name}>
+                      {course.program.name} ({course.syllabus.name})
+                    </TableCell>
+
+                    <TableCell key={course.semester.id + "sem"}>
+                      {course.semester.id}
+                    </TableCell>
+
                     <TableCell>
                       <Button
                         variant="outlined"
@@ -154,18 +150,15 @@ export default function ViewTeacherCourses() {
                 </Typography>
 
                 <Typography key={selectedProgram.code} variant="body1">
-                  Program:{" "}
-                  {selectedProgram?.course?.ProgramCourses[0]?.program?.name}
+                  Program: {selectedProgram?.program?.name}
                 </Typography>
 
                 <Typography key={selectedProgram.code} variant="body1">
-                  Syllabus:{" "}
-                  {selectedProgram?.course?.ProgramCourses[0]?.syllabus?.name}
+                  Syllabus: {selectedProgram?.syllabus?.name}
                 </Typography>
 
                 <Typography key={selectedProgram.code} variant="body1">
-                  Semester:{" "}
-                  {selectedProgram?.course?.ProgramCourses[0]?.semester?.id}
+                  Semester: {selectedProgram?.semester?.id}
                 </Typography>
 
                 <Typography key={selectedProgram.code} variant="body1">
