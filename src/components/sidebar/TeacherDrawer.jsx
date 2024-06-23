@@ -9,6 +9,7 @@ import Toolbar from "@mui/material/Toolbar"
 import DashboardIcon from "@mui/icons-material/Dashboard"
 import AccountBoxIcon from "@mui/icons-material/AccountBox"
 import BookmarkIcon from "@mui/icons-material/Bookmark"
+import AutoStoriesIcon from "@mui/icons-material/AutoStories"
 
 export default function TeacherDrawer() {
   return (
@@ -18,6 +19,11 @@ export default function TeacherDrawer() {
       <List>
         {[
           { text: "Dashboard", icon: <DashboardIcon />, link: "/dashboard" },
+          {
+            text: "Courses",
+            icon: <AutoStoriesIcon />,
+            link: "/teacherCourses",
+          },
           { text: "Marks", icon: <BookmarkIcon />, link: "/marks" },
           { text: "Profile", icon: <AccountBoxIcon />, link: "/profile" },
         ].map((item) => (
