@@ -1,4 +1,4 @@
-import { Avatar, Card, CardContent, Grid, Typography } from "@material-ui/core"
+import { Avatar, Card, CardContent, Grid, Typography } from "@mui/material"
 import EmptySkeleton from "../../skeleton"
 import { useStyles } from "../../../utils/style"
 import useProfile from "../../../hooks/useProfile"

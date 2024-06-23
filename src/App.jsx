@@ -23,7 +23,9 @@ import Marks from "./components/pages/marks/Marks"
 import Settings from "./components/pages/settings/Settings"
 import Dashboard from "./components/pages/dashboard/Dashboard"
 import Syllabus from "./components/pages/Syllabus/Syllabus"
+import AddStudent from "./components/pages/addStudent/AddStudentForm"
 import AddTeacher from "./components/pages/addTeacher/AddTeacherForm"
+import AddStudentForm from "./components/pages/addStudent/AddStudentForm"
 
 export default function App() {
   const { loginState, dispatchLoginState } = useContext(LoginContext)
@@ -116,7 +118,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/profile"
             element={
@@ -173,6 +174,16 @@ export default function App() {
               <ProtectedRoute>
                 <ResponsiveDrawer>
                   <AddTeacher />
+                </ResponsiveDrawer>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/addStudent"
+            element={
+              <ProtectedRoute>
+                <ResponsiveDrawer>
+                  <AddStudentForm />
                 </ResponsiveDrawer>
               </ProtectedRoute>
             }
