@@ -31,10 +31,12 @@ export default function ViewTeacherCourses() {
   const [selectedProgram, setSelectedProgram] = useState(null)
 
   useEffect(() => {
-    if (data !== null) {
-      if (allCourses !== undefined) setAllCourses(data)
+    if (data !== undefined && data !== null) {
+      // if (allCourses !== undefined) {
+      setAllCourses(data.courses)
+      // }
     }
-  }, [data])
+  }, [isLoading, data])
 
   if (isLoading) {
     return <div>Loading...</div>
@@ -82,34 +84,36 @@ export default function ViewTeacherCourses() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {allCourses !== undefined &&
-                allCourses !== null &&
-                allCourses.courses.map((course, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{course.course.name}</TableCell>
-                    <TableCell>{course.course.credit}</TableCell>
+              {allCourses &&
+                allCourses.length > 0 &&
+                allCourses.map((course, index) => (
+                  <>
+                    <TableRow key={index}>
+                      <TableCell>{course.course.name}</TableCell>
+                      <TableCell>{course.course.credit}</TableCell>
 
-                    <TableCell key={course.program.name}>
-                      {course.program.name} ({course.syllabus.name})
-                    </TableCell>
+                      <TableCell key={course.program.name}>
+                        {course.program.name} ({course.syllabus.name})
+                      </TableCell>
 
-                    <TableCell key={course.semester.id + "sem"}>
-                      {course.semester.id}
-                    </TableCell>
+                      <TableCell key={course.semester.id + index}>
+                        {course.semester.id}
+                      </TableCell>
 
-                    <TableCell>
-                      <Button
-                        variant="outlined"
-                        startIcon={<InfoIcon />}
-                        onClick={() => {
-                          setSelectedProgram(course)
-                          setOpenDialog(true)
-                        }}
-                      >
-                        View Details
-                      </Button>
-                    </TableCell>
-                  </TableRow>
+                      <TableCell key={course.course.code + index}>
+                        <Button
+                          variant="outlined"
+                          startIcon={<InfoIcon />}
+                          onClick={() => {
+                            setSelectedProgram(course)
+                            setOpenDialog(true)
+                          }}
+                        >
+                          View Details
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  </>
                 ))}
             </TableBody>
           </Table>
@@ -129,39 +133,39 @@ export default function ViewTeacherCourses() {
           {selectedProgram !== null && (
             <>
               <Stack gap={2} sx={{ padding: 1 }}>
-                <Typography key={selectedProgram.name} variant="body1">
+                <Typography variant="body1">
                   Name: {selectedProgram?.course?.name}
                 </Typography>
 
-                <Typography key={selectedProgram.credit} variant="body1">
+                <Typography variant="body1">
                   Credit: {selectedProgram?.course?.credit}
                 </Typography>
 
-                <Typography key={selectedProgram.code} variant="body1">
+                <Typography variant="body1">
                   Code: {selectedProgram?.course?.code}
                 </Typography>
 
-                <Typography key={selectedProgram.code} variant="body1">
+                <Typography variant="body1">
                   Elective: {selectedProgram?.course?.elective ? "Yes" : "No"}
                 </Typography>
 
-                <Typography key={selectedProgram.code} variant="body1">
+                <Typography variant="body1">
                   Project: {selectedProgram?.course?.project ? "Yes" : "No"}
                 </Typography>
 
-                <Typography key={selectedProgram.code} variant="body1">
+                <Typography variant="body1">
                   Program: {selectedProgram?.program?.name}
                 </Typography>
 
-                <Typography key={selectedProgram.code} variant="body1">
+                <Typography variant="body1">
                   Syllabus: {selectedProgram?.syllabus?.name}
                 </Typography>
 
-                <Typography key={selectedProgram.code} variant="body1">
+                <Typography variant="body1">
                   Semester: {selectedProgram?.semester?.id}
                 </Typography>
 
-                <Typography key={selectedProgram.code} variant="body1">
+                <Typography variant="body1">
                   MarksWeightage: [ Theory:{" "}
                   {selectedProgram?.course?.markWeightage?.theory}, Practical:{" "}
                   {selectedProgram?.course?.markWeightage?.practical} ]
