@@ -262,7 +262,7 @@ const AddStudentForm = () => {
                   margin="normal"
                   error={formik.touched.syllabusId && formik.errors.syllabusId}
                 >
-                  <InputLabel id="syllabusId-label">Syllabus ID *</InputLabel>
+                  <InputLabel id="syllabusId-label">Syllabus *</InputLabel>
                   <Select
                     labelId="syllabusId-label"
                     id="syllabusId"
