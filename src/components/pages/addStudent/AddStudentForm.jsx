@@ -22,20 +22,45 @@ import { toast } from "react-toastify"
 import usePrograms from "../../../hooks/count/usePrograms"
 import { useContext } from "react"
 import { LoginContext } from "../../../store/LoginProvider"
+import axios from "axios"
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
+import * as yup from "yup"
 
+const validationSchema = yup.object({
+  name: yup.string().required("Name is required"),
+  email: yup
+    .string()
+    .email("Please enter a valid email address")
+    .required("Email is required"),
+  address: yup.string().required("Address is required"),
+  contactNo: yup.string().min(6).max(20).required("Contact number is required"),
+  symbolNo: yup.string().min(6).max(20).required("Symbol number is required"),
+  programId: yup.number().positive().required("Program is required"),
+  syllabusId: yup.number().positive().required("Syllabus is required"),
+  semester: yup.number().positive().required("Semester is required"),
+
+  puRegNo: yup
+    .string()
+    .min(6)
+    .max(20)
+    .required("Registration number is required"),
+
+  password: yup
+    .string()
+    .min(5, "The minimum length of Password is 5 characters")
+    .required("Password field is required"),
+})
 const AddStudentForm = () => {
   const { data } = usePrograms()
 
   const [isDialogOpen, setDialogOpen] = useState(false)
   const { loginState } = useContext(LoginContext)
   const token = loginState.token
-  const [programs, setPrograms] = useState([])
+  const [programs, setPrograms] = useState(null)
   const [selectedProgaram, setSelectedProgram] = useState(null)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    // console.log(JSON.stringify(data))
-
     setPrograms(data)
   }, [data])
 
@@ -52,31 +77,77 @@ const AddStudentForm = () => {
       symbolNo: "",
       puRegNo: "",
     },
-    onSubmit: (values) => {
-      fetch(`${VITE_BACKEND_URL}/admin/students`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(values),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.id) {
-            formik.resetForm()
-            toast.success("Form submitted successfully!")
-          } else {
-            toast.error(data.error.message)
-          }
-        })
-
-        .catch((error) => {
-          console.error(error)
-          toast.error(error)
-        })
+    onSubmit: () => {
+      setDialogOpen(true)
     },
+    validationSchema,
   })
+  const createStudent = async () => {
+    const contactNo = Number(formik.values.contactNo)
+    if (isNaN(contactNo)) {
+      toast.warn("Please provide a valid contact number")
+      setLoading(false)
+      setDialogOpen(false)
+
+      return
+    }
+
+    const symbolNo = Number(formik.values.symbolNo)
+    if (isNaN(symbolNo)) {
+      toast.warn("Please provide a valid symbol number")
+      setLoading(false)
+      setDialogOpen(false)
+
+      return
+    }
+    const {
+      email,
+      password,
+      programId,
+      syllabusId,
+      semester,
+      name,
+      address,
+      puRegNo,
+    } = formik.values
+    const data = {
+      email: email,
+      password: password,
+      programId: programId,
+      syllabusId: syllabusId,
+      semester: semester,
+      name: name,
+      address: address,
+      puRegNo: puRegNo,
+      contactNo: String(contactNo),
+      symbolNo: String(symbolNo),
+    }
+
+    await axios
+      .post(
+        `${VITE_BACKEND_URL}/admin/students`,
+        {
+          ...data,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      .then((response) => {
+        if (response.status === 201) {
+          toast.success("Student created successfully!")
+          formik.resetForm()
+        }
+      })
+      .catch((err) => {
+        if (err.response.status === 409) {
+          toast.warn("A Student with provided details already exists!")
+        } else {
+          toast.warn("Something wrong went with request")
+          console.log(err) // see error on console
+        }
+      })
+    setLoading(false)
+    setDialogOpen(false)
+  }
   const handleDialogClose = () => {
     setDialogOpen(false)
   }
@@ -87,12 +158,6 @@ const AddStudentForm = () => {
       : setSelectedProgram(null)
   }
 
-  const handleSubmit = () => {
-    formik.submitForm()
-    setDialogOpen(false)
-  }
-
-  // TODO: Add fetching academic division from network(hooks) and submission logic
   return (
     <Box sx={{ p: 2 }}>
       <Paper sx={{ p: 2 }}>
@@ -107,8 +172,7 @@ const AddStudentForm = () => {
           style={{ marginBottom: "10px", textAlign: "center" }}
         ></Divider>
 
-        {/* <form onSubmit={formik.handleSubmit}> */}
-        <form>
+        <form onSubmit={formik.handleSubmit}>
           <Box sx={{ mt: 2 }}>
             <Grid container spacing={2}>
               {/* Name field */}
@@ -175,9 +239,10 @@ const AddStudentForm = () => {
                     onBlur={formik.handleBlur}
                     label="Program ID *"
                   >
-                    {/* <MenuItem value="">Select a program</MenuItem> */}
                     {/* Loop through programData to generate options */}
-                    {programs.length > 0 &&
+                    {programs !== null &&
+                      Array.isArray(programs) &&
+                      programs.length > 0 &&
                       programs.map((program) => (
                         <MenuItem key={program.id} value={program.id}>
                           {program.name}
@@ -327,13 +392,13 @@ const AddStudentForm = () => {
             </Grid>
 
             <Button
-              type="button"
+              type="submit"
               variant="contained"
               color="primary"
               sx={{ mt: 3 }}
-              onClick={() => setDialogOpen(true)}
+              disabled={loading}
             >
-              Submit
+              {loading ? "Adding Student..." : "Add Student"}
             </Button>
           </Box>
         </form>
@@ -370,7 +435,7 @@ const AddStudentForm = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDialogClose}>Edit</Button>
-          <Button onClick={handleSubmit}>Submit</Button>
+          <Button onClick={createStudent}>Submit</Button>
         </DialogActions>
       </Dialog>
     </Box>
