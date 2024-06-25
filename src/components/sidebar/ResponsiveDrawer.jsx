@@ -36,6 +36,8 @@ import {
 
 import { toast } from "react-toastify"
 import { Divider } from "@mui/material"
+import useProfile from "../../hooks/useProfile"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 
 const drawerWidth = 240
 
@@ -45,24 +47,47 @@ function ResponsiveDrawer(props) {
   const { window } = props
   const [mobileOpen, setMobileOpen] = React.useState(false)
   const [selectedRole, setSelectedRole] = useState(loginState.roles.currentRole)
+  const { data: profileData } = useProfile()
+
+  // Dialog state for logout
+  const [logoutDialog, setLogoutDialog] = useState(false)
+
+  // Dialog state for role Change
+  const [openRoleChangeDialog, setOpenRoleChangeDialog] = useState(false)
+
+  // queryClient
+  const queryClient = useQueryClient()
+
+  const [name, setName] = useState("")
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // invalidate all caches in react-query before logout
+    queryClient.invalidateQueries()
+
     dispatchLoginState({ type: "LOGOUT" })
     toast.warn("You have been logged out!")
   }
-  //here
+
+  // set role from context
   useEffect(() => {
     setRole(loginState.roles.currentRole)
   }, [loginState])
 
+  // set name from profile
+  useEffect(() => {
+    if (profileData !== undefined && profileData !== null) {
+      setName(profileData.name)
+    }
+  }, [profileData])
+
   const handleRoleChange = (event) => {
     const newRole = event.target.value
     setSelectedRole(newRole)
-    setOpenDialog(true)
+    setOpenRoleChangeDialog(true)
   }
 
   const handleConfirmRoleChange = () => {
@@ -72,19 +97,16 @@ function ResponsiveDrawer(props) {
         role: selectedRole,
       },
     })
-    setOpenDialog(false)
+    setOpenRoleChangeDialog(false)
   }
 
   const handleCancelRoleChange = () => {
-    setOpenDialog(false)
+    setOpenRoleChangeDialog(false)
   }
 
   // what does this do ?? need comment here!
   const container =
     window !== undefined ? () => window().document.body : undefined
-
-  // Dialog state
-  const [openDialog, setOpenDialog] = useState(false)
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -108,42 +130,60 @@ function ResponsiveDrawer(props) {
           <Typography variant="h6" noWrap component="div">
             Internal Marks Management System
           </Typography>
-          <Typography
+
+          <Box
             sx={{
-              marginLeft: 40,
-              // border: 1,
+              marginLeft: "auto",
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
+              alignItems: "center",
+              justifyContent: "center",
+              justifyItems: "center",
+              alignContent: "center",
+              gap: 2,
             }}
           >
-            Role:{" "}
-            <span style={{ marginRight: "1.5rem" }}>
-              {loginState.roles.currentRole}
-            </span>
-            {loginState.roles.allRoles.length > 1 ? (
-              <>
-                Change Role:
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={role}
-                  label="Role"
-                  onChange={handleRoleChange}
-                  sx={{
-                    color: "white",
-                    border: "1px solid white",
-                    marginLeft: 1,
-                  }}
-                >
-                  {loginState.roles.allRoles.map((role) => {
-                    return (
-                      <MenuItem key={role} value={role}>
-                        {role}
-                      </MenuItem>
-                    )
-                  })}
-                </Select>
-              </>
-            ) : null}
-          </Typography>
+            <Box
+              sx={{
+                textAlign: "center",
+              }}
+            >
+              <Typography>
+                {name === "" ? "Role" : <b>{name}</b>} :
+                {loginState.roles.currentRole}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography>
+                {loginState.roles.allRoles.length > 1 ? (
+                  <>
+                    Change Role:
+                    <Select
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      value={role}
+                      label="Role"
+                      onChange={handleRoleChange}
+                      sx={{
+                        color: "white",
+                        border: "1px solid white",
+                        marginLeft: 1,
+                      }}
+                    >
+                      {loginState.roles.allRoles.map((role) => {
+                        return (
+                          <MenuItem key={role} value={role}>
+                            {role}{" "}
+                            {role === loginState.roles.currentRole && "*"}
+                          </MenuItem>
+                        )
+                      })}
+                    </Select>
+                  </>
+                ) : null}
+              </Typography>
+            </Box>
+          </Box>
         </Toolbar>
       </AppBar>
       <Box
@@ -204,7 +244,9 @@ function ResponsiveDrawer(props) {
             key="Logout"
             disablePadding
             component={Link}
-            onClick={handleLogout}
+            onClick={() => {
+              setLogoutDialog(true)
+            }}
             button
           >
             <ListItemButton>
@@ -228,7 +270,7 @@ function ResponsiveDrawer(props) {
         {props.children}
       </Box>
 
-      <Dialog open={openDialog} onClose={handleCancelRoleChange}>
+      <Dialog open={openRoleChangeDialog} onClose={handleCancelRoleChange}>
         <DialogTitle>Confirm Role Change</DialogTitle>
         <Divider />
         <DialogContent>
@@ -244,6 +286,31 @@ function ResponsiveDrawer(props) {
           </Button>
           <Button
             onClick={handleCancelRoleChange}
+            color="secondary"
+            variant="outlined"
+          >
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={logoutDialog}
+        onClose={() => {
+          setLogoutDialog(false)
+        }}
+      >
+        <DialogTitle>Confirm Logout?</DialogTitle>
+        <Divider />
+        <DialogContent>Are you sure you want to logout?</DialogContent>
+        <DialogActions>
+          <Button onClick={handleLogout} color="primary" variant="outlined">
+            Confirm
+          </Button>
+          <Button
+            onClick={() => {
+              setLogoutDialog(false)
+            }}
             color="secondary"
             variant="outlined"
           >
