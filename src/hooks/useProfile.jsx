@@ -20,6 +20,6 @@ const useProfile = () => {
     },
   })
 
-  return { isLoading, error, data }
+  return { isLoading, error, data, token }
 }
 export default useProfile
