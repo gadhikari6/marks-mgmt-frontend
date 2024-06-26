@@ -29,6 +29,7 @@
     "formik": "^2.3.2",
     "i": "^0.3.7",
     "icons-material": "link:@mui/icons-material",
+    "jquery": "^3.7.0",
     "jwt-decode": "^3.1.2",
     "marks-mgmt-frontend": "link:",
     "pnpm": "^8.6.0",
