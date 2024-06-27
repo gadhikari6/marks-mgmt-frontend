@@ -1,95 +1,171 @@
-import { Avatar, Card, CardContent, Grid, Typography } from "@mui/material"
-import EmptySkeleton from "../../skeleton"
-import { useStyles } from "../../../utils/style"
+import { useState } from "react"
+import axios from "axios"
+import { toast } from "react-toastify"
+import {
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+} from "@mui/material"
 import useProfile from "../../../hooks/useProfile"
-import Student from "./card/Student"
-import Teacher from "./card/Teacher"
-import Admin from "./card/Admin"
-import UserRoleCards from "./card/UserRolecards"
-function Profile() {
-  const classes = useStyles()
-  // const [data, setData] = useState(null)
-  const { isLoading, error, data } = useProfile()
+import AdminProfile from "./card/Admin"
+import StudentProfile from "./card/Student"
+import TeacherProfile from "./card/Teacher"
 
-  if (isLoading) {
-    return <EmptySkeleton />
+const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
+
+const Profile = () => {
+  const { data, isLoading, error, token } = useProfile()
+
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [editedData, setEditedData] = useState({
+    name: "",
+    address: "",
+    contactNo: "",
+    email: "",
+  })
+
+  const handleEditDialogOpen = () => {
+    setEditDialogOpen(true)
   }
 
-  if (error) return "An error has occurred: " + error.message
-  // console.log(data)
+  const handleEditDialogClose = () => {
+    setEditDialogOpen(false)
+  }
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setEditedData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }))
+  }
+
+  const handleSaveChanges = async () => {
+    try {
+      const response = await axios.put(
+        `${VITE_BACKEND_URL}/profile`,
+        editedData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      if (response.status === 200) {
+        toast.success("Profile updated successfully!")
+        useProfile
+      } else {
+        toast.error(error.message)
+      }
+    } catch (error) {
+      console.error(error)
+    }
+    handleEditDialogClose()
+  }
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
+  if (error) {
+    return <div>Error: {error.message}</div>
+  }
+
+  const { name, address, contactNo, email, UserRoles } = data
 
   return (
-    <div className={classes.root}>
-      <Grid container spacing={2}>
-        <Grid item>
-          <Avatar
-            alt="User Avatar"
-            src={data.avatarUrl}
-            className={classes.avatar}
+    <Card>
+      <CardContent>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <div style={{ flex: 1 }}>
+            <Typography variant="body1">Name: {name}</Typography>
+            <Typography variant="body1">Email: {email}</Typography>
+            <Typography variant="body1">Address: {address}</Typography>
+            <Typography variant="body1">Contact No: {contactNo}</Typography>
+          </div>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleEditDialogOpen}
+            style={{
+              fontSize: "0.9rem",
+              margin: "0.5rem",
+              padding: "0.5rem 1rem",
+            }}
+          >
+            Edit
+          </Button>
+        </div>
+      </CardContent>
+
+      {UserRoles.map((role) => {
+        return (
+          <div key={role.userId}>
+            <Card variant="outlined" sx={{ marginTop: 2 }}>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Role: {role.role.name}
+                </Typography>
+                <Typography variant="body1">
+                  Description: {role.role.description}
+                </Typography>
+              </CardContent>
+            </Card>
+            {/* Render additional role-specific information here */}
+            {role.role.name === "admin" && <AdminProfile data={data} />}
+            {role.role.name === "student" && <StudentProfile data={data} />}
+            {role.role.name === "teacher" && <TeacherProfile data={data} />}
+          </div>
+        )
+      })}
+
+      <Dialog open={editDialogOpen} onClose={handleEditDialogClose}>
+        <DialogTitle>Edit Profile</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Name"
+            name="name"
+            value={editedData.name}
+            onChange={handleInputChange}
+            fullWidth
           />
-        </Grid>
-        <Grid item xs={12} sm container>
-          <Grid item xs container direction="column" spacing={2}>
-            <Grid item xs>
-              <Typography variant="h5">{data.name}</Typography>
-              <Typography variant="subtitle1">{data.email}</Typography>
-            </Grid>
-            <Grid item>
-              <Card className={classes.card}>
-                <CardContent>
-                  <Typography gutterBottom variant="h6">
-                    <strong>
-                      {data.UserRoles.map((userRole) =>
-                        userRole.role.name
-                          .split(" ")
-                          .map(
-                            (word) =>
-                              word.charAt(0).toUpperCase() + word.slice(1)
-                          )
-                          .join(" ")
-                      ).join(", ")}{" "}
-                      Profile
-                    </strong>
-                  </Typography>
-
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} md={6}>
-                      <Typography variant="body1">
-                        <strong>Address:</strong> {data.address}
-                      </Typography>
-                      <Typography variant="body1">
-                        <strong>Contact No:</strong> {data.contactNo}
-                      </Typography>
-                      <Typography variant="body1">
-                        <strong>User Roles:</strong>{" "}
-                        {data.UserRoles.map(
-                          (userRole) => userRole.role.name
-                        ).join(", ")}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      {data.UserRoles[0].role.name === "student" && (
-                        //student
-                        <Student data={data} />
-                      )}
-                      {data.UserRoles[0].role.name === "teacher" && (
-                        //teacherComponent
-                        <Teacher data={data} />
-                      )}
-                      {data.UserRoles[0].role.name === "admin" && (
-                        <Admin data={data} />
-                      )}
-                    </Grid>
-
-                    <UserRoleCards data={data} />
-                  </Grid>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
-    </div>
+          <TextField
+            label="Email"
+            name="email"
+            value={editedData.email}
+            onChange={handleInputChange}
+            fullWidth
+          />
+          <TextField
+            label="Address"
+            name="address"
+            value={editedData.address}
+            onChange={handleInputChange}
+            fullWidth
+          />
+          <TextField
+            label="Contact No"
+            name="contactNo"
+            value={editedData.contactNo}
+            onChange={handleInputChange}
+            fullWidth
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleEditDialogClose}>Cancel</Button>
+          <Button onClick={handleSaveChanges} color="primary">
+            Save Changes
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Card>
   )
 }
 

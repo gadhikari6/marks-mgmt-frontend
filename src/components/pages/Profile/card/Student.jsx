@@ -1,28 +1,70 @@
-/* eslint-disable react/prop-types */
-import { Typography } from "@material-ui/core"
-function Student({ data }) {
+import { Card, Typography } from "@mui/material"
+import PropTypes from "prop-types"
+
+const StudentProfile = ({ data }) => {
+  const { Student } = data
+
   return (
-    <>
-      <Typography variant="body1">
-        <strong>Symbol No:</strong> {data.student.symbolNo}
-      </Typography>
-      <Typography variant="body1">
-        <strong>PU Reg No:</strong> {data.student.puRegNo}
-      </Typography>
-      <Typography variant="body1">
-        <strong>Semester ID:</strong> {data.student.semesterId}
-      </Typography>
-      <Typography variant="body1">
-        <strong>Level:</strong> {data.student.program.level.name}
-      </Typography>
-      <Typography variant="body1">
-        <strong>Program:</strong> {data.student.program.department.name}
-      </Typography>
-      <Typography variant="body1">
-        <strong>Syllabus:</strong> {data.student.syllabus.name}
-      </Typography>
-    </>
+    <Card sx={{ margin: "20px", padding: "20px" }}>
+      <Typography variant="h6">Student Details:</Typography>
+      {Student.map((student) => (
+        <div key={student.id}>
+          <Typography variant="body1">Symbol No: {student.symbolNo}</Typography>
+          <Typography variant="body1">PU Reg No: {student.puRegNo}</Typography>
+          <Typography variant="body1">
+            Program: {student.program.name}
+          </Typography>
+          <Typography variant="body1">
+            Faculty: {student.program.department.faculty.name}
+          </Typography>
+          <Typography variant="body1">
+            Status: {student.StudentStatus[0].status}
+          </Typography>
+          <Typography variant="body1">
+            Syllabus: {student.syllabus.name}
+          </Typography>
+          <Typography variant="body1">
+            Semester: {student.semester.id}
+          </Typography>
+
+          {/* Add any other student details you want to display */}
+        </div>
+      ))}
+    </Card>
   )
 }
 
-export default Student
+StudentProfile.propTypes = {
+  data: PropTypes.shape({
+    email: PropTypes.string.isRequired,
+    Student: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.number.isRequired,
+        symbolNo: PropTypes.string.isRequired,
+        puRegNo: PropTypes.string.isRequired,
+        program: PropTypes.shape({
+          name: PropTypes.string.isRequired,
+          department: PropTypes.shape({
+            faculty: PropTypes.shape({
+              name: PropTypes.string.isRequired,
+            }).isRequired,
+          }).isRequired,
+        }).isRequired,
+        StudentStatus: PropTypes.arrayOf(
+          PropTypes.shape({
+            status: PropTypes.string.isRequired,
+            studentId: PropTypes.number.isRequired,
+          })
+        ).isRequired,
+        syllabus: PropTypes.shape({
+          name: PropTypes.string.isRequired,
+        }).isRequired,
+        semester: PropTypes.shape({
+          id: PropTypes.number.isRequired,
+        }).isRequired,
+      })
+    ).isRequired,
+  }).isRequired,
+}
+
+export default StudentProfile

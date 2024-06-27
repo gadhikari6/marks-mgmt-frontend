@@ -1,20 +1,31 @@
-/* eslint-disable react/prop-types */
-import {
-  Typography,
-} from '@material-ui/core'
-function Teacher({data}) {
+import PropTypes from "prop-types"
+import { Card, Typography } from "@mui/material"
+
+const TeacherProfile = ({ data }) => {
+  const { Teacher } = data
 
   return (
-    <>
-      <Typography variant="body1">
-        <strong>Teacher ID:</strong> {data.teacher.id}
-        
-      </Typography>
-      <Typography variant="body1">
-        <strong>User ID:</strong> {data.teacher.userId}
-      </Typography>
-    </>
+    <Card sx={{ margin: "20px", padding: "20px" }}>
+      <Typography variant="h6">Teacher Details:</Typography>
+      {Teacher.map((teacher) => (
+        <div key={teacher.id}>
+          <Typography>Teacher ID: {teacher.id}</Typography>
+          {/* Add any other teacher details you want to display */}
+        </div>
+      ))}
+    </Card>
   )
 }
 
-export default Teacher
+TeacherProfile.propTypes = {
+  data: PropTypes.shape({
+    email: PropTypes.string.isRequired,
+    Teacher: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.number.isRequired,
+      })
+    ).isRequired,
+  }).isRequired,
+}
+
+export default TeacherProfile
