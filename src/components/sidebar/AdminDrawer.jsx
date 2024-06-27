@@ -11,6 +11,7 @@ import AccountBoxIcon from "@mui/icons-material/AccountBox"
 import BookmarkIcon from "@mui/icons-material/Bookmark"
 import PersonAddIcon from "@mui/icons-material/PersonAdd"
 import GroupIcon from "@mui/icons-material/Group"
+
 export default function AdminDrawer() {
   return (
     <div>
@@ -29,6 +30,7 @@ export default function AdminDrawer() {
             icon: <GroupIcon />,
             link: "/students",
           },
+          { text: "Users", icon: <GroupIcon />, link: "/users" },
         ].map((item) => (
           <ListItem
             key={item.text}
