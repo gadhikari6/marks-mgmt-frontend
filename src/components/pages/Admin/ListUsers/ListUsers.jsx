@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import useRoleName from "../../../../hooks/count/useRoleNames"
 import axios from "axios"
 import { toast } from "react-toastify"
-
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import {
   Typography,
   Select,
@@ -16,12 +16,15 @@ import {
   DialogActions,
   Stack,
   Divider,
+  Box,
 } from "@mui/material"
 import { DataGrid } from "@mui/x-data-grid"
 import DeleteIcon from "@mui/icons-material/Delete"
 import EditIcon from "@mui/icons-material/Edit"
 import CloseIcon from "@mui/icons-material/Close"
 import AddIcon from "@mui/icons-material/Add"
+import { EditDialog } from "../DialogBoxes/EditDialog"
+
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 
 const ListUsers = () => {
@@ -29,6 +32,9 @@ const ListUsers = () => {
   const [selectedRole, setSelectedRole] = useState("")
   const [filteredUsers, setFilteredUsers] = useState([])
   const [userID, setUserID] = useState(null)
+  const [roleId, setRoleId] = useState(null)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+
   const [editUser, setEditUser] = useState({
     address: "",
     contactNo: "",
@@ -36,28 +42,31 @@ const ListUsers = () => {
     name: "",
     role: [],
   })
-  const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false)
+  const queryClient = useQueryClient()
 
+  const deleteMutation = useMutation({
+    mutationFn: handleConfirmDeleteRole,
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["deleterole"] })
+    },
+  })
   useEffect(() => {
-    if (selectedRole) {
-      axios
-        .get(`${VITE_BACKEND_URL}/admin/users?role_id=${selectedRole}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((response) => {
-          setFilteredUsers(response.data.users)
-        })
-        .catch((error) => {
-          console.error("Error fetching filtered users:", error)
-        })
-    } else {
-      setFilteredUsers([])
-    }
-  }, [selectedRole])
-
+    axios
+      .get(`${VITE_BACKEND_URL}/admin/users?role_id=${selectedRole}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        setFilteredUsers(response.data.users)
+      })
+      .catch((error) => {
+        console.error("Error fetching filtered users:", error)
+      })
+  }, [selectedRole, token])
   const handleRoleSelect = (event) => {
     setSelectedRole(event.target.value)
   }
@@ -146,6 +155,69 @@ const ListUsers = () => {
     setDeleteDialogOpen(false)
   }
 
+  const handleAssignRole = (userId) => {
+    setUserID(userId)
+    setAssignDialogOpen(true)
+  }
+  function handleConfirmDeleteRole() {
+    const requestBody = {
+      roleId: roleId,
+    }
+
+    axios
+      .delete(`${VITE_BACKEND_URL}/admin/users/${userID}/roles`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        data: requestBody,
+      })
+      .then((response) => {
+        // Handle successful response
+        console.log("Role deleted:", response.data)
+        setAssignDialogOpen(false)
+        if (response.status === 200) {
+          toast.success("Role deleted successfully")
+        } else {
+          toast.error("Error deleting role")
+        }
+      })
+      .catch((error) => {
+        console.error("Error deleting role:", error)
+        toast.error("Error deleting role")
+      })
+  }
+
+  const handleConfirmAssignRole = () => {
+    const requestBody = {
+      roleId: roleId,
+    }
+
+    axios
+      .put(`${VITE_BACKEND_URL}/admin/users/${userID}/roles`, requestBody, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        // Handle successful response
+        console.log("Role assigned:", response.data)
+        setAssignDialogOpen(false)
+        if (response.status === 200) {
+          toast.success("Role assigned successfully")
+        } else {
+          toast.error("Error assigning role")
+        }
+      })
+      .catch((error) => {
+        console.error("Error assigning role:", error)
+        toast.error("Error assigning role")
+      })
+  }
+
+  const handleCancelAssignRole = () => {
+    setAssignDialogOpen(false)
+  }
+
   if (isLoading) {
     return <Typography>Loading ...</Typography>
   }
@@ -164,9 +236,9 @@ const ListUsers = () => {
     {
       field: "action",
       headerName: "Action",
-      width: 225,
+      width: 325,
       renderCell: (params) => (
-        <div>
+        <Box>
           <Button
             variant="outlined"
             color="primary"
@@ -190,13 +262,27 @@ const ListUsers = () => {
           >
             Delete
           </Button>
-        </div>
+          {params.row.roles.includes("student") ? null : (
+            <Button
+              variant="contained"
+              style={{
+                marginRight: "8px",
+                color: "white",
+                backgroundColor: "green",
+              }}
+              startIcon={<EditIcon />}
+              onClick={() => handleAssignRole(params.row.id)}
+            >
+              Role
+            </Button>
+          )}
+        </Box>
       ),
     },
   ]
 
   return (
-    <div>
+    <Box>
       <InputLabel>
         Select type of users:
         <Select
@@ -206,7 +292,7 @@ const ListUsers = () => {
           displayEmpty
         >
           <MenuItem value="" disabled>
-            Select a role
+            ALL
           </MenuItem>
           {data.roles.map((role) => (
             <MenuItem key={role.id} value={role.id}>
@@ -216,89 +302,34 @@ const ListUsers = () => {
         </Select>
       </InputLabel>
 
-      {selectedRole && (
-        <div>
-          {filteredUsers.length === 0 ? (
-            <Typography>No users found for the selected role.</Typography>
-          ) : (
-            <div style={{ height: 400, width: "100%" }}>
-              <DataGrid
-                rows={getRowsWithSerialNumber(filteredUsers)}
-                columns={columns}
-                filterModel={{
-                  items: columns.map((column) => ({
-                    columnField: column.field,
-                    operatorValue: "contains",
-                    value: "",
-                  })),
-                }}
-                sortingOrder={["asc", "desc"]}
-                hideFooterSelectedRowCount
-              />
-            </div>
-          )}
-        </div>
-      )}
-
-      <Dialog open={editDialogOpen} onClose={handleDialogClose} fullWidth>
-        <DialogTitle>Edit User Details</DialogTitle>
-        <Divider />
-        <DialogContent>
-          <TextField
-            label="Email"
-            value={editUser.email}
-            onChange={(e) =>
-              setEditUser({ ...editUser, email: e.target.value })
-            }
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            label="Name"
-            value={editUser.name}
-            onChange={(e) => setEditUser({ ...editUser, name: e.target.value })}
-            fullWidth
-            margin="normal"
-          />
-          <Stack direction="row" gap={2}>
-            <TextField
-              label="Address"
-              value={editUser.address}
-              onChange={(e) =>
-                setEditUser({ ...editUser, address: e.target.value })
-              }
-              fullWidth
-              margin="normal"
+      <Box>
+        {filteredUsers.length === 0 ? (
+          <Typography>No users found </Typography>
+        ) : (
+          <Box style={{ height: 400, width: "100%" }}>
+            <DataGrid
+              rows={getRowsWithSerialNumber(filteredUsers)}
+              columns={columns}
+              filterModel={{
+                items: columns.map((column) => ({
+                  columnField: column.field,
+                  operatorValue: "contains",
+                  value: "",
+                })),
+              }}
+              sortingOrder={["asc", "desc"]}
+              hideFooterSelectedRowCount
             />
-            <TextField
-              label="Contact No"
-              value={editUser.contactNo}
-              onChange={(e) =>
-                setEditUser({ ...editUser, contactNo: e.target.value })
-              }
-              fullWidth
-              margin="normal"
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={handleUpdateUser}
-            color="primary"
-            variant="contained"
-            startIcon={<AddIcon />}
-          >
-            Update
-          </Button>
-          <Button
-            onClick={handleDialogClose}
-            startIcon={<CloseIcon />}
-            variant="outlined"
-          >
-            Cancel
-          </Button>
-        </DialogActions>
-      </Dialog>
+          </Box>
+        )}
+      </Box>
+      <EditDialog
+        editUser={editUser}
+        setEditUser={setEditUser}
+        userID={userID}
+        editDialogOpen={editDialogOpen}
+        setEditDialogOpen={setEditDialogOpen}
+      />
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={handleCancelDelete}>
@@ -320,18 +351,81 @@ const ListUsers = () => {
             onClick={handleConfirmDelete}
             variant="contained"
             style={{
-              marginRight: "8px",
               color: "white",
               backgroundColor: "red",
             }}
             startIcon={<DeleteIcon />}
-            color="primary"
           >
             Delete
           </Button>
         </DialogActions>
       </Dialog>
-    </div>
+
+      {/* Assign Role Dialog */}
+      <Dialog
+        open={assignDialogOpen}
+        onClose={handleCancelAssignRole}
+        fullWidth
+      >
+        <DialogTitle>Modify Role</DialogTitle>
+        <Divider />
+        <DialogContent>
+          <Stack direction="row" gap={1}>
+            <InputLabel>
+              Select a role to Add or Delete:
+              <Select
+                value={roleId}
+                onChange={(e) => setRoleId(e.target.value)}
+                sx={{ margin: "0.5rem", width: "200px" }}
+              >
+                {data.roles.map((role) => {
+                  if (role.name === "student") {
+                    return
+                  }
+                  return (
+                    <MenuItem key={role.id} value={role.id} fullWidth>
+                      {role.name}
+                    </MenuItem>
+                  )
+                })}
+              </Select>
+            </InputLabel>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleCancelAssignRole}
+            startIcon={<CloseIcon />}
+            variant="outlined"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmAssignRole}
+            variant="contained"
+            style={{
+              color: "white",
+              backgroundColor: "green",
+            }}
+            startIcon={<AddIcon />}
+          >
+            Assign
+          </Button>
+          <Button
+            // onClick={handleConfirmDeleteRole}
+            onClick={deleteMutation.mutate}
+            variant="contained"
+            style={{
+              color: "white",
+              backgroundColor: "blue",
+            }}
+            startIcon={<DeleteIcon />}
+          >
+            Delete now
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   )
 }
 
