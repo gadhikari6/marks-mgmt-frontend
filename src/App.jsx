@@ -203,17 +203,7 @@ export default function App() {
           />
 
           <Route
-            path="/addmarks"
-            element={
-              <ProtectedRoute>
-                <ResponsiveDrawer>
-                  <AddModifyMarks />
-                </ResponsiveDrawer>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/listStudents"
+            path="/students"
             element={
               <ProtectedRoute>
                 <ResponsiveDrawer>
@@ -226,8 +216,10 @@ export default function App() {
             path="*"
             element={
               <>
-                <h3>You are lost!!</h3>
-                <Link to="/">Go to login page!</Link>
+                <h1>You are lost!!</h1>
+                <h3>
+                  <Link to="/">Go to login page!</Link>
+                </h3>
               </>
             }
           />

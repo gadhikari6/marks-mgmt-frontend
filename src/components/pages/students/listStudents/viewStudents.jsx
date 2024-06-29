@@ -57,15 +57,14 @@ export default function ViewStudents() {
   // open student deletion dialog
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
 
+  // open student add dialog
+  const [openAddDialog, setAddDialog] = useState(false)
+
   // state to keep selected student detail for dialog
   const [selectedStudent, setSelectedStudent] = useState(null)
 
   // state to keep student details for editing
   const [editStudentDetails, setEditStudentDetails] = useState({})
-
-  const [isAddStudentFormOpen, setIsAddStudentFormOpen] = useState(false)
-
-  const [isAddingStudent, setIsAddingStudent] = useState(false)
 
   // set selected student for viewing, editing and deleting student
   const setCurrentStudent = (id) => {
@@ -187,12 +186,6 @@ export default function ViewStudents() {
     fetchStudentList(selectedProgram.id)
   }, [selectedProgram])
 
-  // close add-student form
-  const clearAddStudentForm = () => {
-    setIsAddStudentFormOpen(false)
-    setIsAddingStudent(false)
-  }
-
   // schema for edit dialog
   const editStudentSchema = yup.object({
     symbolNo: yup.string().min(6).max(20).required("Symbol number is required"),
@@ -300,27 +293,21 @@ export default function ViewStudents() {
         </FormControl>
 
         <Button
-          variant="outlined"
+          variant="contained"
           startIcon={<AddCircleIcon />}
           onClick={() => {
-            setIsAddingStudent(true)
-            setIsAddStudentFormOpen(true)
+            setAddDialog(true)
+          }}
+          sx={{
+            alignSelf: "center",
+            padding: 1,
+            margin: 1,
+            marginLeft: "auto",
           }}
         >
           Add Student
         </Button>
-        {isAddingStudent && (
-          <Button
-            variant="outlined"
-            onClick={clearAddStudentForm}
-            sx={{ marginLeft: 1 }}
-          >
-            Clear
-          </Button>
-        )}
       </Box>
-
-      {isAddStudentFormOpen && <AddStudentForm />}
 
       {allStudents !== null && (
         <DataGrid
@@ -628,6 +615,38 @@ export default function ViewStudents() {
             color="secondary"
             onClick={(e) => {
               setOpenDeleteDialog(false)
+            }}
+          >
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog to add student  */}
+      <Dialog
+        maxWidth={"lg"}
+        fullWidth
+        open={openAddDialog}
+        onClose={() => {
+          setAddDialog(false)
+          fetchStudentList(selectedProgram.id)
+        }}
+      >
+        <DialogTitle>Add new student</DialogTitle>
+        <Divider />
+        <DialogContent sx={{ marginTop: -3 }}>
+          <AddStudentForm />
+        </DialogContent>
+        <Divider />
+
+        <DialogActions>
+          <Button
+            variant="outlined"
+            startIcon={<CloseIcon />}
+            color="secondary"
+            onClick={() => {
+              setAddDialog(false)
+              fetchStudentList(selectedProgram.id)
             }}
           >
             Cancel
