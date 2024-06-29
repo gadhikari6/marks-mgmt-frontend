@@ -17,6 +17,7 @@ import {
   DialogContent,
   DialogActions,
   Divider,
+  Card,
 } from "@mui/material"
 import { toast } from "react-toastify"
 import usePrograms from "../../../hooks/count/usePrograms"
@@ -245,7 +246,26 @@ const AddStudentForm = () => {
                       programs.length > 0 &&
                       programs.map((program) => (
                         <MenuItem key={program.id} value={program.id}>
-                          {program.name}
+                          <Card
+                            variant="outlined"
+                            sx={{ width: "100%", padding: 1 }}
+                          >
+                            <Typography
+                              sx={{ fontSize: 15 }}
+                              color="text.primary"
+                              gutterBottom
+                            >
+                              {program.name}
+                            </Typography>
+                            <Typography
+                              sx={{ fontSize: 11 }}
+                              color="text.primary"
+                              variant="body1"
+                            >
+                              {program?.department.name},{" "}
+                              {program?.department.faculty.name}
+                            </Typography>
+                          </Card>
                         </MenuItem>
                       ))}
                   </Select>
