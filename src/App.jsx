@@ -28,6 +28,7 @@ import AddTeacher from "./components/pages/addTeacher/AddTeacherForm"
 import AddStudentForm from "./components/pages/addStudent/AddStudentForm"
 import ViewTeacherCourses from "./components/pages/teachers/viewCourses/viewTeacherCourses"
 import AddModifyMarks from "./components/pages/Teacher/AddModifyMarks"
+import ViewStudents from "./components/pages/students/listStudents/viewStudents"
 
 export default function App() {
   const { loginState, dispatchLoginState } = useContext(LoginContext)
@@ -202,22 +203,23 @@ export default function App() {
           />
 
           <Route
-            path="/addmarks"
+            path="/students"
             element={
               <ProtectedRoute>
                 <ResponsiveDrawer>
-                  <AddModifyMarks />
+                  <ViewStudents />
                 </ResponsiveDrawer>
               </ProtectedRoute>
             }
           />
-
           <Route
             path="*"
             element={
               <>
-                <h3>You are lost!!</h3>
-                <Link to="/">Go to login page!</Link>
+                <h1>You are lost!!</h1>
+                <h3>
+                  <Link to="/">Go to login page!</Link>
+                </h3>
               </>
             }
           />
