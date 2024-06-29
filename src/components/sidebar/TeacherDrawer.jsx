@@ -24,7 +24,7 @@ export default function TeacherDrawer() {
             icon: <AutoStoriesIcon />,
             link: "/teacherCourses",
           },
-          { text: "Marks", icon: <BookmarkIcon />, link: "/marks" },
+          { text: " Add Marks", icon: <BookmarkIcon />, link: "/addmarks" },
           { text: "Profile", icon: <AccountBoxIcon />, link: "/profile" },
         ].map((item) => (
           <ListItem
