@@ -460,7 +460,9 @@ const AddModifyMarks = () => {
                 type="number"
                 variant="outlined"
                 margin="normal"
+                defaultValue={selectedRow?.theory || ""}
               />
+
               <TextField
                 id="practical"
                 name="Practical"
@@ -468,11 +470,19 @@ const AddModifyMarks = () => {
                 type="number"
                 variant="outlined"
                 margin="normal"
+                defaultValue={selectedRow?.practical || ""}
               />
             </Stack>
 
             <FormControlLabel
-              control={<Checkbox id="NQ" name="NQ" label="Not Qualified?" />}
+              control={
+                <Checkbox
+                  id="NQ"
+                  name="NQ"
+                  label="Not Qualified?"
+                  defaultChecked={selectedRow?.notQualified || false}
+                />
+              }
               label="Not Qualified ?"
             />
           </DialogContent>
