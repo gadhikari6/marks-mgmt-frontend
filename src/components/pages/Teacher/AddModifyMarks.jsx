@@ -543,8 +543,12 @@ const AddModifyMarks = () => {
                 Toolbar: GridToolbar,
               }}
             />
-            <Typography variant="body2">
-              Note: Before saving, please focus out of rows .
+            <Typography
+              variant="body2"
+              sx={{ backgroundColor: "yellow" }}
+              width={"max-content"}
+            >
+              Note: Before saving, please click out of table .
             </Typography>
           </DialogContent>
           <Divider />
