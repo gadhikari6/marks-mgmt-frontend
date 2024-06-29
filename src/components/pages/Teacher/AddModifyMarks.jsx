@@ -1,11 +1,6 @@
 import { useState, useEffect, useContext } from "react"
 import axios from "axios"
-import {
-  DataGrid,
-  GridActionsCellItem,
-  GridRowEditStopReasons,
-  GridRowModes,
-} from "@mui/x-data-grid"
+import { DataGrid, GridEditInputCell, GridToolbar } from "@mui/x-data-grid"
 import {
   FormControl,
   InputLabel,
@@ -17,9 +12,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  FormLabel,
   Card,
-  CardContent,
   Typography,
   Stack,
   Box,
@@ -31,10 +24,8 @@ import { toast } from "react-toastify"
 import useTeacherCourses from "../../../hooks/useTeacherCourses"
 import { LoginContext } from "../../../store/LoginProvider"
 import EditIcon from "@mui/icons-material/Edit"
-import DeleteIcon from "@mui/icons-material/DeleteOutlined"
 import SaveIcon from "@mui/icons-material/Save"
 import CancelIcon from "@mui/icons-material/Close"
-import { DoorBack } from "@mui/icons-material"
 
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 
@@ -48,13 +39,11 @@ const AddModifyMarks = () => {
 
   const [marks, setMarks] = useState(null) // marks fetched
 
+  // for loading data
   const [loading, setLoading] = useState(true)
-
-  const [openDialog, setOpenDialog] = useState(false)
 
   // for bulk editing
   const [isBulkEditing, setIsBulkEditing] = useState(false)
-  const [bulkEditMarks, setBulkEditMarks] = useState(null)
 
   // rows for datagrid
   const [rows, setRows] = useState([])
@@ -64,7 +53,6 @@ const AddModifyMarks = () => {
   const [selectedRow, setSelectedRow] = useState({})
 
   // fetch courses taught by the teaher
-  // TODO: maybe create a custom hook for it??
   const fetchCourseMarks = async () => {
     if (selectedCourse) {
       try {
@@ -76,15 +64,17 @@ const AddModifyMarks = () => {
             },
           }
         )
-        setMarks(response.data.marks)
-
-        setLoading(false)
+        if (response.status === 200) {
+          setMarks(response.data.marks)
+          setLoading(false)
+        }
       } catch (error) {
-        console.log(error)
+        console.log(error) // for logging
       }
     }
   }
 
+  // fetch marks of selected course using useEffect
   useEffect(() => {
     fetchCourseMarks()
   }, [selectedCourse, token])
@@ -99,7 +89,7 @@ const AddModifyMarks = () => {
   }
 
   // upload bulk marks
-  const handleFormSubmit = () => {
+  const uploadBulkMarks = () => {
     const updatedMarks = rows.map((row) => ({
       studentId: row.id,
       theory: row.theory,
@@ -122,7 +112,6 @@ const AddModifyMarks = () => {
         }
       )
       .then((response) => {
-        console.log(response.data)
         setIsBulkEditing(false)
         if (response.status === 200) {
           toast.success("Marks updated successfully!")
@@ -132,8 +121,14 @@ const AddModifyMarks = () => {
         }
       })
       .catch((error) => {
-        console.log(error)
-        toast.error(error.message)
+        console.log(error) // for logging
+        if (error.response.status === 400) {
+          toast.warn(
+            "Something wrong went with request. Please provide valid details and try again."
+          )
+        } else {
+          toast.error(error.message)
+        }
       })
   }
 
@@ -147,12 +142,11 @@ const AddModifyMarks = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         )
         .then((response) => {
-          console.log(response) // remove later
           toast.success(`Marks was updated successfully.`)
           fetchCourseMarks()
         })
         .catch((err) => {
-          console.log(err)
+          console.log(err) // for logging
           if (err.response.status === 400) {
             toast.warn("Please check values and try again.")
           } else {
@@ -160,35 +154,88 @@ const AddModifyMarks = () => {
           }
         })
     } catch (err) {
-      console.log(err)
+      console.log(err) // for logging
       toast.warn("Something went wrong. Please try again later.")
     }
   }
 
-  const columns = [
-    { field: "name", headerName: "Name", width: 150 },
+  // columns for editable data-grid
+  const bulkEditColumns = [
+    { field: "name", headerName: "Name", width: 180 },
     { field: "symbolNo", headerName: "Symbol", width: 150 },
-    { field: "puRegNo", headerName: "PU Reg No", width: 150 },
-    { field: "semesterId", headerName: "Semester", width: 80 },
+    { field: "puRegNo", headerName: "PU Reg No", width: 180 },
+    { field: "semesterId", headerName: "Semester", width: 75 },
     {
       field: "theory",
       headerName: "Theory",
       type: "number",
-      width: 120,
+      width: 100,
+      editable: true,
+      renderEditCell: (params) => (
+        <GridEditInputCell
+          {...params}
+          inputProps={{
+            max: selectedCourse?.course?.markWeightage?.theory,
+            min: 0,
+          }}
+        />
+      ),
+    },
+    {
+      field: "practical",
+      headerName: "Practical",
+      type: "number",
+      width: 100,
+      editable: true,
+      renderEditCell: (params) => (
+        <GridEditInputCell
+          {...params}
+          inputProps={{
+            max: selectedCourse?.course?.markWeightage?.practical,
+            min: 0,
+          }}
+        />
+      ),
+    },
+    {
+      field: "notQualified",
+      headerName: "Not Qualified",
+      type: "boolean",
+      width: 130,
+      editable: true,
+    },
+    {
+      field: "total",
+      headerName: "Total",
+      width: 100,
+    },
+  ]
+
+  // columns for non-editable data-grid
+  const columns = [
+    { field: "name", headerName: "Name", width: 180 },
+    { field: "symbolNo", headerName: "Symbol", width: 150 },
+    { field: "puRegNo", headerName: "PU Reg No", width: 180 },
+    { field: "semesterId", headerName: "Semester", width: 75 },
+    {
+      field: "theory",
+      headerName: "Theory",
+      type: "number",
+      width: 100,
       editable: false,
     },
     {
       field: "practical",
       headerName: "Practical",
       type: "number",
-      width: 120,
+      width: 100,
       editable: false,
     },
     {
       field: "notQualified",
       headerName: "Not Qualified",
       type: "boolean",
-      width: 150,
+      width: 130,
       editable: false,
     },
     { field: "total", headerName: "Total", width: 100 },
@@ -211,6 +258,7 @@ const AddModifyMarks = () => {
     },
   ]
 
+  // update rows when course is changed
   useEffect(() => {
     if (marks !== undefined && marks !== null) {
       const updatedRows = marks.map((mark) => ({
@@ -222,62 +270,105 @@ const AddModifyMarks = () => {
         semesterId: mark.student.semesterId,
         theory: mark.theory,
         practical: mark.practical,
-        notQualified: mark.notQualified,
+        notQualified: mark.NotQualified,
         total: mark.practical + mark.theory,
       }))
       setRows(updatedRows)
     }
   }, [marks])
 
+  // process row update
+  const processRowUpdate = (newRow) => {
+    // check for max value
+    newRow.theory =
+      newRow.theory > selectedCourse?.course?.markWeightage.theory
+        ? selectedCourse?.course?.markWeightage.theory || newRow.theory
+        : newRow.theory
+
+    // check for negative value
+    newRow.theory = newRow.theory < 0 ? 0 : newRow.theory
+
+    newRow.practical = newRow.practical < 0 ? 0 : newRow.practical
+
+    newRow.practical =
+      newRow.practical > selectedCourse?.course?.markWeightage.practical
+        ? selectedCourse?.course?.markWeightage.practical || newRow.practical
+        : newRow.practical
+
+    newRow.total = newRow.theory + newRow.practical
+
+    setRows(rows.map((row) => (row.id === newRow.id ? newRow : row)))
+  }
+
   return (
     <Box>
-      <FormControl sx={{ m: 1, minWidth: "35rem" }}>
-        <InputLabel>Select a Course</InputLabel>
-        <Select
-          value={selectedCourse ? selectedCourse.courseId : ""}
-          onChange={handleCourseChange}
-        >
-          {teacherCourses !== undefined &&
-            teacherCourses !== null &&
-            teacherCourses.courses.map((course) => (
-              <MenuItem key={course.courseId} value={course.courseId}>
-                <Card variant="outlined" sx={{ width: "100%", padding: 1 }}>
-                  <Typography
-                    sx={{ fontSize: 14 }}
-                    color="text.primary"
-                    gutterBottom
-                  >
-                    Name: {course.course.name}
-                  </Typography>
-                  <Typography
-                    sx={{ fontSize: 13 }}
-                    color="text.primary"
-                    variant="body1"
-                  >
-                    Program: {course.program.name}
-                  </Typography>
-                  <Typography
-                    sx={{ fontSize: 13 }}
-                    color="text.primary"
-                    variant="subtitle"
-                  >
-                    Semester: {course.semester.id}
-                  </Typography>
-                </Card>
-              </MenuItem>
-            ))}
-        </Select>
-      </FormControl>
-      {selectedCourse && (
-        <div style={{ height: 400, width: "100%" }}>
-          <Button
-            variant="contained"
-            color="primary"
-            // onClick={handleEditBulkClick}
-            disabled={isBulkEditing || loading}
+      <Box sx={{ display: "flex", flexDirection: "row", gap: "0.5rem" }}>
+        <FormControl sx={{ m: 1, minWidth: "35rem" }}>
+          <InputLabel>Select a Course</InputLabel>
+          <Select
+            value={selectedCourse ? selectedCourse.courseId : ""}
+            onChange={handleCourseChange}
           >
-            Edit Bulk
-          </Button>
+            {teacherCourses !== undefined &&
+              teacherCourses !== null &&
+              teacherCourses.courses.map((course) => (
+                <MenuItem key={course.courseId} value={course.courseId}>
+                  <Card variant="outlined" sx={{ width: "100%", padding: 1 }}>
+                    <Typography
+                      sx={{ fontSize: 14 }}
+                      color="text.primary"
+                      gutterBottom
+                    >
+                      Name: {course.course.name}{" "}
+                      {course.course.name === selectedCourse?.course.name &&
+                        "*"}
+                    </Typography>
+                    <Typography
+                      sx={{ fontSize: 13 }}
+                      color="text.primary"
+                      variant="body1"
+                    >
+                      Program: {course.program.name}
+                    </Typography>
+                    <Typography
+                      sx={{ fontSize: 13 }}
+                      color="text.primary"
+                      variant="subtitle"
+                    >
+                      Semester: {course.semester.id}
+                    </Typography>
+                  </Card>
+                </MenuItem>
+              ))}
+          </Select>
+        </FormControl>
+
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            setIsBulkEditing(true)
+          }}
+          disabled={isBulkEditing || loading}
+          sx={{
+            justifySelf: "center",
+            alignSelf: "end",
+            margin: 2,
+            marginLeft: "auto",
+          }}
+        >
+          Edit Bulk
+        </Button>
+      </Box>
+
+      {selectedCourse && (
+        <div
+          style={{
+            height: 400,
+            width: "100%",
+            display: "flex",
+          }}
+        >
           <DataGrid
             rows={rows}
             columns={columns}
@@ -287,7 +378,10 @@ const AddModifyMarks = () => {
             checkboxSelection
             disableSelectionOnClick
             loading={isLoading}
-            {...(isBulkEditing && { onCellEditCommit: handleFormSubmit })}
+            resizable={true}
+            components={{
+              Toolbar: GridToolbar,
+            }}
           />
         </div>
       )}
@@ -409,62 +503,57 @@ const AddModifyMarks = () => {
           setIsBulkEditing(false)
         }}
       >
-        {/* <form
+        <form
           onSubmit={async (e) => {
             e.preventDefault()
-            const theory = Number(e.target.theory.value)
-            const practical = Number(e.target.practical.value)
-            const NQ = e.target.NQ.checked
-            const maxTheory = selectedCourse.course.markWeightage.theory
-            const maxPrac = selectedCourse.course.markWeightage.practical
+            toast.info(
+              "Marks upload request has been sent. Please wait for response.",
+              { autoClose: 1000 }
+            )
 
-            if (theory < 0 || theory > maxTheory) {
-              toast.warn("Please provide a valid theory marks value.")
-              return
-            }
+            // close the bulk edit form
+            setIsBulkEditing(false)
 
-            if (practical < 0 || practical > maxPrac) {
-              toast.warn("Please provide a valid practical marks value.")
-              return
-            }
-
-            setSingleEdit(false)
-
-            await uploadSingleStudentMark({
-              practical: practical,
-              theory: theory,
-              notQualified: NQ,
-              studentId: selectedRow.studentId,
-              courseId: selectedCourse.courseId,
-            })
+            // send marks to server
+            uploadBulkMarks()
           }}
-        > */}
-        <DialogTitle>Edit Student Marks</DialogTitle>
-        <Divider />
+        >
+          <DialogTitle>Edit Student Marks</DialogTitle>
+          <Divider />
 
-        <DialogContent></DialogContent>
-        <Divider />
-        <DialogActions>
-          <Button
-            // onClick={}
-            variant="outlined"
-            startIcon={<SaveIcon />}
-            type="submit"
-          >
-            Save
-          </Button>
-          <Button
-            variant="outlined"
-            color="secondary"
-            startIcon={<CancelIcon />}
-            onClick={() => {
-              setSingleEdit(false)
-            }}
-          >
-            Cancel
-          </Button>
-        </DialogActions>
-        {/* </form> */}
+          <DialogContent>
+            <DataGrid
+              rows={rows}
+              columns={bulkEditColumns}
+              processRowUpdate={processRowUpdate}
+              onProcessRowUpdateError={() => {}}
+              checkboxSelection={true}
+              editMode="row"
+              components={{
+                Toolbar: GridToolbar,
+              }}
+            />
+            <Typography variant="body2">
+              Note: Before saving, please focus out of rows .
+            </Typography>
+          </DialogContent>
+          <Divider />
+          <DialogActions>
+            <Button variant="outlined" startIcon={<SaveIcon />} type="submit">
+              Save
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              startIcon={<CancelIcon />}
+              onClick={() => {
+                setIsBulkEditing(false)
+              }}
+            >
+              Cancel
+            </Button>
+          </DialogActions>
+        </form>
       </Dialog>
     </Box>
   )
