@@ -10,6 +10,7 @@ import DashboardIcon from "@mui/icons-material/Dashboard"
 import AccountBoxIcon from "@mui/icons-material/AccountBox"
 import BookmarkIcon from "@mui/icons-material/Bookmark"
 import PersonAddIcon from "@mui/icons-material/PersonAdd"
+import VisibilityIcon from "@mui/icons-material/Visibility"
 
 export default function AdminDrawer() {
   return (
@@ -24,6 +25,11 @@ export default function AdminDrawer() {
           { text: "Profile", icon: <AccountBoxIcon />, link: "/profile" },
           { text: "Add Teacher", icon: <PersonAddIcon />, link: "/addTeacher" },
           { text: "Add Student", icon: <PersonAddIcon />, link: "/addStudent" },
+          {
+            text: "View Student",
+            icon: <VisibilityIcon />,
+            link: "/listStudents",
+          },
         ].map((item) => (
           <ListItem
             key={item.text}
