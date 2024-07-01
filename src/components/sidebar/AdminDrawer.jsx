@@ -22,7 +22,7 @@ export default function AdminDrawer() {
           { text: "Marks", icon: <BookmarkIcon />, link: "/marks" },
 
           { text: "Profile", icon: <AccountBoxIcon />, link: "/profile" },
-          { text: "Add Teacher", icon: <PersonAddIcon />, link: "/addTeacher" },
+          { text: "Teachers", icon: <GroupIcon />, link: "/teachers" },
           {
             text: "Students",
             icon: <GroupIcon />,

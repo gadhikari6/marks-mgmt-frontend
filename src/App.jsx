@@ -29,6 +29,7 @@ import AddStudentForm from "./components/pages/addStudent/AddStudentForm"
 import ViewTeacherCourses from "./components/pages/teachers/viewCourses/viewTeacherCourses"
 import AddModifyMarks from "./components/pages/Teacher/AddModifyMarks"
 import ViewStudents from "./components/pages/students/listStudents/viewStudents"
+import ViewTeachers from "./components/pages/Admin/ViewTeachers"
 
 export default function App() {
   const { loginState, dispatchLoginState } = useContext(LoginContext)
@@ -212,6 +213,18 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+            path="/teachers"
+            element={
+              <ProtectedRoute>
+                <ResponsiveDrawer>
+                  <ViewTeachers />
+                </ResponsiveDrawer>
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="*"
             element={
