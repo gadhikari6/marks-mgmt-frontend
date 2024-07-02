@@ -57,9 +57,6 @@ export default function ViewTeachers() {
   // open teacher detail dialog
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false)
 
-  // open teacher detail editing dialog
-  const [openEditDialog, setOpenEditDialog] = useState(false)
-
   // open teacher deletion dialog
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
 
@@ -90,26 +87,16 @@ export default function ViewTeachers() {
         <Stack direction="row" gap={1}>
           <Button
             variant="outlined"
-            startIcon={<InfoIcon />}
+            startIcon={<EditIcon />}
             onClick={() => {
               setCurrentTeacher(params.row.id)
               fetchTeacherDetails(params.row.id)
               setOpenDetailsDialog(true)
             }}
           >
-            Details
+            Courses
           </Button>
-          <Button
-            variant="outlined"
-            startIcon={<EditIcon />}
-            onClick={() => {
-              setCurrentTeacher(params.row.id)
-              // assign and remove courses to teacher
-              // setOpenDetailsDialog(true)
-            }}
-          >
-            Edit
-          </Button>
+
           <Button
             variant="outlined"
             sx={{ color: "red" }}
@@ -415,7 +402,7 @@ export default function ViewTeachers() {
                 Email: {selectedTeacher.email}
               </Typography>
               <Typography variant="h5" sx={{ margin: 2 }}>
-                Are you sure you want to delete this student?
+                Are you sure you want to delete this teacher?
               </Typography>
             </>
           )}
@@ -429,7 +416,7 @@ export default function ViewTeachers() {
             startIcon={<DeleteForeverIcon />}
             onClick={() => {
               setOpenDeleteDialog(false)
-              deleteStudent(selectedStudent.id)
+              deleteTeacher(selectedTeacher.id)
             }}
           >
             Confirm
@@ -457,7 +444,7 @@ export default function ViewTeachers() {
           fetchTeachersList(selectedProgram.id)
         }}
       >
-        <DialogTitle>Add new student</DialogTitle>
+        <DialogTitle>Add new teacher</DialogTitle>
         <Divider />
         <DialogContent sx={{ marginTop: -3 }}>
           <AddTeacherForm />
