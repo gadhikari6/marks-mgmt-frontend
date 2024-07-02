@@ -203,6 +203,37 @@ export default function ViewTeachers() {
     }
   }
 
+  // remove a course from teacher
+  const removeCourseFromTeacher = async (teacherId, courseId, programId) => {
+    try {
+      const body = {
+        teacherId: teacherId,
+        programId: programId,
+      }
+      await axios
+        .delete(`${VITE_BACKEND_URL}/admin/courses/${courseId}/teacher`, {
+          headers: { Authorization: `Bearer ${loginState.token}` },
+          data: { ...body },
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            toast.success(`Course was removed successfully.`)
+            fetchTeacherDetails(selectedTeacher.id)
+          }
+        })
+        .catch((err) => {
+          console.log(err) // for logging
+          if (err.response.status === 400 || err.response.status === 404) {
+            toast.warn("Please check values and try again.")
+          } else {
+            toast.warn("Something went wrong. Please try again later.")
+          }
+        })
+    } catch (err) {
+      console.log(err) // for logging
+      toast.warn("Something went wrong. Please try again later.")
+    }
+  }
   return (
     <Box
       fontFamily={{
@@ -334,8 +365,12 @@ export default function ViewTeachers() {
                                         sx={{ color: "red" }}
                                         startIcon={<DeleteForeverIcon />}
                                         onClick={() => {
-                                          // setCurrentTeacher(params.row.id)
-                                          // setOpenDeleteDialog(true)
+                                          // remove course
+                                          removeCourseFromTeacher(
+                                            teacherDetails.id,
+                                            course.courseId,
+                                            course.programId
+                                          )
                                         }}
                                       >
                                         Remove
