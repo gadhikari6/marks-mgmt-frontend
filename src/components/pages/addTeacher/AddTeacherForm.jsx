@@ -123,124 +123,112 @@ const AddTeacherForm = () => {
           '"Segoe UI Symbol"',
         ].join(","),
       }}
-      sx={{ marginLeft: 10 }}
+      sx={{ padding: 2 }}
     >
-      <Paper
-        elevation={2}
-        sx={{ padding: 5, paddingTop: 2, borderRadius: 1, width: "30rem" }}
-      >
-        <form onSubmit={formik.handleSubmit}>
-          <Box display="flex" flexDirection="column" alignItems="center">
-            <Typography variant="h4" align="center" gutterBottom>
-              Add New Teacher
-            </Typography>
+      <form onSubmit={formik.handleSubmit}>
+        <Box display="flex" flexDirection="column" alignItems="center">
+          <TextField
+            id="name"
+            name="name"
+            label="Name *"
+            variant="outlined"
+            {...formik.getFieldProps("name")}
+            error={formik.touched.name && formik.errors.name}
+            helperText={formik.touched.name && formik.errors.name}
+            fullWidth
+            margin="normal"
+          />
 
-            <TextField
-              id="name"
-              name="name"
-              label="Name *"
-              variant="outlined"
-              {...formik.getFieldProps("name")}
-              error={formik.touched.name && formik.errors.name}
-              helperText={formik.touched.name && formik.errors.name}
-              fullWidth
-              margin="normal"
-            />
+          <TextField
+            id="email"
+            name="email"
+            label="Email *"
+            variant="outlined"
+            {...formik.getFieldProps("email")}
+            error={formik.touched.email && formik.errors.email}
+            helperText={formik.touched.email && formik.errors.email}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            id="password"
+            name="password"
+            label="Password *"
+            type="password"
+            variant="outlined"
+            {...formik.getFieldProps("password")}
+            error={formik.touched.password && formik.errors.password}
+            helperText={formik.touched.password && formik.errors.password}
+            fullWidth
+            margin="normal"
+          />
 
-            <TextField
-              id="email"
-              name="email"
-              label="Email *"
-              variant="outlined"
-              {...formik.getFieldProps("email")}
-              error={formik.touched.email && formik.errors.email}
-              helperText={formik.touched.email && formik.errors.email}
-              fullWidth
-              margin="normal"
-            />
-            <TextField
-              id="password"
-              name="password"
-              label="Password *"
-              type="password"
-              variant="outlined"
-              {...formik.getFieldProps("password")}
-              error={formik.touched.password && formik.errors.password}
-              helperText={formik.touched.password && formik.errors.password}
-              fullWidth
-              margin="normal"
-            />
+          <TextField
+            id="address"
+            name="address"
+            label="Address *"
+            variant="outlined"
+            {...formik.getFieldProps("address")}
+            error={formik.touched.address && formik.errors.address}
+            helperText={formik.touched.address && formik.errors.address}
+            fullWidth
+            margin="normal"
+          />
 
-            <TextField
-              id="address"
-              name="address"
-              label="Address *"
-              variant="outlined"
-              {...formik.getFieldProps("address")}
-              error={formik.touched.address && formik.errors.address}
-              helperText={formik.touched.address && formik.errors.address}
-              fullWidth
-              margin="normal"
-            />
-
-            <TextField
-              id="contactNo"
-              name="contactNo"
-              label="Contact No. *"
-              variant="outlined"
-              {...formik.getFieldProps("contactNo")}
-              error={formik.touched.contactNo && formik.errors.contactNo}
-              helperText={formik.touched.contactNo && formik.errors.contactNo}
-              fullWidth
-              margin="normal"
-            />
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              fullWidth
-              disabled={loading}
-              sx={{ marginTop: 2 }}
-            >
-              {loading ? "Adding Teacher..." : "Add Teacher"}
-            </Button>
-          </Box>
-        </form>
-        {/* Dialog to display filled data */}
-        <Dialog open={openDialog} onClose={closeDialog}>
-          <DialogTitle>Confirm Entered Data</DialogTitle>
-          <Divider />
-          <DialogContent>
-            <Stack gap={2} sx={{ padding: 1 }}>
-              {Object.entries(formik.values).map((value) => {
-                return (
-                  <Typography key={value[0]} variant="body1">
-                    {value[0]}: {value[1]}
-                  </Typography>
-                )
-              })}
-            </Stack>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              onClick={() => {
-                setOpenDialog(false)
-              }}
-              color="primary"
-              variant="outlined"
-            >
-              Edit
-            </Button>
-            <Button
-              onClick={createTeacher}
-              color="secondary"
-              variant="outlined"
-            >
-              Submit
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </Paper>
+          <TextField
+            id="contactNo"
+            name="contactNo"
+            label="Contact No. *"
+            variant="outlined"
+            {...formik.getFieldProps("contactNo")}
+            error={formik.touched.contactNo && formik.errors.contactNo}
+            helperText={formik.touched.contactNo && formik.errors.contactNo}
+            fullWidth
+            margin="normal"
+          />
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            disabled={loading}
+            sx={{ marginTop: 2 }}
+          >
+            {loading ? "Adding Teacher..." : "Add Teacher"}
+          </Button>
+        </Box>
+      </form>
+      {/* Dialog to display filled data */}
+      <Dialog open={openDialog} onClose={closeDialog} maxWidth="xs" fullWidth>
+        <DialogTitle>Confirm Entered Data</DialogTitle>
+        <Divider />
+        <DialogContent>
+          <Stack gap={2} sx={{ padding: 1 }}>
+            {Object.entries(formik.values).map((value) => {
+              return (
+                <Typography key={value[0]} variant="body1">
+                  {value[0]}: {value[1]}
+                </Typography>
+              )
+            })}
+          </Stack>
+        </DialogContent>
+        <Divider />
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setOpenDialog(false)
+            }}
+            color="primary"
+            variant="outlined"
+          >
+            Edit
+          </Button>
+          <Button onClick={createTeacher} color="secondary" variant="outlined">
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

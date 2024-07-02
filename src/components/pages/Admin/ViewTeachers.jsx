@@ -634,7 +634,7 @@ export default function ViewTeachers() {
 
       {/* Dialog to add teacher  */}
       <Dialog
-        maxWidth={"max-content"}
+        maxWidth={"md"}
         fullWidth
         open={openAddDialog}
         onClose={() => {
