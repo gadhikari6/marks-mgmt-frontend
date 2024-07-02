@@ -9,7 +9,7 @@ const useSyllabus = () => {
   const token = loginState.token
 
   const { isLoading, error, data } = useQuery({
-    queryKey: ["syllabus"],
+    queryKey: ["student-syllabus"],
     queryFn: async () => {
       const response = await axios.get(
         `${VITE_BACKEND_URL}/students/syllabus`,

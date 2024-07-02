@@ -3,6 +3,7 @@ import { useState } from "react"
 import {
   Box,
   Button,
+  Card,
   Dialog,
   DialogActions,
   DialogContent,
@@ -11,7 +12,6 @@ import {
   FormControl,
   InputLabel,
   MenuItem,
-  Paper,
   Select,
   Stack,
   Table,
@@ -22,7 +22,6 @@ import {
   TableRow,
   Typography,
 } from "@mui/material"
-import InfoIcon from "@mui/icons-material/Info"
 import CloseIcon from "@mui/icons-material/Close"
 import EditIcon from "@mui/icons-material/Edit"
 import AddIcon from "@mui/icons-material/Add"
@@ -37,7 +36,6 @@ import { toast } from "react-toastify"
 import AddTeacherForm from "../addTeacher/AddTeacherForm"
 import usePrograms from "../../../hooks/count/usePrograms"
 import { LoginContext } from "../../../store/LoginProvider"
-import { Update } from "@mui/icons-material"
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // Fetching from .env file
 
 export default function ViewTeachers() {
@@ -68,6 +66,18 @@ export default function ViewTeachers() {
 
   // state to keep teacher's fetched details
   const [teacherDetails, setTeacherDetails] = useState(null)
+
+  // used when assigning course to a teacher
+  const [selectedCourseProgram, setSelectedCourseProgram] = useState(0)
+  const [courses, setCourses] = useState([])
+  const [selectedCourse, setSelectedCourse] = useState(0)
+
+  // fetch courses for a program
+  useEffect(() => {
+    if (selectedCourseProgram > 0) {
+      fetchCourses(selectedCourseProgram)
+    }
+  }, [selectedCourseProgram])
 
   // set selected teacher for viewing, editing and deleting teacher
   const setCurrentTeacher = (id) => {
@@ -113,7 +123,7 @@ export default function ViewTeachers() {
     },
   ]
 
-  // change selected program from dropdown
+  // change selected program from dropdown for fetching teacher list
   const handleProgramChange = (event) => {
     const programId = parseInt(event.target.value)
     if (programId === 0) {
@@ -124,7 +134,27 @@ export default function ViewTeachers() {
     }
   }
 
-  // fetch list of students based on program selected
+  // fetch courses from the system
+  const fetchCourses = async (programId = 0) => {
+    let url = `${VITE_BACKEND_URL}/public/courses`
+
+    if (programId > 0) {
+      url += `?program_id=${programId}`
+    }
+
+    try {
+      const response = await axios.get(url)
+      if ((response.status === 200) & (response.data.length > 0)) {
+        // set courses for listing
+        setCourses(response.data)
+      }
+    } catch (error) {
+      console.log(error) // for logging
+      toast.warn(`Error while fetching program courses: ${error.message}`)
+    }
+  }
+
+  // fetch list of teacherss based on program selected
   const fetchTeachersList = async (programId) => {
     const url =
       programId === 0
@@ -171,7 +201,7 @@ export default function ViewTeachers() {
     }
   }
 
-  // fetch students whenever program is changed
+  // fetch teachers whenever program is changed
   useEffect(() => {
     fetchTeachersList(selectedProgram.id)
   }, [selectedProgram])
@@ -234,6 +264,43 @@ export default function ViewTeachers() {
       toast.warn("Something went wrong. Please try again later.")
     }
   }
+
+  // asign course to a teacher
+  const assignCourseToTeacher = async (teacherId, courseId, programId) => {
+    try {
+      const body = {
+        teacherId: teacherId,
+        programId: programId,
+      }
+      await axios
+        .post(`${VITE_BACKEND_URL}/admin/courses/${courseId}/teacher`, body, {
+          headers: { Authorization: `Bearer ${loginState.token}` },
+        })
+        .then((response) => {
+          if (response.status === 201) {
+            toast.success(`Course was added successfully.`)
+            fetchTeacherDetails(selectedTeacher.id)
+          }
+        })
+        .catch((err) => {
+          console.log(err) // for logging
+          if (err.response.status === 409) {
+            toast.warn("Teacher is already assigned with the course.")
+          } else if (
+            err.response.status === 400 ||
+            err.response.status === 404
+          ) {
+            toast.warn("Please check values and try again.")
+          } else {
+            toast.warn("Something went wrong. Please try again later.")
+          }
+        })
+    } catch (err) {
+      console.log(err) // for logging
+      toast.warn("Something went wrong. Please try again later.")
+    }
+  }
+
   return (
     <Box
       fontFamily={{
@@ -312,23 +379,19 @@ export default function ViewTeachers() {
           setOpenDetailsDialog(false)
         }}
       >
-        <DialogTitle>Teacher Details</DialogTitle>
-        <Divider />
-        <DialogContent sx={{ margin: 1, padding: 1 }}>
-          {selectedTeacher !== null && (
-            <>
+        {selectedTeacher !== null && (
+          <>
+            <DialogTitle>
+              Edit Teacher Courses [ Name: {selectedTeacher.name}, Email:{"  "}
+              {selectedTeacher.email} ]
+            </DialogTitle>
+            <Divider />
+            <DialogContent sx={{ margin: 1, padding: 1 }}>
               <Stack gap={2} sx={{ padding: 1 }}>
-                <Typography variant="body1">
-                  Name: {selectedTeacher.name}
-                </Typography>
-                <Typography variant="body1">
-                  Email: {selectedTeacher.email}
-                </Typography>
                 {teacherDetails !== null && (
                   <>
-                    <Divider />
                     <Typography variant="h6">Teacher Courses</Typography>
-                    <TableContainer component={Paper}>
+                    <TableContainer sx={{ marginTop: -2 }}>
                       <Table>
                         <TableHead>
                           <TableRow>
@@ -384,14 +447,113 @@ export default function ViewTeachers() {
                       </Table>
                     </TableContainer>
 
-                    <Typography variant="h6">Teacher Courses</Typography>
+                    <Divider />
+                    <Typography variant="h6">Assign Course</Typography>
+                    <Stack direction="row" gap={1} sx={{ marginTop: -2 }}>
+                      <FormControl variant="outlined" fullWidth margin="normal">
+                        <InputLabel id="program-label">
+                          Select Program*
+                        </InputLabel>
+                        <Select
+                          required
+                          label="Select Program*"
+                          id="program"
+                          fullWidth
+                          labelId="program-label"
+                          onChange={(e) => {
+                            setSelectedCourseProgram(e.target.value)
+                          }}
+                        >
+                          {programs !== null &&
+                            programs.length > 0 &&
+                            programs.map((item) => (
+                              <MenuItem key={item.id} value={item.id}>
+                                <Card
+                                  variant="outlined"
+                                  sx={{ width: "100%", padding: 1 }}
+                                >
+                                  <Typography
+                                    sx={{ fontSize: 15 }}
+                                    color="text.primary"
+                                    gutterBottom
+                                  >
+                                    {item.name}
+                                  </Typography>
+                                  <Typography
+                                    sx={{ fontSize: 13 }}
+                                    color="text.primary"
+                                    variant="body1"
+                                  >
+                                    {item?.level?.name}
+                                    {", "}
+                                    {item?.department?.name}
+                                  </Typography>
+                                </Card>
+                              </MenuItem>
+                            ))}
+                        </Select>
+                      </FormControl>
+                      <FormControl variant="outlined" fullWidth margin="normal">
+                        <InputLabel id="course-label">
+                          Select Course*
+                        </InputLabel>
+                        <Select
+                          required
+                          label="Select Course*"
+                          id="syllabus"
+                          fullWidth
+                          labelId="course-label"
+                          onChange={(e) => {
+                            // set the course
+                            setSelectedCourse(e.target.value)
+                          }}
+                        >
+                          {courses !== null &&
+                            courses.length > 0 &&
+                            courses.map((item) => (
+                              <MenuItem key={item.id} value={item.id}>
+                                <Card
+                                  variant="outlined"
+                                  sx={{ width: "100%", padding: 1 }}
+                                >
+                                  <Typography
+                                    sx={{ fontSize: 15 }}
+                                    color="text.primary"
+                                    gutterBottom
+                                  >
+                                    {item.name}
+                                  </Typography>
+                                  <Typography
+                                    sx={{ fontSize: 13 }}
+                                    color="text.primary"
+                                    variant="body1"
+                                  >
+                                    Code: {item.code}, Credit: {item.credit},
+                                    Elective: {item.elective ? "Yes" : "No"},
+                                    Project: {item.project ? "Yes" : "No"}
+                                  </Typography>
+                                </Card>
+                              </MenuItem>
+                            ))}
+                        </Select>
+                      </FormControl>
+                    </Stack>
                     <Button
+                      sx={{ maxWidth: "max-content", padding: 1 }}
                       variant="contained"
                       startIcon={<AddIcon />}
                       color="primary"
-                      onClick={() => {
-                        // setCurrentTeacher(params.row.id)
-                        // setOpenDeleteDialog(true)
+                      onClick={async () => {
+                        toast.info(
+                          "Request for assigning course has been sent.",
+                          { autoClose: 1000 }
+                        )
+                        // assign course to a teacher
+                        await assignCourseToTeacher(
+                          selectedTeacher.id,
+                          selectedCourse,
+                          selectedCourseProgram
+                        )
                       }}
                     >
                       Add Course
@@ -399,9 +561,10 @@ export default function ViewTeachers() {
                   </>
                 )}
               </Stack>
-            </>
-          )}
-        </DialogContent>
+            </DialogContent>
+          </>
+        )}
+
         <Divider />
 
         <DialogActions>
@@ -460,7 +623,7 @@ export default function ViewTeachers() {
             variant="outlined"
             startIcon={<CloseIcon />}
             color="secondary"
-            onClick={(e) => {
+            onClick={() => {
               setOpenDeleteDialog(false)
             }}
           >
