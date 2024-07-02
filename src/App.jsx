@@ -28,6 +28,7 @@ import ViewStudents from "./components/pages/students/listStudents/viewStudents"
 import ViewTeacherCourses from "./components/pages/teachers/viewCourses/viewTeacherCourses"
 import AddCourses from "./components/pages/addcourses/admincourses"
 import ListUsers from "./components/pages/Admin/ListUsers/ListUsers"
+import ViewTeachers from "./components/pages/Admin/ViewTeachers"
 
 export default function App() {
   const { loginState, dispatchLoginState } = useContext(LoginContext)
@@ -212,6 +213,18 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+            path="/teachers"
+            element={
+              <ProtectedRoute>
+                <ResponsiveDrawer>
+                  <ViewTeachers />
+                </ResponsiveDrawer>
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/addcourses"
             element={

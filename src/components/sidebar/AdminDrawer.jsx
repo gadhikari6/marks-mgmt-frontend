@@ -9,7 +9,6 @@ import Toolbar from "@mui/material/Toolbar"
 import DashboardIcon from "@mui/icons-material/Dashboard"
 import AccountBoxIcon from "@mui/icons-material/AccountBox"
 import BookmarkIcon from "@mui/icons-material/Bookmark"
-import PersonAddIcon from "@mui/icons-material/PersonAdd"
 import GroupIcon from "@mui/icons-material/Group"
 
 export default function AdminDrawer() {
@@ -24,7 +23,7 @@ export default function AdminDrawer() {
 
           { text: "Profile", icon: <AccountBoxIcon />, link: "/profile" },
           { text: "Add Courses", icon: <BookmarkIcon />, link: "/addcourses" },
-          { text: "Add Teacher", icon: <PersonAddIcon />, link: "/addTeacher" },
+          { text: "Teachers", icon: <GroupIcon />, link: "/teachers" },
           {
             text: "Students",
             icon: <GroupIcon />,
