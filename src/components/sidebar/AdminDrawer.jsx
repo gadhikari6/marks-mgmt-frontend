@@ -10,6 +10,7 @@ import DashboardIcon from "@mui/icons-material/Dashboard"
 import AccountBoxIcon from "@mui/icons-material/AccountBox"
 import BookmarkIcon from "@mui/icons-material/Bookmark"
 import GroupIcon from "@mui/icons-material/Group"
+import SchoolIcon from "@mui/icons-material/School"
 
 export default function AdminDrawer() {
   return (
@@ -28,6 +29,11 @@ export default function AdminDrawer() {
             link: "/students",
           },
           { text: "Users", icon: <GroupIcon />, link: "/users" },
+          {
+            text: "Academic Divisions",
+            icon: <SchoolIcon />,
+            link: "/divisions",
+          },
         ].map((item) => (
           <ListItem
             key={item.text}
