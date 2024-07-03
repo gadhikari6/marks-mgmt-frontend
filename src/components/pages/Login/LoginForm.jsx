@@ -1,13 +1,27 @@
+/* eslint-disable react/no-unescaped-entities */
 // LoginForm.jsx
 import { useState } from "react"
 import { useFormik } from "formik"
 import * as yup from "yup"
-import { TextField, Button, Box, Typography, Paper, Link } from "@mui/material"
+import {
+  TextField,
+  Button,
+  Box,
+  Typography,
+  Paper,
+  Link,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+} from "@mui/material"
 import { useContext } from "react"
 import { LoginContext } from "../../../store/LoginProvider"
 import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
+
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 
 /**
@@ -27,10 +41,18 @@ const LoginForm = () => {
     email: "",
     password: "",
   }
+  const handleFAQOpen = () => {
+    setShowFAQ(true)
+  }
+
+  const handleFAQClose = () => {
+    setShowFAQ(false)
+  }
 
   const [loginError, setLoginError] = useState("")
   const [loginSuccess, setLoginSuccess] = useState("")
   const [loading, setLoading] = useState(false)
+  const [showFAQ, setShowFAQ] = useState(false)
 
   const onSubmit = async (values) => {
     setLoading(true)
@@ -145,6 +167,80 @@ const LoginForm = () => {
                 Sign in with your email and password
               </Typography>
             </Box>
+            <Box sx={{ paddingTop: 2 }}>
+              <Link
+                href="#"
+                underline="hover"
+                title="Click here to clear your confusion"
+                onClick={handleFAQOpen}
+              >
+                {showFAQ ? "Hide FAQ" : "FAQ"}
+              </Link>
+            </Box>
+            <Dialog open={showFAQ} onClose={handleFAQClose}>
+              <DialogTitle style={{ color: "blue" }}>
+                Frequently Asked Questions
+              </DialogTitle>
+              <DialogContent
+                style={{
+                  height: 400,
+                  overflow: "auto",
+                }}
+              >
+                <DialogContentText color={"black"}>
+                  <Typography variant="body1" sx={{ marginTop: 2 }}>
+                    <strong style={{ color: "green" }}>
+                      1: How do I create an account?
+                    </strong>
+                    <br />
+                    Ans: To create an account, please click on the "Sign Up"
+                    button and follow the instructions on the registration page.
+                  </Typography>
+                  <Typography variant="body1" sx={{ marginTop: 2 }}>
+                    <strong style={{ color: "green" }}>
+                      2: how can I change my password?
+                    </strong>
+                    <br />
+                    Ans: You can change your password by navigating to the
+                    "Account Settings" page and selecting the "Change Password"
+                    option.
+                  </Typography>
+                  <Typography variant="body1" sx={{ marginTop: 2 }}>
+                    <strong style={{ color: "green" }}>
+                      3: How can I recover a forgotten password?
+                    </strong>
+                    <br />
+                    Ans: If you have forgotten your password, you can click on
+                    the "Forgot Password" link on the login page and follow the
+                    instructions to reset your password.
+                  </Typography>
+                  <Typography variant="body1" sx={{ marginTop: 2 }}>
+                    <strong style={{ color: "green" }}>
+                      4: How can I update my profile information?
+                    </strong>
+                    <br />
+                    Ans: To update your profile information, navigate to the
+                    "Account Settings" page and edit the necessary details such
+                    as name, email, or contact information.
+                  </Typography>
+                  <Typography variant="body1" sx={{ marginTop: 2 }}>
+                    <strong style={{ color: "green" }}>
+                      5: How do I delete my account?
+                    </strong>
+                    <br />
+                    Ans: To delete your account, please contact our support team
+                    and provide them with the necessary information. They will
+                    guide you through the account deletion process.
+                  </Typography>
+                  {/* Add more questions and answers here */}
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleFAQClose} color="primary">
+                  Close
+                </Button>
+              </DialogActions>
+            </Dialog>
           </Box>
           <Box
             display="flex"
