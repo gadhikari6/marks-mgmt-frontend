@@ -19,8 +19,6 @@ export default function AdminDrawer() {
       <List>
         {[
           { text: "Dashboard", icon: <DashboardIcon />, link: "/dashboard" },
-          { text: "Marks", icon: <BookmarkIcon />, link: "/marks" },
-
           { text: "Profile", icon: <AccountBoxIcon />, link: "/profile" },
           { text: "Add Courses", icon: <BookmarkIcon />, link: "/addcourses" },
           { text: "Teachers", icon: <GroupIcon />, link: "/teachers" },
