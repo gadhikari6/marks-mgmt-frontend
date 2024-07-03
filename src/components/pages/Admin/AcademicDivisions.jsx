@@ -10,6 +10,10 @@ import {
   Card,
   CardContent,
   CardHeader,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
   FormControl,
   InputLabel,
@@ -28,6 +32,9 @@ import { useContext } from "react"
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // Fetching from .env file
 import { LoginContext } from "../../../store/LoginProvider"
 import { useFormik } from "formik"
+import CloseIcon from "@mui/icons-material/Close"
+
+import { DeleteForever } from "@mui/icons-material"
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props
@@ -105,6 +112,18 @@ function Programs() {
 }
 
 function Faculties() {
+  // for adding dialog
+  const [openAddDialog, setOpenAddDialog] = useState(false)
+
+  // for dialog
+  const [openDialog, setOpenDialog] = useState(false)
+  const [dialogDetails, setDialogDetails] = useState({
+    id: 0,
+    item: "None",
+    name: "",
+    deleteFunc: () => {},
+  })
+
   const facultyValidationSchema = yup.object({
     name: yup.string().required("Name is required"),
     head: yup.string().optional(),
@@ -125,6 +144,72 @@ function Faculties() {
     facultyId: "",
     name: "",
     head: "",
+  }
+
+  // delete faculty
+  const deleteFaculty = async () => {
+    await axios
+      .delete(
+        `${VITE_BACKEND_URL}/admin/divisions/faculty/${dialogDetails.id}`,
+        {
+          headers: { Authorization: `Bearer ${loginState.token}` },
+        }
+      )
+      .then((response) => {
+        if (response.status === 200) {
+          toast.success("Faculty deleted successfully!")
+          // update faculty list
+          fetchFaculties()
+        }
+      })
+      .catch((err) => {
+        toast.warn("Something wrong went with request")
+        console.log(err) // remove later
+      })
+  }
+
+  // delete department
+  const deleteDept = async () => {
+    await axios
+      .delete(
+        `${VITE_BACKEND_URL}/admin/divisions/department/${dialogDetails.id}`,
+        {
+          headers: { Authorization: `Bearer ${loginState.token}` },
+        }
+      )
+      .then((response) => {
+        if (response.status === 200) {
+          toast.success("Department deleted successfully!")
+          // update faculty list
+          fetchFaculties()
+        }
+      })
+      .catch((err) => {
+        toast.warn("Something wrong went with request")
+        console.log(err) // remove later
+      })
+  }
+
+  // delete program
+  const deleteProgram = async () => {
+    await axios
+      .delete(
+        `${VITE_BACKEND_URL}/admin/divisions/program/${dialogDetails.id}`,
+        {
+          headers: { Authorization: `Bearer ${loginState.token}` },
+        }
+      )
+      .then((response) => {
+        if (response.status === 200) {
+          toast.success("Faculty deleted successfully!")
+          // update faculty list
+          fetchFaculties()
+        }
+      })
+      .catch((err) => {
+        toast.warn("Something wrong went with request")
+        console.log(err) // remove later
+      })
   }
 
   // add new faculty
@@ -231,50 +316,253 @@ function Faculties() {
   return (
     <Box>
       <Stack direction="column" gap={1}>
-        <Paper variant="outlined" sx={{ p: 2 }} collapse>
-          <Typography variant="h6">Add New Faculty</Typography>
-          <form onSubmit={facultyFormik.handleSubmit}>
-            <Stack direction="row" gap={1}>
-              <TextField
-                label="Faculty Name"
-                fullWidth
-                id="faculty-name"
-                margin="normal"
-                required
-                {...facultyFormik.getFieldProps("name")}
-                error={
-                  facultyFormik.touched.name &&
-                  Boolean(facultyFormik.errors.name)
-                }
-                helperText={
-                  facultyFormik.touched.name && facultyFormik.errors.name
-                }
-              />
-              <TextField
-                label="Faculty Head"
-                fullWidth
-                id="faculty-head"
-                margin="normal"
-                {...facultyFormik.getFieldProps("head")}
-                error={
-                  facultyFormik.touched.head &&
-                  Boolean(facultyFormik.errors.head)
-                }
-                helperText={
-                  facultyFormik.touched.head && facultyFormik.errors.head
-                }
-              />
-            </Stack>
-            <Button
-              startIcon={<AddIcon />}
-              variant="contained"
-              sx={{ marginTop: 1 }}
-              type="submit"
-            >
-              Add Faculty
-            </Button>
-          </form>
-          <Paper variant="outlined" sx={{ marginTop: 2, p: 1 }}>
+        <Button
+          startIcon={<AddIcon />}
+          variant="contained"
+          sx={{
+            width: "max-content",
+            marginLeft: "auto",
+            padding: 1,
+            marginBottom: 1,
+          }}
+          onClick={() => {
+            setOpenAddDialog(true)
+          }}
+        >
+          Add New Faculty And Department
+        </Button>
+        <Paper variant="outlined" sx={{ p: 2 }}>
+          <Stack direction="column" gap={2}>
+            {allFaculties.length > 0 &&
+              allFaculties.map((faculty, index) => (
+                <Card variant="outlined" key={faculty.id}>
+                  <CardHeader
+                    title={
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <Typography variant="h6">
+                          {index + 1 + ". " + faculty.name}
+                        </Typography>
+                        <Button
+                          variant="outlined"
+                          startIcon={<DeleteForever />}
+                          sx={{ marginLeft: "auto" }}
+                          onClick={() => {
+                            // delete faculty
+                            setDialogDetails((prev) => ({
+                              ...prev,
+                              id: faculty.id,
+                              item: "FACULTY",
+                              name: faculty.name,
+                              deleteFunc: deleteFaculty,
+                            }))
+                            setOpenDialog(true)
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </Box>
+                    }
+                  />
+                  <Divider />
+                  <CardContent>
+                    <Typography variant="body2">
+                      Head: {faculty.head}
+                    </Typography>
+                    <ol>
+                      <Stack direction="column" gap={2}>
+                        {faculty.Department.length > 0 &&
+                          faculty.Department.map((dept) => (
+                            <li key={dept.id}>
+                              <Stack direction="row">
+                                <Typography variant="h7">
+                                  {dept.name}
+                                </Typography>
+                                <Button
+                                  variant="outlined"
+                                  startIcon={<DeleteForever />}
+                                  sx={{ marginLeft: "auto" }}
+                                  onClick={() => {
+                                    // delete department
+                                    setDialogDetails((prev) => ({
+                                      ...prev,
+                                      id: dept.id,
+                                      item: "DEPARTMENT",
+                                      name: dept.name,
+                                      deleteFunc: deleteDept,
+                                    }))
+                                    setOpenDialog(true)
+                                  }}
+                                >
+                                  Delete Dept
+                                </Button>
+                              </Stack>
+                              {dept.Program.length > 0 && (
+                                <ol>
+                                  <Stack
+                                    direction="column"
+                                    gap={2}
+                                    sx={{ marginTop: 2 }}
+                                  >
+                                    {dept.Program.map((prog) => (
+                                      <li key={prog.id}>
+                                        <Stack
+                                          direction="row"
+                                          sx={{ width: "30rem" }}
+                                        >
+                                          <Typography>{prog.name}</Typography>
+
+                                          <Button
+                                            variant="outlined"
+                                            startIcon={<DeleteForever />}
+                                            sx={{
+                                              marginLeft: "auto",
+                                            }}
+                                            onClick={() => {
+                                              // delete program
+                                              setDialogDetails((prev) => ({
+                                                ...prev,
+                                                id: prog.id,
+                                                item: "PROGRAM",
+                                                name: prog.name,
+                                                deleteFunc: deleteProgram,
+                                              }))
+                                              setOpenDialog(true)
+                                            }}
+                                          >
+                                            Delete
+                                          </Button>
+                                        </Stack>
+                                      </li>
+                                    ))}
+                                  </Stack>
+                                </ol>
+                              )}
+                              <Divider sx={{ marginTop: 2 }} />
+                            </li>
+                          ))}
+                      </Stack>
+                    </ol>
+                  </CardContent>
+                </Card>
+              ))}
+          </Stack>
+        </Paper>
+      </Stack>
+
+      {/* Dialog to delete item  */}
+      <Dialog
+        maxWidth={"md"}
+        fullWidth
+        open={openDialog}
+        onClose={() => {
+          setOpenDialog(false)
+          fetchFaculties()
+        }}
+      >
+        <DialogTitle>Delete {dialogDetails.item}</DialogTitle>
+        <Divider />
+        <DialogContent>
+          <Typography variant="h6">
+            Are you sure you want to delete {dialogDetails.item} : `
+            {dialogDetails.name}`
+          </Typography>
+          <Typography variant="subtitle">
+            The sub-divisions and components associated with it will also be
+            deleted.
+          </Typography>
+        </DialogContent>
+        <Divider />
+
+        <DialogActions>
+          <Button
+            variant="outlined"
+            startIcon={<DeleteForever />}
+            color="primary"
+            onClick={async () => {
+              setOpenDialog(false)
+              // perform delete operation
+              dialogDetails.deleteFunc()
+              fetchFaculties()
+            }}
+          >
+            Confirm
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<CloseIcon />}
+            color="secondary"
+            onClick={() => {
+              setOpenDialog(false)
+              fetchFaculties()
+            }}
+          >
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog to add program and department  */}
+      <Dialog
+        maxWidth={"md"}
+        fullWidth
+        open={openAddDialog}
+        onClose={() => {
+          setOpenAddDialog(false)
+          fetchFaculties()
+        }}
+      >
+        <DialogTitle>Add Faculty and Department</DialogTitle>
+        <Divider />
+        <DialogContent>
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <Typography variant="h6">Add New Faculty</Typography>
+            <form onSubmit={facultyFormik.handleSubmit}>
+              <Stack direction="row" gap={1}>
+                <TextField
+                  label="Faculty Name"
+                  fullWidth
+                  id="faculty-name"
+                  margin="normal"
+                  required
+                  {...facultyFormik.getFieldProps("name")}
+                  error={
+                    facultyFormik.touched.name &&
+                    Boolean(facultyFormik.errors.name)
+                  }
+                  helperText={
+                    facultyFormik.touched.name && facultyFormik.errors.name
+                  }
+                />
+                <TextField
+                  label="Faculty Head"
+                  fullWidth
+                  id="faculty-head"
+                  margin="normal"
+                  {...facultyFormik.getFieldProps("head")}
+                  error={
+                    facultyFormik.touched.head &&
+                    Boolean(facultyFormik.errors.head)
+                  }
+                  helperText={
+                    facultyFormik.touched.head && facultyFormik.errors.head
+                  }
+                />
+              </Stack>
+              <Button
+                startIcon={<AddIcon />}
+                variant="contained"
+                sx={{ marginTop: 1 }}
+                type="submit"
+              >
+                Add Faculty
+              </Button>
+            </form>
+            <Divider sx={{ margin: 2 }} />
             <Typography variant="h6">Add New Department</Typography>
             <form onSubmit={deptFormik.handleSubmit}>
               <Stack direction="row" gap={1}>
@@ -340,39 +628,23 @@ function Faculties() {
               </Button>
             </form>
           </Paper>
-        </Paper>
-        <Paper variant="outlined" sx={{ p: 2 }}>
-          <Stack direction="column" gap={2}>
-            {allFaculties.length > 0 &&
-              allFaculties.map((faculty, index) => (
-                <Card variant="outlined" key={faculty.id}>
-                  <CardHeader title={index + 1 + ". " + faculty.name} />
-                  <Divider />
-                  <CardContent>
-                    <Typography variant="body2">
-                      Head: {faculty.head}
-                    </Typography>
-                    <ol>
-                      {faculty.Department.length > 0 &&
-                        faculty.Department.map((dept) => (
-                          <li key={dept.id}>
-                            {dept.name}
-                            {dept.Program.length > 0 && (
-                              <ol>
-                                {dept.Program.map((prog) => (
-                                  <li key={prog.id}>{prog.name}</li>
-                                ))}
-                              </ol>
-                            )}
-                          </li>
-                        ))}
-                    </ol>
-                  </CardContent>
-                </Card>
-              ))}
-          </Stack>
-        </Paper>
-      </Stack>
+        </DialogContent>
+        <Divider />
+
+        <DialogActions>
+          <Button
+            variant="outlined"
+            startIcon={<CloseIcon />}
+            color="secondary"
+            onClick={() => {
+              setOpenAddDialog(false)
+              fetchFaculties()
+            }}
+          >
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }
