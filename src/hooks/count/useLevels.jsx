@@ -2,15 +2,15 @@ import axios from "axios"
 import { useQuery } from "@tanstack/react-query"
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 
-const useDepartments = () => {
+const useLevels = () => {
   const { isLoading, error, data } = useQuery({
-    queryKey: ["departments"],
+    queryKey: ["levels"],
     queryFn: async () => {
-      const response = await axios.get(`${VITE_BACKEND_URL}/public/departments`)
+      const response = await axios.get(`${VITE_BACKEND_URL}/public/levels`)
       return response.data
     },
   })
 
   return { isLoading, error, data }
 }
-export default useDepartments
+export default useLevels
