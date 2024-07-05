@@ -31,6 +31,7 @@ import ListUsers from "./components/pages/Admin/ListUsers/ListUsers"
 import ViewTeachers from "./components/pages/Admin/ViewTeachers"
 import AddModifyMarks from "./components/pages/Teacher/AddModifyMarks"
 import AcademicDivisions from "./components/pages/Admin/AcademicDivisions"
+import CreateBatch from "./components/pages/create-batch/CreateBatch"
 
 export default function App() {
   const { loginState, dispatchLoginState } = useContext(LoginContext)
@@ -254,6 +255,16 @@ export default function App() {
               <ProtectedRoute>
                 <ResponsiveDrawer>
                   <AcademicDivisions />
+                </ResponsiveDrawer>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/createbatch"
+            element={
+              <ProtectedRoute>
+                <ResponsiveDrawer>
+                  <CreateBatch />
                 </ResponsiveDrawer>
               </ProtectedRoute>
             }
