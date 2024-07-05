@@ -9,7 +9,7 @@ const useRoleNames = () => {
   const token = loginState.token
 
   const { isLoading, error, data } = useQuery({
-    queryKey: ["userroles"],
+    queryKey: ["user-roles"],
     queryFn: async () => {
       const response = await axios.get(
         `${VITE_BACKEND_URL}/admin/users/roles`,
