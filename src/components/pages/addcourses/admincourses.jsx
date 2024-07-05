@@ -103,6 +103,7 @@ const Courses = () => {
           defaultValue={formik.values.name}
           error={formik.touched.name && formik.errors.name}
           {...formik.getFieldProps("name")}
+          helperText={formik.touched.name && formik.errors.name}
           required
         />
         <Stack direction="row" gap={1}>
@@ -113,6 +114,7 @@ const Courses = () => {
             defaultValue={formik.values.code}
             error={formik.touched.code && formik.errors.code}
             {...formik.getFieldProps("code")}
+            helperText={formik.touched.code && formik.errors.code}
             required
           />
           <TextField
@@ -122,6 +124,7 @@ const Courses = () => {
             {...formik.getFieldProps("credit")}
             defaultValue={formik.values.credit}
             error={formik.touched.credit && formik.errors.credit}
+            helperText={formik.touched.credit && formik.errors.credit}
             required
           />
         </Stack>
@@ -131,6 +134,7 @@ const Courses = () => {
             id="elective"
             defaultValue={formik.values.elective}
             error={formik.touched.elective && formik.errors.elective}
+            helperText={formik.touched.elective && formik.errors.elective}
             required
             select
             fullWidth
@@ -146,6 +150,7 @@ const Courses = () => {
             id="project"
             defaultValue={formik.values.project}
             error={formik.touched.project && formik.errors.project}
+            helperText={formik.touched.project && formik.errors.project}
             required
             select
             fullWidth
@@ -167,6 +172,9 @@ const Courses = () => {
             select
             fullWidth
             {...formik.getFieldProps("markWeightageId")}
+            helperText={
+              formik.touched.markWeightageId && formik.errors.markWeightageId
+            }
           >
             {markWtList.length > 0 &&
               markWtList.map((item) => (
