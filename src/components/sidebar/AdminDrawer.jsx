@@ -11,7 +11,7 @@ import AccountBoxIcon from "@mui/icons-material/AccountBox"
 import BookmarkIcon from "@mui/icons-material/Bookmark"
 import GroupIcon from "@mui/icons-material/Group"
 import SchoolIcon from "@mui/icons-material/School"
-
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline"
 export default function AdminDrawer() {
   return (
     <div>
@@ -33,6 +33,11 @@ export default function AdminDrawer() {
             text: "Academic Divisions",
             icon: <SchoolIcon />,
             link: "/divisions",
+          },
+          {
+            text: "Create Batch",
+            icon: <AddCircleOutlineIcon />,
+            link: "/createbatch",
           },
         ].map((item) => (
           <ListItem
