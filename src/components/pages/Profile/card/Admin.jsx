@@ -9,7 +9,9 @@ const AdminProfile = ({ data }) => {
       <Typography variant="h6">Admin Details:</Typography>
       {Admin.map((admin) => (
         <div key={admin.id}>
-          <Typography>Admin ID: {admin.id}</Typography>
+          <Typography variant="body1" margin={2} color="text.secondary">
+            Admin ID: {admin.id}
+          </Typography>
           {/* Add any other admin details you want to display */}
         </div>
       ))}

@@ -1,30 +1,52 @@
-import { Card, Typography } from "@mui/material"
+import { Card, Divider, Typography } from "@mui/material"
 import PropTypes from "prop-types"
 
 const StudentProfile = ({ data }) => {
   const { Student } = data
 
   return (
-    <Card sx={{ margin: "20px", padding: "20px" }}>
-      <Typography variant="h6">Student Details:</Typography>
+    <Card>
+      <Typography variant="h6">Student Details</Typography>
+      <Divider />
       {Student.map((student) => (
         <div key={student.id}>
-          <Typography variant="body1">Symbol No: {student.symbolNo}</Typography>
-          <Typography variant="body1">PU Reg No: {student.puRegNo}</Typography>
-          <Typography variant="body1">
-            Program: {student.program.name}
+          <Typography variant="body1" margin={2} color="text.secondary">
+            <strong style={{ marginRight: "90px" }}>
+              PU Registration Number
+            </strong>{" "}
+            {student.puRegNo}
           </Typography>
-          <Typography variant="body1">
-            Faculty: {student.program.department.faculty.name}
+          <Divider />
+          <Typography variant="body1" margin={2} color="text.secondary">
+            <strong style={{ marginRight: "220px" }}>Faculty</strong>{" "}
+            {student.program.department.faculty.name}
           </Typography>
-          <Typography variant="body1">
-            Status: {student.StudentStatus[0].status}
+          <Divider />
+          <Typography variant="body1" margin={2} color="text.secondary">
+            <strong style={{ marginRight: "210px" }}>Program</strong>{" "}
+            {student.program.name}
           </Typography>
-          <Typography variant="body1">
-            Syllabus: {student.syllabus.name}
+          <Divider />
+          <Typography variant="body1" margin={2} color="text.secondary">
+            <strong style={{ marginRight: "150px" }}>Symbol Number:</strong>{" "}
+            {student.symbolNo}
           </Typography>
-          <Typography variant="body1">
-            Semester: {student.semester.id}
+          <Divider />
+
+          <Typography variant="body1" margin={2} color="text.secondary">
+            <strong style={{ marginRight: "210px" }}>Syllabus</strong>{" "}
+            {student.syllabus.name}
+          </Typography>
+          <Divider />
+
+          <Typography variant="body1" margin={2} color="text.secondary">
+            <strong style={{ marginRight: "200px" }}>Semester</strong>
+            {student.semester.id}
+          </Typography>
+          <Divider />
+          <Typography variant="body1" margin={2} color="text.secondary">
+            <strong style={{ marginRight: "230px" }}>Status</strong>{" "}
+            {student.StudentStatus[0].status}
           </Typography>
 
           {/* Add any other student details you want to display */}

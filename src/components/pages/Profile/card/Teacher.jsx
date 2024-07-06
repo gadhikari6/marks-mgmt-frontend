@@ -9,7 +9,10 @@ const TeacherProfile = ({ data }) => {
       <Typography variant="h6">Teacher Details:</Typography>
       {Teacher.map((teacher) => (
         <div key={teacher.id}>
-          <Typography>Teacher ID: {teacher.id}</Typography>
+          <Typography variant="body1" margin={2} color="text.secondary">
+            Teacher ID: {teacher.id}
+          </Typography>
+
           {/* Add any other teacher details you want to display */}
         </div>
       ))}
