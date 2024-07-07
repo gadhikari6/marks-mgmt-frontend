@@ -28,10 +28,14 @@ import CloseIcon from "@mui/icons-material/Close"
 import SaveIcon from "@mui/icons-material/Save"
 import { useFormik } from "formik"
 import * as yup from "yup"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 
 const Profile = () => {
+  // Get QueryClient from the context
+  const queryClient = useQueryClient()
+
   const { data, isLoading, error, token } = useProfile()
 
   const [editDialogOpen, setEditDialogOpen] = useState(false)
@@ -77,6 +81,9 @@ const Profile = () => {
         )
         if (response.status === 200) {
           toast.success("Profile updated successfully!")
+          // invalidate the old cache, such that new data will be fetched
+          queryClient.invalidateQueries({ queryKey: ["profile"] })
+
           // Update profile data or perform necessary actions after successful update
         } else {
           toast.error(error.message)
