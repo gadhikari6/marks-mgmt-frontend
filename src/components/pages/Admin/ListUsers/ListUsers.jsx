@@ -337,9 +337,7 @@ const ListUsers = () => {
           sx={{ margin: "1rem" }}
           displayEmpty
         >
-          <MenuItem value="" disabled>
-            ALL
-          </MenuItem>
+          <MenuItem value="">ALL</MenuItem>
           {data.roles.map((role) => (
             <MenuItem key={role.id} value={role.id}>
               {role.name}
@@ -352,7 +350,7 @@ const ListUsers = () => {
         {filteredUsers.length === 0 ? (
           <Typography>No users found </Typography>
         ) : (
-          <Box style={{ height: 400, width: "100%" }}>
+          <Box style={{ width: "100%" }}>
             <DataGrid
               rows={getRowsWithSerialNumber(filteredUsers)}
               columns={columns}
