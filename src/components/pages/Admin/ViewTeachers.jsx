@@ -167,6 +167,7 @@ export default function ViewTeachers() {
         },
       })
       if (response.status === 200) {
+        console.log(response.data.teachers)
         const teachers = response.data.teachers.map((teacher, index) => ({
           id: teacher.id,
           sn: index + 1,
