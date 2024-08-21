@@ -95,6 +95,8 @@ const AddModifyMarks = () => {
       theory: row.theory,
       practical: row.practical,
       notQualified: row.notQualified,
+      absent: row.absent,
+      expelled: row.expelled,
     }))
 
     axios
@@ -205,6 +207,20 @@ const AddModifyMarks = () => {
       editable: true,
     },
     {
+      field: "absent",
+      headerName: "Absent",
+      type: "boolean",
+      width: 80,
+      editable: true,
+    },
+    {
+      field: "expelled",
+      headerName: "Expelled",
+      type: "boolean",
+      width: 80,
+      editable: true,
+    },
+    {
       field: "total",
       headerName: "Total",
       width: 100,
@@ -236,6 +252,20 @@ const AddModifyMarks = () => {
       headerName: "Not Qualified",
       type: "boolean",
       width: 130,
+      editable: false,
+    },
+    {
+      field: "absent",
+      headerName: "Absent",
+      type: "boolean",
+      width: 80,
+      editable: false,
+    },
+    {
+      field: "expelled",
+      headerName: "Expelled",
+      type: "boolean",
+      width: 80,
       editable: false,
     },
     { field: "total", headerName: "Total", width: 100 },
@@ -271,6 +301,8 @@ const AddModifyMarks = () => {
         theory: mark.theory,
         practical: mark.practical,
         notQualified: mark.NotQualified,
+        absent: mark.absent || false,
+        expelled: mark.expelled || false,
         total: mark.practical + mark.theory,
       }))
       setRows(updatedRows)
@@ -330,13 +362,24 @@ const AddModifyMarks = () => {
                     >
                       Program: {course.program.name}
                     </Typography>
-                    <Typography
-                      sx={{ fontSize: 13 }}
-                      color="text.primary"
-                      variant="subtitle"
-                    >
-                      Semester: {course.semester.id}
-                    </Typography>
+                    <Stack direction={"row"} gap={5}>
+                      <Typography
+                        sx={{ fontSize: 13 }}
+                        color="text.primary"
+                        variant="subtitle"
+                      >
+                        Semester: {course.semester.id}
+                      </Typography>
+                      <Typography
+                        sx={{ fontSize: 13 }}
+                        color="text.primary"
+                        variant="subtitle"
+                      >
+                        MarkWeightage:- Theory:{" "}
+                        {course.course?.markWeightage?.theory}, Practical:{" "}
+                        {course.course?.markWeightage?.practical}
+                      </Typography>
+                    </Stack>
                   </Card>
                 </MenuItem>
               ))}
@@ -402,6 +445,8 @@ const AddModifyMarks = () => {
             const NQ = e.target.NQ.checked
             const maxTheory = selectedCourse.course.markWeightage.theory
             const maxPrac = selectedCourse.course.markWeightage.practical
+            const absent = e.target.absent.checked
+            const expelled = e.target.expelled.checked
 
             if (theory < 0 || theory > maxTheory) {
               toast.warn("Please provide a valid theory marks value.")
@@ -421,6 +466,8 @@ const AddModifyMarks = () => {
               notQualified: NQ,
               studentId: selectedRow.studentId,
               courseId: selectedCourse.courseId,
+              absent: absent,
+              expelled: expelled,
             })
           }}
         >
@@ -445,7 +492,7 @@ const AddModifyMarks = () => {
             </Typography>
 
             <Typography sx={{ fontSize: 14 }} color="text.primary" gutterBottom>
-              Marks: [Theory: {selectedRow?.theory}, Practical:{" "}
+              Current Marks: [Theory: {selectedRow?.theory}, Practical:{" "}
               {selectedRow?.practical}, Not Qualified:{" "}
               {selectedRow?.notQualified ? "Yes" : "No"}]
             </Typography>
@@ -484,6 +531,28 @@ const AddModifyMarks = () => {
                 />
               }
               label="Not Qualified ?"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  id="absent"
+                  name="absent"
+                  label="Absent?"
+                  defaultChecked={selectedRow?.absent || false}
+                />
+              }
+              label="Absent ?"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  id="expelled"
+                  name="expelled"
+                  label="Expelled?"
+                  defaultChecked={selectedRow?.expelled || false}
+                />
+              }
+              label="Expelled ?"
             />
           </DialogContent>
           <Divider />
