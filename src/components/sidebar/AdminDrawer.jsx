@@ -12,6 +12,7 @@ import BookmarkIcon from "@mui/icons-material/Bookmark"
 import GroupIcon from "@mui/icons-material/Group"
 import SchoolIcon from "@mui/icons-material/School"
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline"
+import ChromeReaderModeIcon from "@mui/icons-material/ChromeReaderMode"
 export default function AdminDrawer() {
   return (
     <div>
@@ -29,6 +30,11 @@ export default function AdminDrawer() {
             link: "/students",
           },
           { text: "Users", icon: <GroupIcon />, link: "/users" },
+          {
+            text: "Marks",
+            icon: <ChromeReaderModeIcon />,
+            link: "/adminmarks",
+          },
           {
             text: "Academic Divisions",
             icon: <SchoolIcon />,
