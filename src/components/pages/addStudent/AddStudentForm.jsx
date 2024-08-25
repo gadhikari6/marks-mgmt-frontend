@@ -77,6 +77,8 @@ const AddStudentForm = () => {
       contactNo: "",
       symbolNo: "",
       puRegNo: "",
+      yearJoined: "",
+      dateOfBirth: "",
     },
     onSubmit: () => {
       setDialogOpen(true)
@@ -110,6 +112,8 @@ const AddStudentForm = () => {
       name,
       address,
       puRegNo,
+      yearJoined,
+      dateOfBirth,
     } = formik.values
     const data = {
       email: email,
@@ -122,6 +126,8 @@ const AddStudentForm = () => {
       puRegNo: puRegNo,
       contactNo: String(contactNo),
       symbolNo: String(symbolNo),
+      yearJoined: yearJoined,
+      dateOfBirth: dateOfBirth,
     }
 
     await axios
@@ -163,7 +169,7 @@ const AddStudentForm = () => {
     <Box>
       <form onSubmit={formik.handleSubmit}>
         <Box sx={{ mt: 2 }}>
-          <Grid container spacing={2}>
+          <Grid container spacing={0.5}>
             {/* Name field */}
             <Grid item xs={6}>
               <TextField
@@ -335,6 +341,40 @@ const AddStudentForm = () => {
                 )}
               </FormControl>
             </Grid>
+            {/* Year Joined field */}
+            <Grid item xs={6}>
+              <TextField
+                id="yearJoined"
+                name="yearJoined"
+                label="Year Joined *"
+                variant="outlined"
+                {...formik.getFieldProps("yearJoined")}
+                error={formik.touched.yearJoined && formik.errors.yearJoined}
+                helperText={
+                  formik.touched.yearJoined && formik.errors.yearJoined
+                }
+                fullWidth
+                margin="normal"
+                type="number"
+              />
+            </Grid>
+
+            {/* Date of birth field */}
+            <Grid item xs={6}>
+              <TextField
+                id="dateOfBirth"
+                name="dateOfBirth"
+                label="Date of Birth *"
+                variant="outlined"
+                {...formik.getFieldProps("dateOfBirth")}
+                error={formik.touched.dateOfBirth && formik.errors.dateOfBirth}
+                helperText={
+                  formik.touched.dateOfBirth && formik.errors.dateOfBirth
+                }
+                fullWidth
+                margin="normal"
+              />
+            </Grid>
 
             {/* Address field */}
             <Grid item xs={6}>
@@ -412,10 +452,14 @@ const AddStudentForm = () => {
       {/* Dialog to display filled data */}
       <Dialog open={isDialogOpen} onClose={handleDialogClose}>
         <DialogTitle>Confirm Entered Data</DialogTitle>
+        <Divider />
         <DialogContent>
           <Typography variant="body1">Name: {formik.values.name}</Typography>
 
           <Typography variant="body1">Email: {formik.values.email}</Typography>
+          <Typography variant="body1">
+            Password: {formik.values.password}
+          </Typography>
           <Typography variant="body1">
             Program: {formik.values.programId}
           </Typography>
@@ -439,6 +483,7 @@ const AddStudentForm = () => {
             PU Registration Number: {formik.values.puRegNo}
           </Typography>
         </DialogContent>
+        <Divider />
         <DialogActions>
           <Button onClick={handleDialogClose}>Edit</Button>
           <Button onClick={createStudent}>Submit</Button>

@@ -31,6 +31,7 @@ import axios from "axios"
 import { toast } from "react-toastify"
 import * as yup from "yup"
 import { useFormik } from "formik"
+import useYearJoined from "../../../../hooks/count/useYearJoined"
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // Fetching from .env file
 
 export default function ViewStudents() {
@@ -38,6 +39,15 @@ export default function ViewStudents() {
 
   // list of program in system
   const { data: programs } = usePrograms()
+
+  // fetch distinct list of years of studetn joining
+  const { data: years } = useYearJoined()
+
+  //  keep track of year selection
+  const [yearSelected, setYearSelected] = useState(0)
+
+  //  keep track of semester selection
+  const [semesterSelected, setSemesterSelected] = useState(0)
 
   // currently selected program
   const [selectedProgram, setSelectedProgram] = useState({
@@ -71,6 +81,17 @@ export default function ViewStudents() {
     // set selected student for viewing details
     setSelectedStudent(responseData.find((student) => student.id === id))
   }
+
+  // handler for year selector
+  const yearSelectHandler = (e) => {
+    setYearSelected(Number(e.target.value) || 0)
+  }
+
+  // handler for semester selector
+  const semesterSelectHandler = (e) => {
+    setSemesterSelected(Number(e.target.value) || 0)
+  }
+
   // columns for students data-grid
   const columns = [
     { field: "sn", headerName: "S.N.", width: 50 },
@@ -143,11 +164,12 @@ export default function ViewStudents() {
   }
 
   // fetch list of students based on program selected
-  const fetchStudentList = async (programId) => {
-    const url =
-      programId === 0
-        ? `${VITE_BACKEND_URL}/admin/students`
-        : `${VITE_BACKEND_URL}/admin/students?program_id=${programId}`
+  const fetchStudentList = async (
+    programId = 0,
+    semester = 0,
+    yearJoined = 0
+  ) => {
+    const url = `${VITE_BACKEND_URL}/admin/students?program_id=${programId}&semester=${semester}&year_joined=${yearJoined}`
     try {
       const response = await axios.get(url, {
         headers: {
@@ -183,8 +205,8 @@ export default function ViewStudents() {
 
   // fetch students whenever program is changed
   useEffect(() => {
-    fetchStudentList(selectedProgram.id)
-  }, [selectedProgram])
+    fetchStudentList(selectedProgram.id, semesterSelected, yearSelected)
+  }, [selectedProgram, semesterSelected, yearSelected])
 
   // schema for edit dialog
   const editStudentSchema = yup.object({
@@ -273,11 +295,12 @@ export default function ViewStudents() {
       }}
     >
       <Box sx={{ display: "flex", flexDirection: "row", gap: "1rem" }}>
-        <FormControl sx={{ m: 1, minWidth: "35rem" }}>
+        <FormControl sx={{ m: 1, minWidth: "25rem" }}>
           <InputLabel>Select a Program</InputLabel>
           <Select
             value={selectedProgram ? selectedProgram.id : ""}
             onChange={handleProgramChange}
+            label="Select a Program"
           >
             <MenuItem key={0} value={0}>
               All Programs
@@ -287,6 +310,61 @@ export default function ViewStudents() {
               programs.map((program) => (
                 <MenuItem key={program.id} value={program.id}>
                   {program.name}
+                </MenuItem>
+              ))}
+          </Select>
+        </FormControl>
+        <FormControl sx={{ m: 1, minWidth: "15rem" }}>
+          <InputLabel label="year-joined">Select a Year-Joined</InputLabel>
+          <Select
+            value={yearSelected ? yearSelected : 0}
+            onChange={yearSelectHandler}
+            labelId="year-joined"
+            label="Select a Year-Joined"
+            id="yearJoined"
+          >
+            <MenuItem key={0} value={0}>
+              All Years
+            </MenuItem>
+            {years !== undefined &&
+              years !== null &&
+              years.map((year) => (
+                <MenuItem key={year.yearJoined} value={year.yearJoined}>
+                  {year.yearJoined}
+                </MenuItem>
+              ))}
+          </Select>
+        </FormControl>
+
+        <FormControl sx={{ m: 1, minWidth: "15rem" }}>
+          <InputLabel label="sem-label">Select a semester</InputLabel>
+          <Select
+            id="semester"
+            value={semesterSelected ? semesterSelected : 0}
+            onChange={semesterSelectHandler}
+            label="Select a semester"
+          >
+            <MenuItem key={0} value={0}>
+              All Semesters
+            </MenuItem>
+            {selectedProgram !== null &&
+              Array.from(
+                Array(
+                  selectedProgram.ProgramSemesters !== undefined
+                    ? selectedProgram.ProgramSemesters[0].semesterId
+                    : 8
+                ).keys()
+              ).map((index) => (
+                <MenuItem key={index + 1} value={index + 1}>
+                  {`${index + 1}${
+                    index === 0
+                      ? "st"
+                      : index === 1
+                      ? "nd"
+                      : index === 2
+                      ? "rd"
+                      : "th"
+                  } Semester`}
                 </MenuItem>
               ))}
           </Select>
@@ -315,6 +393,7 @@ export default function ViewStudents() {
           rows={allStudents}
           columns={columns}
           pageSize={100}
+          pageSizeOptions={[5, 10, 25, 50, 100]}
           rowsPerPageOptions={[100]}
           resizable={true}
           components={{
