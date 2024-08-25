@@ -354,13 +354,6 @@ const ListUsers = () => {
             <DataGrid
               rows={getRowsWithSerialNumber(filteredUsers)}
               columns={columns}
-              filterModel={{
-                items: columns.map((column) => ({
-                  columnField: column.field,
-                  operatorValue: "contains",
-                  value: "",
-                })),
-              }}
               sortingOrder={["asc", "desc"]}
               hideFooterSelectedRowCount
               components={{
