@@ -23,7 +23,7 @@ import {
   TableBody,
   TextField,
 } from "@mui/material"
-import { DataGrid } from "@mui/x-data-grid"
+import { DataGrid, GridToolbar } from "@mui/x-data-grid"
 import DeleteIcon from "@mui/icons-material/Delete"
 import EditIcon from "@mui/icons-material/Edit"
 import CloseIcon from "@mui/icons-material/Close"
@@ -363,6 +363,9 @@ const ListUsers = () => {
               }}
               sortingOrder={["asc", "desc"]}
               hideFooterSelectedRowCount
+              components={{
+                Toolbar: GridToolbar,
+              }}
             />
           </Box>
         )}
