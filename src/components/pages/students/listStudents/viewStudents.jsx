@@ -96,12 +96,15 @@ export default function ViewStudents() {
   const columns = [
     { field: "sn", headerName: "S.N.", width: 50 },
 
-    { field: "name", headerName: "Name", width: 180 },
+    { field: "name", headerName: "Name", width: 170 },
     { field: "symbolNo", headerName: "Symbol", width: 120 },
-    { field: "puRegNo", headerName: "PU Reg No", width: 180 },
-    { field: "program", headerName: "Program", width: 190 },
-    { field: "semesterId", headerName: "Semester", width: 120 },
-    { field: "status", headerName: "Status", width: 115 },
+    { field: "puRegNo", headerName: "PU Reg No", width: 160 },
+    { field: "program", headerName: "Program", width: 180 },
+    { field: "semesterId", headerName: "Semester", width: 100 },
+    { field: "status", headerName: "Status", width: 110 },
+    { field: "dateOfBirth", headerName: "DOB", width: 110 },
+    { field: "yearJoined", headerName: "Joined", width: 70 },
+
     {
       field: "actions",
       headerName: "Actions",
@@ -191,6 +194,8 @@ export default function ViewStudents() {
             syllabusId: student.syllabusId,
             status: student.StudentStatus[0].status || "",
             syllabus: student.syllabus.name,
+            yearJoined: student.yearJoined,
+            dateOfBirth: student.dateOfBirth,
           }
         })
         // set students data
@@ -421,6 +426,10 @@ export default function ViewStudents() {
                 </Typography>
                 <Typography variant="body1">
                   Email: {selectedStudent.user.email}
+                </Typography>
+                <Typography variant="body1">
+                  Joined Year: {selectedStudent.yearJoined}, Date Of Birth:{" "}
+                  {selectedStudent.dateOfBirth}
                 </Typography>
                 <Typography variant="body1">
                   Contact No:
