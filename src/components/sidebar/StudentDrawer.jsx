@@ -21,11 +21,8 @@ export default function StudentDrawer() {
         {[
           { text: "Dashboard", icon: <DashboardIcon />, link: "/dashboard" },
           { text: "Marks", icon: <BookmarkIcon />, link: "/marks" },
-
-          { text: "Profile", icon: <AccountBoxIcon />, link: "/profile" },
           { text: "Syllabus", icon: <MenuBookIcon />, link: "/syllabus" },
-
-          { text: "Settings", icon: <SettingsIcon />, link: "/settings" },
+          { text: "Profile", icon: <AccountBoxIcon />, link: "/profile" },
         ].map((item) => (
           <ListItem
             key={item.text}
