@@ -116,16 +116,6 @@ export default function App() {
         <Route path="">
           <Route path="/" index element={<LoginForm />} />
           <Route
-            path="/home"
-            element={
-              <ProtectedRoute>
-                <ResponsiveDrawer>
-                  <Demo />
-                </ResponsiveDrawer>
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/profile"
             element={
               <ProtectedRoute>

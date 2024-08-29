@@ -7,7 +7,6 @@ import ListItemIcon from "@mui/material/ListItemIcon"
 import ListItemText from "@mui/material/ListItemText"
 import Toolbar from "@mui/material/Toolbar"
 import DashboardIcon from "@mui/icons-material/Dashboard"
-import AccountBoxIcon from "@mui/icons-material/AccountBox"
 import BookmarkIcon from "@mui/icons-material/Bookmark"
 import GroupIcon from "@mui/icons-material/Group"
 import SchoolIcon from "@mui/icons-material/School"
@@ -21,20 +20,19 @@ export default function AdminDrawer() {
       <List>
         {[
           { text: "Dashboard", icon: <DashboardIcon />, link: "/dashboard" },
-          { text: "Profile", icon: <AccountBoxIcon />, link: "/profile" },
-          { text: "Add Courses", icon: <BookmarkIcon />, link: "/addcourses" },
+          { text: "Users", icon: <GroupIcon />, link: "/users" },
           { text: "Teachers", icon: <GroupIcon />, link: "/teachers" },
           {
             text: "Students",
             icon: <GroupIcon />,
             link: "/students",
           },
-          { text: "Users", icon: <GroupIcon />, link: "/users" },
           {
             text: "Marks",
             icon: <ChromeReaderModeIcon />,
             link: "/adminmarks",
           },
+          { text: "Add Courses", icon: <BookmarkIcon />, link: "/addcourses" },
           {
             text: "Academic Divisions",
             icon: <SchoolIcon />,

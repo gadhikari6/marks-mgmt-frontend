@@ -19,7 +19,7 @@ const LoginForm = () => {
 
   useEffect(() => {
     if (loginState.isLogged) {
-      navigate("/home")
+      navigate("/dashboard")
     }
   }, [loginState.isLogged])
 

@@ -25,7 +25,6 @@ export default function TeacherDrawer() {
             link: "/teacherCourses",
           },
           { text: " Add Marks", icon: <BookmarkIcon />, link: "/addmarks" },
-          { text: "Profile", icon: <AccountBoxIcon />, link: "/profile" },
         ].map((item) => (
           <ListItem
             key={item.text}

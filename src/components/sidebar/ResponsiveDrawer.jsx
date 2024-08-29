@@ -38,6 +38,7 @@ import { toast } from "react-toastify"
 import { Divider } from "@mui/material"
 import useProfile from "../../hooks/useProfile"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
+import AccountBoxIcon from "@mui/icons-material/AccountBox"
 
 const drawerWidth = 240
 
@@ -206,7 +207,7 @@ function ResponsiveDrawer(props) {
             },
           }}
         >
-          {/* Donot put items in here. Also do not remote it */}
+          {/* Donot put items in here. Also do not remove this drawer */}
         </Drawer>
         <Drawer
           variant="permanent"
@@ -225,6 +226,21 @@ function ResponsiveDrawer(props) {
           {loginState.roles.currentRole === "teacher" && <TeacherDrawer />}
 
           {/* Permanent settings and logout button */}
+          <ListItem
+            key="Profile"
+            disablePadding
+            component={Link}
+            button
+            to={"/profile"}
+          >
+            <ListItemButton>
+              <ListItemIcon>
+                <AccountBoxIcon />
+              </ListItemIcon>
+              <ListItemText primary="Profile" />
+            </ListItemButton>
+          </ListItem>
+
           <ListItem
             key="Settings"
             disablePadding
@@ -303,6 +319,7 @@ function ResponsiveDrawer(props) {
         <DialogTitle>Confirm Logout?</DialogTitle>
         <Divider />
         <DialogContent>Are you sure you want to logout?</DialogContent>
+        <Divider />
         <DialogActions>
           <Button onClick={handleLogout} color="primary" variant="outlined">
             Confirm

@@ -340,6 +340,7 @@ const AddModifyMarks = () => {
           <Select
             value={selectedCourse ? selectedCourse.courseId : ""}
             onChange={handleCourseChange}
+            label="Select a Course"
           >
             {teacherCourses !== undefined &&
               teacherCourses !== null &&
@@ -417,6 +418,7 @@ const AddModifyMarks = () => {
             columns={columns}
             pageSize={100}
             editMode="row"
+            pageSizeOptions={[5, 10, 25, 50, 100]}
             rowsPerPageOptions={[100]}
             checkboxSelection
             disableSelectionOnClick
