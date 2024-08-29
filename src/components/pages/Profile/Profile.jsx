@@ -103,7 +103,7 @@ const Profile = () => {
     return <div>Error: {error.message}</div>
   }
 
-  const { name, address, contactNo, email, activated, UserRoles } = data
+  const { id, name, address, contactNo, email, activated, UserRoles } = data
 
   return (
     <>
@@ -125,6 +125,18 @@ const Profile = () => {
                     {name}
                   </Typography>
                   <Divider />
+
+                  <Typography
+                    variant="body1"
+                    margin={1}
+                    color="text.secondary"
+                    gutterBottom
+                  >
+                    <strong style={{ marginRight: "200px" }}>Email</strong>
+                    {email}
+                  </Typography>
+                  <Divider />
+
                   <Typography
                     variant="body1"
                     margin={1}
@@ -141,8 +153,10 @@ const Profile = () => {
                     color="text.secondary"
                     gutterBottom
                   >
-                    <strong style={{ marginRight: "200px" }}>Email</strong>
-                    {email}
+                    <strong style={{ marginRight: "118px" }}>
+                      Contact Number
+                    </strong>
+                    {contactNo}
                   </Typography>
                   <Divider />
                   <Typography
@@ -151,12 +165,11 @@ const Profile = () => {
                     color="text.secondary"
                     gutterBottom
                   >
-                    <strong style={{ marginRight: "118px" }}>
-                      Contact Number
-                    </strong>
-                    {contactNo}
+                    <strong style={{ marginRight: "200px" }}>User Id</strong>
+                    {id}
                   </Typography>
                   <Divider />
+
                   <Box style={{ display: "flex", alignItems: "center" }}>
                     <Typography
                       variant="body1"
