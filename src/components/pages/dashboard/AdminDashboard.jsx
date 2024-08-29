@@ -6,19 +6,42 @@ import {
   CardContent,
   Typography,
   Divider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material"
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Colors } from "chart.js"
-import { Doughnut } from "react-chartjs-2"
+import { Bar, Doughnut } from "react-chartjs-2"
 
 import useStudentCount from "../../../hooks/count/useStudentCount"
-
+import useTeacherCount from "../../../hooks/count/useTeacherCount"
 import { useState } from "react"
 import { useEffect } from "react"
 import useDepartments from "../../../hooks/count/useDepartments"
+import useBatches from "../../../hooks/count/useBatches"
+import axios from "axios"
+import { useContext } from "react"
+import { LoginContext } from "../../../store/LoginProvider"
+
+const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 
 ChartJS.register(ArcElement, Tooltip, Legend, Colors)
 
-// TODO: add skeleton for dashboard if needed at all
+// chart options
+const options = {
+  responsive: true,
+
+  plugins: {
+    legend: {
+      position: "top",
+    },
+    title: {
+      display: true,
+      text: "Performance chart",
+    },
+  },
+}
 
 const prepDoughnutData = (data) => {
   const labels = []
@@ -39,11 +62,40 @@ const prepDoughnutData = (data) => {
       },
     ],
   }
-  console.log(JSON.stringify(chartData))
   return chartData
 }
 
+// prepare chart data for overall of a certain batch
+const prepareBatchWise = (data) => {
+  let labels = []
+  let values = []
+  const marks = new Map()
+
+  for (const mark of data) {
+    const program = mark.student.program.name
+    let total = mark.theory + mark.practical
+    if (marks.get(program) === undefined) {
+      marks.set(program, total)
+    } else {
+      total += marks.get(program)
+      marks.set(program, total)
+    }
+  }
+
+  marks.forEach((value, key) => {
+    labels.push(key)
+    values.push(value)
+  })
+
+  return {
+    labels: labels,
+    datasets: [{ label: `Marks Obtained`, data: values }],
+  }
+}
+
 export default function AdminDashboard() {
+  const { loginState } = useContext(LoginContext)
+
   const [totalStds, setTotalStds] = useState(0)
   const [activeStds, setActiveStds] = useState(0)
   const [programs, setPrograms] = useState([])
@@ -51,7 +103,55 @@ export default function AdminDashboard() {
   const [doughnutData, setDoughnutData] = useState(null)
   const { isLoading, error, data } = useStudentCount()
 
+  const { data: teacherCount } = useTeacherCount()
+
   const { data: departmentsData } = useDepartments()
+
+  // list of all batches
+  const { data: batchList } = useBatches()
+
+  // batch id
+  const [selectedBatchId, setSelectedBatchId] = useState(0)
+
+  // make data by batch id
+  useEffect(() => {
+    if (
+      selectedBatchId === undefined ||
+      selectedBatchId === null ||
+      selectedBatchId === 0
+    ) {
+      return
+    }
+    fetchMarks(selectedBatchId)
+  }, [selectedBatchId])
+
+  // chartData for vertical bar
+  const [verticalBarData, setVerticalBarData] = useState(null)
+
+  // fetchMarks
+  const fetchMarks = async (batchId = 0) => {
+    if (batchId === 0) return
+    try {
+      const response = await axios.get(
+        `${VITE_BACKEND_URL}/admin/marks?batch_id=${batchId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${loginState.token}`,
+          },
+        }
+      )
+      if (response.status === 200) {
+        setVerticalBarData(prepareBatchWise(response.data))
+      }
+    } catch (error) {
+      console.log(error) // for logging
+    }
+  }
+
+  // handle batch id change
+  const handleBatchChange = (event) => {
+    setSelectedBatchId(Number(event.target.value) || 0)
+  }
 
   // for students count and programs
   useEffect(() => {
@@ -132,8 +232,9 @@ export default function AdminDashboard() {
                   </Typography>
                   <Divider />
                   <Typography gutterBottom variant="h3" component="div">
-                    {/* Add teachers count over here */}
-                    .....
+                    {teacherCount !== undefined &&
+                      teacherCount !== null &&
+                      (teacherCount.total || "...")}
                   </Typography>
                 </Stack>
               </CardContent>
@@ -159,8 +260,8 @@ export default function AdminDashboard() {
         <Box>
           <Stack
             direction="row"
-            spacing={5}
-            justifyContent={"space-evenly"}
+            spacing={2}
+            justifyContent={"center"}
             textAlign="center"
           >
             <Card>
@@ -169,6 +270,38 @@ export default function AdminDashboard() {
                   Student Distribution
                 </Typography>
                 {doughnutData !== null && <Doughnut data={doughnutData} />}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent>
+                <Typography gutterBottom variant="h5" component="div">
+                  Performance Chart
+                </Typography>
+                <FormControl sx={{ m: 1, width: "35rem" }}>
+                  <InputLabel>Select Batch</InputLabel>
+                  <Select
+                    value={selectedBatchId ? selectedBatchId : 0}
+                    onChange={handleBatchChange}
+                    label="Select Batch"
+                  >
+                    <MenuItem key={0} value={0}>
+                      Select a batch
+                    </MenuItem>
+
+                    {batchList !== undefined &&
+                      batchList !== null &&
+                      batchList.map((item, index) => (
+                        <MenuItem key={index} value={item.id}>
+                          {item.year} {item.season}
+                        </MenuItem>
+                      ))}
+                  </Select>
+                </FormControl>
+                <Divider />
+                {verticalBarData !== null && (
+                  <Bar options={options} data={verticalBarData} />
+                )}
               </CardContent>
             </Card>
           </Stack>

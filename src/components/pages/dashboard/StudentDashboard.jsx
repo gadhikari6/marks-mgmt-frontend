@@ -227,7 +227,7 @@ export default function StudentDashboard() {
                   <Select
                     value={semesterId ? semesterId : 0}
                     onChange={handleSemesterChange}
-                    label="Semester Semester"
+                    label="Select Semester"
                   >
                     <MenuItem key={0} value={0}>
                       All Semesters
