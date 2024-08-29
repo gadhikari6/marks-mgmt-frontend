@@ -125,6 +125,41 @@ const Courses = () => {
   const [detailsDialog, setDetailsDialog] = useState(false)
   const [details, setDetails] = useState(null)
 
+  // set edit dialog toggle
+  const [editDialogToggle, setEditDialogToggle] = useState(false)
+
+  // used while assiging course to a program
+  const [assignProgram, setAssignProgram] = useState({
+    id: 0,
+    name: "Select a program",
+  })
+
+  const [assignSyllabus, setAssignSyllabus] = useState(0)
+  const [assignSemester, setAssignSemester] = useState(0)
+
+  // handle program change on course assignment form
+  const handleAssignProgramChangle = (event) => {
+    const programId = Number(event.target.value) || 0
+    if (programId === 0) {
+      setAssignProgram({ id: 0, name: "All Programs" })
+    } else {
+      const selected = programs.find((program) => program.id === programId)
+      setAssignProgram(selected)
+    }
+  }
+
+  // handle syllabus change on course assignment form
+  const handleAssignSyllabusChange = (event) => {
+    const id = Number(event.target.value) || 0
+    setAssignSyllabus(id)
+  }
+
+  // handle semester change on course assignment form
+  const handleAssignSemesterChange = (event) => {
+    const id = Number(event.target.value) || 0
+    setAssignSemester(id)
+  }
+
   // delete dialog
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
 
@@ -170,10 +205,10 @@ const Courses = () => {
             variant="outlined"
             color="secondary"
             startIcon={<EditIcon />}
-            // onClick={() => {
-            //   setCurrentStudent(params.row.id)
-            //   setOpenDetailsDialog(true)
-            // }}
+            onClick={() => {
+              setDetails(params.row)
+              setEditDialogToggle(true)
+            }}
           >
             Edit
           </Button>
@@ -325,7 +360,10 @@ const Courses = () => {
         })
         .then((response) => {
           if (response.status === 200) {
-            queryClient.invalidateQueries(["all-courses"])
+            fetchCourses(
+              selectedProgram?.id ? selectedProgram.id : 0,
+              selectedSyllabus ? selectedSyllabus : 0
+            )
             toast.success("Course deleted successfully!")
             // update courses list
           }
@@ -363,9 +401,97 @@ const Courses = () => {
     }
   }
 
-  // selecting multiple rows
-  const [multiRows, setMultiRows] = useState(null)
-  const [multiAddToggle, setMultiAddToggle] = useState(false)
+  // remove course association
+  const removeCourseAssign = async (
+    courseId,
+    programId,
+    syllabusId,
+    semesterId
+  ) => {
+    try {
+      if (
+        courseId === 0 ||
+        programId === 0 ||
+        syllabusId === 0 ||
+        semesterId === 0
+      ) {
+        return
+      }
+
+      const body = {
+        programId: programId,
+        syllabusId: syllabusId,
+        semesterId: semesterId,
+      }
+
+      console.log(body)
+      await axios
+        .delete(`${VITE_BACKEND_URL}/admin/courses/${courseId}/remove`, {
+          headers: { Authorization: `Bearer ${loginState.token}` },
+          data: body,
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            queryClient.invalidateQueries(["all-courses"])
+            toast.success("Course assignment removed successfully!")
+          }
+        })
+        .catch((err) => {
+          toast.warn("Something wrong went with request")
+          console.log(err) // remove later
+        })
+    } catch (err) {
+      toast.warn("Something wrong went with request")
+      console.log(err) // remove later
+    }
+  }
+
+  // add course association
+  const addCourseAssign = async (
+    courseId,
+    programId,
+    syllabusId,
+    semesterId
+  ) => {
+    try {
+      if (
+        courseId === 0 ||
+        programId === 0 ||
+        syllabusId === 0 ||
+        semesterId === 0
+      ) {
+        return
+      }
+      await axios
+        .post(
+          `${VITE_BACKEND_URL}/admin/courses/${courseId}/assign`,
+          {
+            programId: programId,
+            syllabusId: syllabusId,
+            semesterId: semesterId,
+          },
+          {
+            headers: { Authorization: `Bearer ${loginState.token}` },
+          }
+        )
+        .then((response) => {
+          if (response.status === 201) {
+            queryClient.invalidateQueries(["all-courses"])
+            toast.success("Course assignment successfull!")
+          }
+        })
+        .catch((err) => {
+          if (err.response.status === 409) {
+            toast.success("Conflict. Course is already assigned")
+          }
+          toast.warn("Something wrong went with request")
+          console.log(err.response) // remove later
+        })
+    } catch (err) {
+      toast.warn("Something wrong went with request")
+      console.log(err) // remove later
+    }
+  }
 
   return (
     <Box>
@@ -400,6 +526,7 @@ const Courses = () => {
           Manage Mark Weightages
         </Button>
 
+        {/* 
         <Button
           variant="contained"
           startIcon={<AddCircleIcon />}
@@ -415,7 +542,7 @@ const Courses = () => {
           }}
         >
           Add to Syllabus
-        </Button>
+        </Button> */}
 
         <Button
           variant="contained"
@@ -801,28 +928,56 @@ const Courses = () => {
               Mark Weightage: [ Theory : {details?.markWeightage?.theory} ,
               Practical: {details?.markWeightage?.practical} ]
             </Typography>
-            <Typography variant="body1">
-              Programs:
-              <ol>
-                {details.ProgramCourses?.map((item, index) => (
-                  <li key={index}>
-                    {" "}
-                    {item?.syllabus?.program?.name} ( {item?.syllabus?.name} )
-                  </li>
-                ))}
-              </ol>
-            </Typography>
-            <Typography variant="body1">
-              Teachers:
-              <ol>
-                {details.TeacherCourses?.map((item, index) => (
-                  <li key={index}>
-                    {" "}
-                    {item?.teacher?.user?.name} ( {item?.teacher?.user?.email} )
-                  </li>
-                ))}
-              </ol>
-            </Typography>
+
+            <Divider sx={{ m: 1 }}>Programs Associated</Divider>
+            <TableContainer component={Paper} sx={{ margin: 1 }}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Program</TableCell>
+                    <TableCell>Syllabus</TableCell>
+                    <TableCell>Semester</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {details.ProgramCourses?.map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell>
+                        {item?.syllabus?.program?.name || "..."}
+                      </TableCell>
+                      <TableCell> {item?.syllabus?.name || "..."}</TableCell>
+                      <TableCell> {item?.semesterId || "..."}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            <Divider sx={{ m: 1 }}>Teachers Associated</Divider>
+
+            <TableContainer component={Paper} sx={{ margin: 1 }}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Teacher Name</TableCell>
+                    <TableCell>Teacher Email</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {details.TeacherCourses?.map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell>
+                        {item?.teacher?.user?.name || "..."}
+                      </TableCell>
+                      <TableCell>
+                        {" "}
+                        {item?.teacher?.user?.email || "..."}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </DialogContent>
         )}
 
@@ -833,6 +988,202 @@ const Courses = () => {
             variant="outlined"
             onClick={() => {
               setDetailsDialog(false)
+            }}
+          >
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog for Edit */}
+      <Dialog
+        open={editDialogToggle}
+        onClose={() => {
+          setEditDialogToggle(false)
+        }}
+        maxWidth={"md"}
+        fullWidth
+      >
+        <DialogTitle>Edit Course</DialogTitle>
+        <Divider />
+        {details !== null && (
+          <DialogContent>
+            <Typography variant="body1">
+              Name: {details?.name}, Code: {details?.code}
+            </Typography>
+            <Typography variant="body1">
+              Id: {details?.id}, Credit: {details?.credit}
+            </Typography>
+            <Typography variant="body1">
+              Elective: {details?.elective ? "Yes" : "No"}, Project:{" "}
+              {details?.project ? "Yes" : "No"}
+            </Typography>
+            <Typography variant="body1">
+              Mark Weightage: [ Theory : {details?.markWeightage?.theory} ,
+              Practical: {details?.markWeightage?.practical} ]
+            </Typography>
+
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Program</TableCell>
+                    <TableCell>Syllabus</TableCell>
+                    <TableCell>Semester</TableCell>
+                    <TableCell>Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {details.ProgramCourses?.map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell>
+                        {item?.syllabus?.program?.name || "..."}
+                      </TableCell>
+                      <TableCell> {item?.syllabus?.name || "..."}</TableCell>
+                      <TableCell> {item?.semesterId || "..."}</TableCell>
+                      <TableCell>
+                        {" "}
+                        <Button
+                          variant="outlined"
+                          startIcon={<DeleteForeverIcon />}
+                          color="error"
+                          onClick={() => {
+                            removeCourseAssign(
+                              item.courseId,
+                              item.programId,
+                              item.syllabusId,
+                              item.semesterId
+                            )
+                            toast.info("Request has been submitted.", {
+                              autoClose: 300,
+                            })
+                          }}
+                        >
+                          Remove
+                        </Button>{" "}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            <Paper sx={{ padding: 1 }}>
+              <Typography variant="h6" sx={{ margin: 1 }}>
+                Assign Course
+              </Typography>
+              <Divider sx={{ margin: 1 }} />
+              <Stack direction={"row"} gap={1}>
+                <FormControl sx={{ m: 1, minWidth: "15rem" }}>
+                  <InputLabel>Select a Program</InputLabel>
+                  <Select
+                    value={assignProgram ? assignProgram.id : ""}
+                    onChange={handleAssignProgramChangle}
+                    label="Select a Program"
+                  >
+                    <MenuItem key={0} value={0}>
+                      Select a Program
+                    </MenuItem>
+                    {programs !== undefined &&
+                      programs !== null &&
+                      programs.map((program) => (
+                        <MenuItem key={program.id} value={program.id}>
+                          {program.name}
+                        </MenuItem>
+                      ))}
+                  </Select>
+                </FormControl>
+                <FormControl sx={{ m: 1, minWidth: "15rem" }}>
+                  <InputLabel>Select a Syllabus</InputLabel>
+                  <Select
+                    value={assignSyllabus ? assignSyllabus : ""}
+                    onChange={handleAssignSyllabusChange}
+                    label="Select a Syallbus"
+                  >
+                    <MenuItem key={0} value={0}>
+                      Select a Syallbus
+                    </MenuItem>
+                    {assignProgram !== undefined &&
+                      assignProgram !== null &&
+                      assignProgram.id > 0 &&
+                      assignProgram.Syllabus.map((item) => (
+                        <MenuItem key={item.id} value={item.id}>
+                          {item.name}
+                        </MenuItem>
+                      ))}
+                  </Select>
+                </FormControl>
+
+                <FormControl sx={{ m: 1, minWidth: "15rem" }}>
+                  <InputLabel>Select a Semester</InputLabel>
+                  <Select
+                    value={assignSemester ? assignSemester : ""}
+                    onChange={handleAssignSemesterChange}
+                    label="Select a Semester"
+                  >
+                    <MenuItem key={0} value={0}>
+                      Select a Semester
+                    </MenuItem>
+                    {assignProgram !== undefined &&
+                      assignProgram !== null &&
+                      assignProgram.id > 0 &&
+                      Array.from(
+                        Array(
+                          assignProgram.ProgramSemesters !== undefined
+                            ? assignProgram.ProgramSemesters[0].semesterId
+                            : 8
+                        ).keys()
+                      ).map((index) => (
+                        <MenuItem key={index + 1} value={index + 1}>
+                          {`${index + 1}${
+                            index === 0
+                              ? "st"
+                              : index === 1
+                              ? "nd"
+                              : index === 2
+                              ? "rd"
+                              : "th"
+                          } Semester`}
+                        </MenuItem>
+                      ))}
+                  </Select>
+                </FormControl>
+              </Stack>
+              <Stack direction="row" gap={1}>
+                <Button
+                  variant="contained"
+                  startIcon={<AddCircleIcon />}
+                  onClick={() => {
+                    addCourseAssign(
+                      details.id,
+                      assignProgram.id,
+                      assignSyllabus,
+                      assignSemester
+                    )
+                    toast.info("Request has been submitted. Please wait.", {
+                      autoClose: 300,
+                    })
+                  }}
+                  sx={{
+                    padding: 1,
+                    margin: 1,
+                    minWidth: "15rem",
+                  }}
+                >
+                  Assign Course
+                </Button>
+              </Stack>
+            </Paper>
+          </DialogContent>
+        )}
+
+        <Divider />
+        <DialogActions>
+          <Button
+            startIcon={<CloseIcon />}
+            variant="outlined"
+            onClick={() => {
+              setEditDialogToggle(false)
             }}
           >
             Close
