@@ -29,11 +29,17 @@ import EditIcon from "@mui/icons-material/Edit"
 import CloseIcon from "@mui/icons-material/Close"
 import AddIcon from "@mui/icons-material/Add"
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever"
+import AddCircleIcon from "@mui/icons-material/AddCircle"
+import { useFormik } from "formik"
+import * as yup from "yup"
+import { useContext } from "react"
+import { LoginContext } from "../../../../store/LoginProvider"
 
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 
 const ListUsers = () => {
-  // TODO: Add button and dialog add new user of type (admin, programHead, examHEad) : also to select pogram/faculty for them
+  const { loginState } = useContext(LoginContext)
+
   const { isLoading, error, data, token } = useRoleName()
 
   // state to fetch user based on role
@@ -53,6 +59,70 @@ const ListUsers = () => {
     email: "",
     name: "",
     role: [],
+  })
+
+  // add user formik object
+  const addUserFormik = useFormik({
+    initialValues: {
+      address: "",
+      contactNo: "",
+      email: "",
+      name: "",
+      password: "",
+      role: "",
+    },
+    onSubmit: async (values) => {
+      // create new user of type: admin and examhead
+      try {
+        console.log(values) // remove later
+        await axios
+          .post(
+            `${VITE_BACKEND_URL}/admin/users`,
+            { ...values },
+            {
+              headers: { Authorization: `Bearer ${loginState.token}` },
+            }
+          )
+          .then((response) => {
+            if (response.status === 201) {
+              addUserFormik.resetForm()
+              toast.success(`User was was deleted successfully.`)
+              fetchUserList()
+            }
+          })
+          .catch((err) => {
+            console.log(err) // for logging
+            if (err.response.status === 400 || err.response.status === 404) {
+              toast.warn("Please check values and try again.")
+            } else if (err.response.status === 409) {
+              toast.warn("User already exists.")
+            } else {
+              toast.warn("Something went wrong. Please try again later.")
+            }
+          })
+      } catch (err) {
+        console.log(err) // for logging
+        toast.warn("Something went wrong. Please try again later.")
+      }
+    },
+    validationSchema: yup.object({
+      name: yup.string().required("Name is required"),
+      email: yup
+        .string()
+        .email("Please enter a valid email address")
+        .required("Email is required"),
+      address: yup.string().required("Address is required"),
+      contactNo: yup
+        .string()
+        .min(6)
+        .max(20)
+        .required("Contact number is required"),
+      password: yup
+        .string()
+        .min(5, "The minimum length of Password is 5 characters")
+        .required("Password field is required"),
+      role: yup.string().required("Role field is required"),
+    }),
   })
 
   // for delete dialog
@@ -85,7 +155,7 @@ const ListUsers = () => {
     if (userID !== null) {
       setSelectedUser(filteredUsers.find((user) => user.id === userID))
     }
-  }, [filteredUsers])
+  }, [filteredUsers, userID])
 
   // role selection to fetch users based on role type
   const handleRoleSelect = (event) => {
@@ -141,6 +211,16 @@ const ListUsers = () => {
     }))
   }
   const handleDeleteUser = (userId) => {
+    // Find the user by ID from the filtered users list
+    const user = filteredUsers.find((user) => user.id === userId)
+    if (user) {
+      setEditUser({
+        address: user.address || "",
+        contactNo: user.contactNo || "",
+        email: user.email || "",
+        name: user.name || "",
+      })
+    }
     // Set the user ID to be deleted
     setUserID(userId)
     // Open the delete confirmation dialog
@@ -149,27 +229,32 @@ const ListUsers = () => {
 
   // delete a user
   const handleConfirmDelete = async () => {
-    await axios
-      .delete(`${VITE_BACKEND_URL}/admin/users/${userID}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        // Handle successful response
-        console.log("User deleted:", response.data)
-        setDeleteDialogOpen(false)
-        if (response.status === 200) {
-          toast.success("User deleted successfully")
-          fetchUserList()
-        } else {
+    try {
+      await axios
+        .delete(`${VITE_BACKEND_URL}/admin/users/${userID}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          // Handle successful response
+          console.log("User deleted:", response.data)
+          setDeleteDialogOpen(false)
+          if (response.status === 200) {
+            toast.success("User deleted successfully")
+            fetchUserList()
+          } else {
+            toast.error("Error deleting user")
+          }
+        })
+        .catch((error) => {
+          console.error("Error deleting user:", error)
           toast.error("Error deleting user")
-        }
-      })
-      .catch((error) => {
-        console.error("Error deleting user:", error)
-        toast.error("Error deleting user")
-      })
+        })
+    } catch (error) {
+      console.error("Error deleting user:", error)
+      toast.error("Error deleting user")
+    }
   }
 
   const handleCancelDelete = () => {
@@ -257,6 +342,9 @@ const ListUsers = () => {
     setAssignDialogOpen(false)
   }
 
+  // toggle for add user toggle
+  const [addUserToggle, setAddUserToggle] = useState(false)
+
   if (isLoading) {
     return <Typography>Loading ...</Typography>
   }
@@ -329,23 +417,40 @@ const ListUsers = () => {
 
   return (
     <Box>
-      <InputLabel>
-        Select type of users:
-        <Select
-          value={selectedRole}
-          onChange={handleRoleSelect}
-          sx={{ margin: "1rem" }}
-          displayEmpty
-        >
-          <MenuItem value="">ALL</MenuItem>
-          {data.roles.map((role) => (
-            <MenuItem key={role.id} value={role.id}>
-              {role.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </InputLabel>
+      <Stack direction="row" gap={1}>
+        <InputLabel>
+          Select type of users:{" "}
+          <Select
+            value={selectedRole}
+            onChange={handleRoleSelect}
+            sx={{ margin: "1rem" }}
+            displayEmpty
+          >
+            <MenuItem value="">All Users</MenuItem>
+            {data.roles.map((role) => (
+              <MenuItem key={role.id} value={role.id}>
+                {role.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </InputLabel>
 
+        <Button
+          variant="contained"
+          startIcon={<AddCircleIcon />}
+          onClick={() => {
+            setAddUserToggle(true)
+          }}
+          sx={{
+            alignSelf: "center",
+            padding: 1,
+            margin: 1,
+            marginLeft: "auto",
+          }}
+        >
+          Add Admin / ExamHead
+        </Button>
+      </Stack>
       <Box>
         {filteredUsers.length === 0 ? (
           <Typography>No users found </Typography>
@@ -364,6 +469,143 @@ const ListUsers = () => {
         )}
       </Box>
 
+      {/* Add user dialog */}
+      <Dialog
+        open={addUserToggle}
+        onClose={() => setAddUserToggle(false)}
+        maxWidth={"sm"}
+        fullWidth
+      >
+        <DialogTitle>Add new user</DialogTitle>
+        <Divider />
+        <DialogContent>
+          <form onSubmit={addUserFormik.handleSubmit}>
+            <Box display="flex" flexDirection="column" alignItems="center">
+              <TextField
+                id="name"
+                name="name"
+                label="Name *"
+                variant="outlined"
+                {...addUserFormik.getFieldProps("name")}
+                error={addUserFormik.touched.name && addUserFormik.errors.name}
+                helperText={
+                  addUserFormik.touched.name && addUserFormik.errors.name
+                }
+                fullWidth
+                margin="normal"
+              />
+
+              <TextField
+                id="email"
+                name="email"
+                label="Email *"
+                variant="outlined"
+                {...addUserFormik.getFieldProps("email")}
+                error={
+                  addUserFormik.touched.email && addUserFormik.errors.email
+                }
+                helperText={
+                  addUserFormik.touched.email && addUserFormik.errors.email
+                }
+                fullWidth
+                margin="normal"
+              />
+              <TextField
+                id="password"
+                name="password"
+                label="Password *"
+                type="password"
+                variant="outlined"
+                {...addUserFormik.getFieldProps("password")}
+                error={
+                  addUserFormik.touched.password &&
+                  addUserFormik.errors.password
+                }
+                helperText={
+                  addUserFormik.touched.password &&
+                  addUserFormik.errors.password
+                }
+                fullWidth
+                margin="normal"
+              />
+
+              <TextField
+                id="address"
+                name="address"
+                label="Address *"
+                variant="outlined"
+                {...addUserFormik.getFieldProps("address")}
+                error={
+                  addUserFormik.touched.address && addUserFormik.errors.address
+                }
+                helperText={
+                  addUserFormik.touched.address && addUserFormik.errors.address
+                }
+                fullWidth
+                margin="normal"
+              />
+
+              <TextField
+                id="contactNo"
+                name="contactNo"
+                label="Contact No. *"
+                variant="outlined"
+                {...addUserFormik.getFieldProps("contactNo")}
+                error={
+                  addUserFormik.touched.contactNo &&
+                  addUserFormik.errors.contactNo
+                }
+                helperText={
+                  addUserFormik.touched.contactNo &&
+                  addUserFormik.errors.contactNo
+                }
+                fullWidth
+                margin="normal"
+              />
+              <Select
+                id="role"
+                name="role"
+                label="Role"
+                labelId="role-lbl"
+                variant="outlined"
+                {...addUserFormik.getFieldProps("role")}
+                error={addUserFormik.touched.role && addUserFormik.errors.role}
+                helperText={
+                  addUserFormik.touched.role && addUserFormik.errors.role
+                }
+                fullWidth
+                margin="normal"
+              >
+                <MenuItem key={0} value="admin">
+                  Admin
+                </MenuItem>
+                <MenuItem key={1} value="examHead">
+                  ExamHead
+                </MenuItem>
+              </Select>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+                sx={{ marginTop: 2 }}
+              >
+                Add User
+              </Button>
+            </Box>
+          </form>
+        </DialogContent>
+        <Divider />
+        <DialogActions>
+          <Button
+            onClick={() => setAddUserToggle(false)}
+            startIcon={<CloseIcon />}
+            variant="outlined"
+          >
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
       {/* Edit dialog */}
       <Dialog
         open={editDialogOpen}
@@ -440,7 +682,36 @@ const ListUsers = () => {
         <DialogTitle>Delete User</DialogTitle>
         <Divider />
         <DialogContent>
-          <Typography variant="h6">
+          <Stack direction="column" gap={1}>
+            {selectedUser !== undefined && selectedUser !== null && (
+              <>
+                <Typography>Name: {selectedUser.name}</Typography>
+                <Typography>Email: {selectedUser.email}</Typography>
+
+                <Divider sx={{ marginTop: 1 }}>Assigned Roles</Divider>
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Role</TableCell>
+                        <TableCell>Description</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {selectedUser.UserRoles.map((role, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{role.role.name}</TableCell>
+                          <TableCell>{role.role.description}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </>
+            )}
+          </Stack>
+          <Divider />
+          <Typography variant="h5" sx={{ m: 1 }}>
             Are you sure you want to delete this user?
           </Typography>
         </DialogContent>
@@ -479,7 +750,7 @@ const ListUsers = () => {
         <Divider />
         <DialogContent>
           <Stack direction="column" gap={1}>
-            {selectedUser !== null && (
+            {selectedUser !== undefined && selectedUser !== null && (
               <>
                 <Typography>Name: {selectedUser.name}</Typography>
                 <Typography>Email: {selectedUser.email}</Typography>
