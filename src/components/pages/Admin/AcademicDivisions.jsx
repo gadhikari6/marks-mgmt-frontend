@@ -1119,7 +1119,7 @@ function Faculties() {
             <form onSubmit={deptFormik.handleSubmit}>
               <Stack direction="row" gap={1}>
                 <FormControl variant="outlined" fullWidth margin="normal">
-                  <InputLabel id="dept-label">Select Department*</InputLabel>
+                  <InputLabel id="dept-label">Select Faculty*</InputLabel>
                   <Select
                     id="dept"
                     required
