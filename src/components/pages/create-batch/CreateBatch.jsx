@@ -12,6 +12,9 @@ import {
   Select,
   Paper,
   Stack,
+  FormControlLabel,
+  Switch,
+  Checkbox,
 } from "@mui/material"
 import { useFormik } from "formik"
 import * as Yup from "yup"
@@ -25,6 +28,10 @@ import useCurrentBatch from "../../../hooks/count/useCurrentBatch"
 import useBatches from "../../../hooks/count/useBatches"
 import { useState } from "react"
 import { useEffect } from "react"
+import UpgradeIcon from "@mui/icons-material/Upgrade"
+import NoSimIcon from "@mui/icons-material/NoSim"
+import { NoSim } from "@mui/icons-material"
+import AddChartIcon from "@mui/icons-material/Addchart"
 
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 
@@ -46,11 +53,15 @@ const CreateBatch = () => {
   // target batch details
   const [targetBatchDetails, setTargetBatchDetails] = useState(null)
 
+  // marks toggle
+  const [marksToggle, setMarksToggle] = useState(false)
+
   // fetch current batch details
   useEffect(() => {
     if (currentBatch !== undefined && currentBatch !== null) {
       setYear(currentBatch.year)
       setSeason(currentBatch.season)
+      setMarksToggle(currentBatch.marksCollect)
     }
   }, [currentBatch])
 
@@ -75,6 +86,7 @@ const CreateBatch = () => {
     season: Yup.string().required(
       "Season (SPRING/FALL/WINTER/SUMMER) is required"
     ),
+    used: Yup.boolean().required(),
   })
 
   // formik
@@ -82,6 +94,7 @@ const CreateBatch = () => {
     initialValues: {
       year: "",
       season: "",
+      used: "",
     },
     validationSchema: validationSchema,
     onSubmit: async (values) => {
@@ -153,9 +166,49 @@ const CreateBatch = () => {
     }
   }
 
+  // method call for marks toggle
+  const marksToggleHandler = async (toggle = false) => {
+    try {
+      const url = `${VITE_BACKEND_URL}/admin/divisions/batch/current`
+      await axios
+        .put(
+          url,
+          { marksCollect: toggle },
+          {
+            headers: {
+              Authorization: `Bearer ${loginState.token}`,
+            },
+          }
+        )
+        .then(() => {
+          // for success
+          toast.success(
+            `Marks Collection ${toggle ? "enabled" : "disabled"} successfully.`
+          )
+          queryClient.invalidateQueries(["batches"])
+          queryClient.invalidateQueries(["current-batch"])
+        })
+        .catch((err) => {
+          console.log(err.response)
+          toast.warn(err.response.data.error.message)
+        })
+    } catch (err) {
+      console.log(err) // logging
+      toast.warn("Something went wrong. Please try again.")
+    }
+  }
+
   return (
     <Container maxWidth="lg">
-      <Paper elevation={2} sx={{ margin: 2, padding: 2, maxWidth: "50rem" }}>
+      <Paper
+        elevation={2}
+        sx={{
+          margin: 2,
+          padding: 2,
+          minWidth: "70rem",
+          justifyContent: "center",
+        }}
+      >
         <Typography variant="h4" gutterBottom>
           Add Batch
         </Typography>
@@ -197,13 +250,30 @@ const CreateBatch = () => {
                 <MenuItem value="SUMMER">SUMMER</MenuItem>
               </TextField>
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={10} sm={3}>
+              <TextField
+                id="used"
+                margin="normal"
+                defaultValue={formik.values.used}
+                error={formik.touched.used && formik.errors.used}
+                helperText={formik.touched.used && formik.errors.used}
+                {...formik.getFieldProps("used")}
+                label="Select Old or New"
+                select
+                fullWidth
+                required
+              >
+                <MenuItem value={false}>NEW</MenuItem>
+                <MenuItem value={true}>OLD</MenuItem>
+              </TextField>
+            </Grid>
+            <Grid item xs={12} sm={5}>
               <Button
                 fullWidth
                 variant="contained"
                 type="submit"
                 color="primary"
-                sx={{ maxWidth: "max-content", height: "40px" }}
+                sx={{ maxWidth: "20rem", height: "40px" }}
                 size="medium"
                 startIcon={<AddCircleOutlineIcon />}
               >
@@ -213,58 +283,108 @@ const CreateBatch = () => {
           </Grid>
         </form>
       </Paper>
-
-      <Paper elevation={2} sx={{ margin: 2, padding: 2, maxWidth: "50rem" }}>
-        <Typography variant="h4" gutterBottom>
-          Upgrade Batch (Semester)
-        </Typography>
-        <Divider m={1} />
-        <Stack direction="column" gap={2}>
-          <Typography variant="h5" gutterBottom m={1}>
-            Current batch: {year} {season}
+      <Stack direction={"row"} gap={1} justifyContent={"center"}>
+        {/* Marks enable or disable*/}
+        <Paper elevation={2} sx={{ margin: 2, padding: 2, minWidth: "35rem" }}>
+          <Typography variant="h4" gutterBottom>
+            Mark Collection For Batch
           </Typography>
+          <Divider m={1} />
+          <Stack direction="column" gap={1}>
+            <Typography variant="h5" gutterBottom m={1} p={1}>
+              Current batch: {year} {season}
+            </Typography>
+            <Typography variant="h5" p={1}>
+              Marks Collection :{" "}
+              <Typography variant="h5" color={"red"} component={"span"}>
+                {marksToggle ? "Enabled" : "Disabled"}
+              </Typography>
+            </Typography>
 
-          <FormControl sx={{ m: 1, minWidth: "15rem" }}>
-            <InputLabel label="batch-label">Target batch</InputLabel>
-            <Select
-              id="batch"
-              value={targetBatch ? targetBatch : ""}
-              onChange={targetBatchHandler}
-              label="Target batch"
+            <Divider />
+            <Stack direction="row" gap={2} m={1}>
+              <Button
+                startIcon={<AddChartIcon />}
+                variant="contained"
+                fullWidth
+                disabled={marksToggle}
+                onClick={() => {
+                  marksToggleHandler(true)
+                }}
+              >
+                Enable
+              </Button>
+              <Button
+                startIcon={<NoSim />}
+                variant="contained"
+                fullWidth
+                disabled={!marksToggle}
+                onClick={() => {
+                  marksToggleHandler(false)
+                }}
+              >
+                Disable
+              </Button>
+            </Stack>
+          </Stack>
+        </Paper>
+        {/* Batch upgrade form*/}
+        <Paper elevation={2} sx={{ margin: 2, padding: 2, minWidth: "35rem" }}>
+          <Typography variant="h4" gutterBottom>
+            Upgrade Batch (Semester)
+          </Typography>
+          <Divider m={1} />
+          <Stack direction="column" gap={2}>
+            <Typography variant="h5" gutterBottom m={1}>
+              Current batch: {year} {season}
+            </Typography>
+
+            <FormControl sx={{ m: 1, minWidth: "15rem" }}>
+              <InputLabel label="batch-label">Target batch</InputLabel>
+              <Select
+                id="batch"
+                value={targetBatch ? targetBatch : ""}
+                onChange={targetBatchHandler}
+                label="Target batch"
+              >
+                <MenuItem key={0} value={0}>
+                  Select a target batch
+                </MenuItem>
+
+                {targetBatchDetails !== undefined &&
+                  targetBatchDetails !== null &&
+                  targetBatchDetails.map((batch) => (
+                    <MenuItem key={batch.id} value={batch.id}>
+                      {batch.year} {batch.season}
+                    </MenuItem>
+                  ))}
+              </Select>
+            </FormControl>
+
+            <Button
+              variant="contained"
+              startIcon={<UpgradeIcon />}
+              onClick={async () => {
+                if (targetBatch <= 0) {
+                  toast.warn("Please set a proper target batch")
+                  return
+                }
+
+                toast.info(
+                  "Request has been submitted. Might take some time.",
+                  {
+                    autoClose: 400,
+                  }
+                )
+
+                upgradeBatch()
+              }}
             >
-              <MenuItem key={0} value={0}>
-                Select a target batch
-              </MenuItem>
-
-              {targetBatchDetails !== undefined &&
-                targetBatchDetails !== null &&
-                targetBatchDetails.map((batch) => (
-                  <MenuItem key={batch.id} value={batch.id}>
-                    {batch.year} {batch.season}
-                  </MenuItem>
-                ))}
-            </Select>
-          </FormControl>
-
-          <Button
-            variant="contained"
-            onClick={async () => {
-              if (targetBatch <= 0) {
-                toast.warn("Please set a proper target batch")
-                return
-              }
-
-              toast.info("Request has been submitted. Might take some time.", {
-                autoClose: 400,
-              })
-
-              upgradeBatch()
-            }}
-          >
-            Upgrade Batch
-          </Button>
-        </Stack>
-      </Paper>
+              Upgrade Batch
+            </Button>
+          </Stack>
+        </Paper>
+      </Stack>
     </Container>
   )
 }
