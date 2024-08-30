@@ -476,6 +476,10 @@ const Courses = () => {
         )
         .then((response) => {
           if (response.status === 201) {
+            fetchCourses(
+              selectedProgram?.id ? selectedProgram.id : 0,
+              selectedSyllabus ? selectedSyllabus : 0
+            )
             queryClient.invalidateQueries(["all-courses"])
             toast.success("Course assignment successfull!")
           }
@@ -890,7 +894,7 @@ const Courses = () => {
             rows={rows}
             columns={columns}
             pageSize={100}
-            pageSizeOptions={[5, 10, 20, 25, 50]}
+            pageSizeOptions={[5, 10, 20, 25, 50, 100]}
             rowsPerPageOptions={[100]}
             resizable={true}
             components={{
