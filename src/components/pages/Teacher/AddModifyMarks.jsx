@@ -26,6 +26,7 @@ import { LoginContext } from "../../../store/LoginProvider"
 import EditIcon from "@mui/icons-material/Edit"
 import SaveIcon from "@mui/icons-material/Save"
 import CancelIcon from "@mui/icons-material/Close"
+import useCurrentBatch from "../../../hooks/count/useCurrentBatch"
 
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 
@@ -33,6 +34,18 @@ const AddModifyMarks = () => {
   const { isLoading, error, data: teacherCourses } = useTeacherCourses()
   const { loginState } = useContext(LoginContext)
   const token = loginState.token
+
+  const [marksEditToggle, setMarksEditToggle] = useState(false)
+
+  // list of current
+  const { data: currentBatch } = useCurrentBatch()
+
+  // change marks toggle
+  useEffect(() => {
+    if (currentBatch !== undefined && currentBatch !== null) {
+      setMarksEditToggle(Boolean(currentBatch.marksCollect))
+    }
+  }, [currentBatch])
 
   // course selected from dropdown
   const [selectedCourse, setSelectedCourse] = useState(null)
@@ -277,6 +290,7 @@ const AddModifyMarks = () => {
         <Button
           variant="outlined"
           startIcon={<EditIcon />}
+          disabled={!marksEditToggle}
           onClick={() => {
             setSelectedRow(params.row)
             setSingleEdit(true)
@@ -386,14 +400,19 @@ const AddModifyMarks = () => {
               ))}
           </Select>
         </FormControl>
-
+        <Typography variant="body1" m={1}>
+          Marks Collection:
+          <Typography component={"span"} color="red">
+            {marksEditToggle ? " Enabled" : " Disabled"}
+          </Typography>
+        </Typography>
         <Button
           variant="contained"
           color="primary"
           onClick={() => {
             setIsBulkEditing(true)
           }}
-          disabled={isBulkEditing || loading}
+          disabled={!marksEditToggle || !(selectedCourse?.courseId > 0)}
           sx={{
             justifySelf: "center",
             alignSelf: "end",
