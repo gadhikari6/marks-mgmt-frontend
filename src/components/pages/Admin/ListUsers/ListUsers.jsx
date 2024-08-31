@@ -58,6 +58,7 @@ const ListUsers = () => {
     contactNo: "",
     email: "",
     name: "",
+    password: "",
     role: [],
   })
 
@@ -606,7 +607,7 @@ const ListUsers = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      {/* Edit dialog */}
+      {/* Edit user profile details dialog */}
       <Dialog
         open={editDialogOpen}
         onClose={() => setEditDialogOpen(false)}
@@ -630,6 +631,17 @@ const ListUsers = () => {
             onChange={(e) => setEditUser({ ...editUser, name: e.target.value })}
             fullWidth
             margin="normal"
+          />
+
+          <TextField
+            label="Password"
+            value={editUser.password}
+            onChange={(e) =>
+              setEditUser({ ...editUser, password: e.target.value })
+            }
+            fullWidth
+            margin="normal"
+            type="password"
           />
           <Stack direction="row" gap={2}>
             <TextField
