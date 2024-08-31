@@ -15,7 +15,6 @@ import LoginForm from "./components/pages/Login/LoginForm"
 import ProtectedRoute from "./components/ProtectedRoute"
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 const tokenValidationUrl = VITE_BACKEND_URL + "/tokens/validate"
-import Demo from "./components/pages/Home/Demo"
 import { Link, Route } from "react-router-dom"
 import ResponsiveDrawer from "./components/sidebar/ResponsiveDrawer"
 import Profile from "./components/pages/Profile/Profile"
@@ -33,6 +32,7 @@ import AddModifyMarks from "./components/pages/Teacher/AddModifyMarks"
 import AcademicDivisions from "./components/pages/Admin/AcademicDivisions"
 import CreateBatch from "./components/pages/create-batch/CreateBatch"
 import AdminMarks from "./components/pages/Admin/marks/AdminMarks"
+import { useNavigate } from "react-router-dom"
 
 export default function App() {
   const { loginState, dispatchLoginState } = useContext(LoginContext)
@@ -89,6 +89,18 @@ export default function App() {
       dispatchLoginState({ type: "LOGOUT" })
     }
   }
+
+  // during page load or refresh
+  // check for saved page location
+  const navigate = useNavigate()
+  useEffect(() => {
+    // fetch path from session storage
+    const pathFromSession = sessionStorage.getItem("path")
+    // redirect to the last page
+    if (pathFromSession !== undefined && pathFromSession !== null) {
+      navigate(pathFromSession)
+    }
+  }, [])
 
   useEffect(() => {
     // if not logged in and there is a token in local storage
