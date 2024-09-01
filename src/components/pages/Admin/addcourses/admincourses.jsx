@@ -42,6 +42,7 @@ import ManageSearchIcon from "@mui/icons-material/ManageSearch"
 import usePrograms from "../../../../hooks/count/usePrograms"
 import GetAppIcon from "@mui/icons-material/GetApp"
 import ClearIcon from "@mui/icons-material/Clear"
+import ImportDialog from "../../ImportDialog/ImportDialog"
 
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 
@@ -497,6 +498,46 @@ const Courses = () => {
     }
   }
 
+  // import dialog toggle
+  const [importToggle, setImportToggle] = useState(false)
+
+  // method to upload csv
+  const uploadCourseCSV = async (file) => {
+    try {
+      await axios
+        .post(
+          `${VITE_BACKEND_URL}/admin/courses/import`,
+          {
+            file: file,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${loginState.token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        )
+        .then((response) => {
+          if (response.status === 201) {
+            const valid = response.data?.validQueries?.length || 0
+            const invalid = response.data?.invalidQueries?.length || 0
+
+            toast.success(
+              `Request resulted in ${valid} valid queries and ${invalid} invalid queries.`
+            )
+            queryClient.invalidateQueries(["all-courses"])
+          }
+        })
+        .catch((err) => {
+          console.log(err.response) // remove later
+          toast.warn(err.response.data.error.message)
+        })
+    } catch (err) {
+      toast.warn("Something wrong went with request")
+      console.log(err) // remove later
+    }
+  }
+
   return (
     <Box>
       <Stack direction={"row"} gap={2}>
@@ -552,7 +593,7 @@ const Courses = () => {
           variant="contained"
           startIcon={<AddCircleIcon />}
           onClick={() => {
-            // setAddDialog(true)
+            setImportToggle(true)
           }}
           sx={{
             alignSelf: "center",
@@ -1279,6 +1320,16 @@ const Courses = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <ImportDialog
+        openToggle={importToggle}
+        closeToggleFunc={() => {
+          setImportToggle(false)
+        }}
+        dialogTitle={"Courses"}
+        downloadLink={"/courses-sample.csv"}
+        uploadFunc={uploadCourseCSV}
+      />
     </Box>
   )
 }
