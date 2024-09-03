@@ -42,6 +42,7 @@ import { NoSim } from "@mui/icons-material"
 import AddChartIcon from "@mui/icons-material/Addchart"
 import ManageSearchIcon from "@mui/icons-material/ManageSearch"
 import CloseIcon from "@mui/icons-material/Close"
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever"
 
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 
@@ -211,6 +212,29 @@ const CreateBatch = () => {
   // batch dialog toggle
   const [batchDialog, setBatchDialog] = useState(false)
 
+  // delete course method call
+  const deleteBatch = async (batchId) => {
+    try {
+      await axios
+        .delete(`${VITE_BACKEND_URL}/admin/divisions/batch/${batchId}`, {
+          headers: { Authorization: `Bearer ${loginState.token}` },
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            queryClient.invalidateQueries(["batches"])
+            toast.success("Batch was deleted successfully!")
+            // update courses list
+          }
+        })
+        .catch((err) => {
+          toast.warn("Something wrong went with request")
+          console.log(err) // remove later
+        })
+    } catch (err) {
+      toast.warn("Something wrong went with request")
+      console.log(err) // remove later
+    }
+  }
   return (
     <Container maxWidth="lg">
       <Paper
@@ -442,6 +466,9 @@ const CreateBatch = () => {
                 <TableCell>
                   <Typography>Status</Typography>
                 </TableCell>
+                <TableCell>
+                  <Typography>Action</Typography>
+                </TableCell>
               </TableRow>
             </TableHead>
 
@@ -461,6 +488,27 @@ const CreateBatch = () => {
                   <TableCell>
                     <Typography>
                       {batch.current ? "CURRENT" : batch.used ? "OLD" : "NEW"}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography>
+                      {batch.current ? (
+                        "-"
+                      ) : (
+                        <Button
+                          variant="outlined"
+                          sx={{ color: "red" }}
+                          startIcon={<DeleteForeverIcon />}
+                          onClick={() => {
+                            deleteBatch(batch.id)
+                            toast.info("Request was submitted. Please wait.", {
+                              autoClose: 300,
+                            })
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      )}
                     </Typography>
                   </TableCell>
                 </TableRow>
