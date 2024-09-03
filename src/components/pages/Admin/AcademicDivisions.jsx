@@ -159,6 +159,9 @@ function Programs() {
           <Typography sx={{ fontSize: 12 }}>
             Faculty: {params.row.department.faculty.name || ""}
           </Typography>
+          <Typography sx={{ fontSize: 12 }}>
+            ProgramId: {params.row.id || ""}
+          </Typography>
         </CardContent>
       ),
     },
@@ -170,9 +173,14 @@ function Programs() {
         <CardContent sx={{ p: 1 }}>
           <Table>
             <TableBody>
-              {params.row.Syllabus.map((syllabus) => (
-                <TableRow key={syllabus.id}>
-                  <TableCell>{syllabus.name}</TableCell>
+              {params.row.Syllabus.map((syllabus, index) => (
+                <TableRow key={index}>
+                  <TableCell>
+                    {syllabus.name}
+                    <Typography sx={{ fontSize: 12 }}>
+                      SyllabusId: {syllabus.id || ""}
+                    </Typography>
+                  </TableCell>
                   <TableCell>
                     <Button
                       startIcon={<DeleteForever />}

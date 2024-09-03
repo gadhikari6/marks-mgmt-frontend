@@ -65,6 +65,9 @@ export default function ImportDialog({
             Click here
           </a>
         </Typography>
+        <Typography component={"div"} variant="caption">
+          Note: Please donot upload more than a thousand records at once.
+        </Typography>
         <form
           onSubmit={(e) => {
             e.preventDefault()
