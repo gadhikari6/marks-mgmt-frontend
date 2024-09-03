@@ -32,14 +32,18 @@ export default function AdminDrawer() {
             icon: <ChromeReaderModeIcon />,
             link: "/adminmarks",
           },
-          { text: "Add Courses", icon: <BookmarkIcon />, link: "/addcourses" },
+          {
+            text: "Manage Courses",
+            icon: <BookmarkIcon />,
+            link: "/addcourses",
+          },
           {
             text: "Academic Divisions",
             icon: <SchoolIcon />,
             link: "/divisions",
           },
           {
-            text: "Create Batch",
+            text: "Manage Batch",
             icon: <AddCircleOutlineIcon />,
             link: "/createbatch",
           },

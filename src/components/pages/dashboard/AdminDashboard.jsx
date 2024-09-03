@@ -193,7 +193,8 @@ export default function AdminDashboard() {
                 </Stack>
               </CardContent>
             </Card>
-            <Card>
+            {/* Active student card */}
+            {/* <Card>
               <CardContent>
                 <Stack direction="column" spacing={2} textAlign="center">
                   <Typography gutterBottom variant="h4" component="div">
@@ -205,7 +206,7 @@ export default function AdminDashboard() {
                   </Typography>
                 </Stack>
               </CardContent>
-            </Card>
+            </Card> */}
             <Card>
               <CardContent>
                 <Stack
