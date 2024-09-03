@@ -32,6 +32,8 @@ import { toast } from "react-toastify"
 import * as yup from "yup"
 import { useFormik } from "formik"
 import useYearJoined from "../../../../hooks/count/useYearJoined"
+import ImportDialog from "../../ImportDialog/ImportDialog"
+import { QueryClient } from "react-query"
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // Fetching from .env file
 
 export default function ViewStudents() {
@@ -281,6 +283,51 @@ export default function ViewStudents() {
     }
   }
 
+  // toggle for import dialog
+  const [importDialog, setImportDialog] = useState(false)
+
+  const queryClient = new QueryClient()
+
+  // method to upload csv of student bulk data
+  const uploadStudentCSV = async (file) => {
+    try {
+      await axios
+        .post(
+          `${VITE_BACKEND_URL}/admin/students/import`,
+          {
+            file: file,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${loginState.token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        )
+        .then((response) => {
+          if (response.status === 201) {
+            const valid = response.data?.validQueries?.length || 0
+            const invalid = response.data?.invalidQueries?.length || 0
+
+            toast.success(
+              `Request resulted in ${valid} valid queries and ${invalid} invalid queries.`
+            )
+            fetchStudentList() // fetch student list
+            queryClient.invalidateQueries(["students", "student-count"]) // invalidate other related queries
+          }
+        })
+        .catch((err) => {
+          console.log(err.response) // remove later
+          toast.warn(err.response.data.error.message)
+          toast.warn(
+            "Did you provide right csv fields? Use the sample csv as guide."
+          )
+        })
+    } catch (err) {
+      toast.warn("Something wrong went with request")
+      console.log(err) // remove later
+    }
+  }
   return (
     <Box
       fontFamily={{
@@ -389,6 +436,20 @@ export default function ViewStudents() {
           }}
         >
           Add Student
+        </Button>
+        <Button
+          variant="contained"
+          startIcon={<AddCircleIcon />}
+          onClick={() => {
+            setImportDialog(true)
+          }}
+          sx={{
+            alignSelf: "center",
+            padding: 1,
+            margin: 1,
+          }}
+        >
+          Import Students
         </Button>
       </Box>
 
@@ -741,6 +802,18 @@ export default function ViewStudents() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/*  Import dialog */}
+      <ImportDialog
+        openToggle={importDialog}
+        closeToggleFunc={() => {
+          setImportDialog(false)
+        }}
+        dialogTitle={"Students"}
+        downloadLink={"/student-sample.csv"}
+        uploadFunc={uploadStudentCSV}
+        extraMsg="The initial password of a student will be the value placed in dob field. A student can change it later."
+      />
     </Box>
   )
 }

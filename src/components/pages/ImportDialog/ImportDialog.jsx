@@ -21,6 +21,7 @@ export default function ImportDialog({
   dialogTitle,
   downloadLink,
   uploadFunc,
+  extraMsg = "",
 }) {
   const [selectedFile, setSelectedFile] = useState(null)
   const [isSelected, setIsSelected] = useState(false)
@@ -68,6 +69,7 @@ export default function ImportDialog({
         <Typography component={"div"} variant="caption">
           Note: Please donot upload more than a thousand records at once.
         </Typography>
+
         <form
           onSubmit={(e) => {
             e.preventDefault()
@@ -97,6 +99,10 @@ export default function ImportDialog({
             </Button>
           </Stack>
         </form>
+
+        <Typography component={"div"} variant="caption" mt={1}>
+          {extraMsg}
+        </Typography>
       </DialogContent>
       <Divider />
       <DialogActions>

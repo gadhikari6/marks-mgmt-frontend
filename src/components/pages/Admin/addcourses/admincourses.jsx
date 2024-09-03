@@ -531,6 +531,9 @@ const Courses = () => {
         .catch((err) => {
           console.log(err.response) // remove later
           toast.warn(err.response.data.error.message)
+          toast.warn(
+            "Did you provide right csv fields? Use the sample csv as guide."
+          )
         })
     } catch (err) {
       toast.warn("Something wrong went with request")
