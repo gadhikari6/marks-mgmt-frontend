@@ -15,6 +15,14 @@ import {
   FormControlLabel,
   Switch,
   Checkbox,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
 } from "@mui/material"
 import { useFormik } from "formik"
 import * as Yup from "yup"
@@ -32,6 +40,8 @@ import UpgradeIcon from "@mui/icons-material/Upgrade"
 import NoSimIcon from "@mui/icons-material/NoSim"
 import { NoSim } from "@mui/icons-material"
 import AddChartIcon from "@mui/icons-material/Addchart"
+import ManageSearchIcon from "@mui/icons-material/ManageSearch"
+import CloseIcon from "@mui/icons-material/Close"
 
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 
@@ -198,6 +208,9 @@ const CreateBatch = () => {
     }
   }
 
+  // batch dialog toggle
+  const [batchDialog, setBatchDialog] = useState(false)
+
   return (
     <Container maxWidth="lg">
       <Paper
@@ -209,9 +222,25 @@ const CreateBatch = () => {
           justifyContent: "center",
         }}
       >
-        <Typography variant="h4" gutterBottom>
-          Add Batch
-        </Typography>
+        <Stack direction="row">
+          <Typography variant="h4" gutterBottom>
+            Add Batch
+          </Typography>
+          <Button
+            variant="contained"
+            startIcon={<ManageSearchIcon />}
+            onClick={() => {
+              setBatchDialog(true)
+            }}
+            sx={{
+              alignSelf: "center",
+
+              marginLeft: "auto",
+            }}
+          >
+            View All Batches
+          </Button>
+        </Stack>
         <Divider m={1} p={1} />
         <form onSubmit={formik.handleSubmit}>
           <Grid container spacing={2} alignItems="center">
@@ -385,6 +414,73 @@ const CreateBatch = () => {
           </Stack>
         </Paper>
       </Stack>
+
+      <Dialog
+        open={batchDialog}
+        onClose={() => {
+          setBatchDialog(false)
+        }}
+        maxWidth={"sm"}
+        fullWidth
+      >
+        <DialogTitle>List of all batches</DialogTitle>
+        <Divider />
+
+        <DialogContent>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  <Typography>Batch Id</Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography>Year</Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography>Season</Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography>Status</Typography>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+
+            {allBatches !== undefined &&
+              allBatches !== null &&
+              allBatches.map((batch, index) => (
+                <TableRow key={index}>
+                  <TableCell>
+                    <Typography>{batch.id}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography>{batch.year} </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography>{batch.season}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography>
+                      {batch.current ? "CURRENT" : batch.used ? "OLD" : "NEW"}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ))}
+          </Table>
+        </DialogContent>
+        <Divider />
+
+        <DialogActions>
+          <Button
+            variant="outlined"
+            startIcon={<CloseIcon />}
+            onClick={() => {
+              setBatchDialog(false)
+            }}
+          >
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   )
 }
