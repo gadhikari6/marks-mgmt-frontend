@@ -5,7 +5,6 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
-  Input,
   Stack,
   TextField,
   Typography,
@@ -59,7 +58,7 @@ export default function ImportDialog({
           Download sample:{" "}
           <a
             href={downloadLink}
-            download={"courses-sample.csv"}
+            download={downloadLink.split("/")[1] || "sample.csv"}
             target="_blank"
             rel="noreferrer"
           >

@@ -22,6 +22,9 @@ import { toast } from "react-toastify"
 import { useContext } from "react"
 import { LoginContext } from "../../../../store/LoginProvider"
 import { useEffect } from "react"
+import AddCircleIcon from "@mui/icons-material/AddCircle"
+import ImportDialog from "../../ImportDialog/ImportDialog"
+
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 
 export default function AdminMarks() {
@@ -242,6 +245,48 @@ export default function AdminMarks() {
     },
   ]
 
+  // toggle to open dialog
+  const [importToggle, setImportToggle] = useState(false)
+
+  // method to upload csv
+  const uploadMarksCSV = async (file) => {
+    try {
+      await axios
+        .post(
+          `${VITE_BACKEND_URL}/admin/marks/import`,
+          {
+            file: file,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${loginState.token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        )
+        .then((response) => {
+          if (response.status === 201) {
+            const valid = response.data?.validQueries?.length || 0
+            const invalid = response.data?.invalidQueries?.length || 0
+
+            toast.success(
+              `Request resulted in ${valid} valid queries and ${invalid} invalid queries.`
+            )
+            fetchMarks(batchId || 0, year || 0, programId || 0, semester || 0)
+          }
+        })
+        .catch((err) => {
+          console.log(err.response) // remove later
+          toast.warn(err.response.data.error.message)
+          toast.warn(
+            "Did you provide right csv fields? Use the sample csv as guide."
+          )
+        })
+    } catch (err) {
+      toast.warn("Something wrong went with request")
+      console.log(err) // remove later
+    }
+  }
   return (
     <Box
       fontFamily={{
@@ -320,6 +365,23 @@ export default function AdminMarks() {
             }}
           >
             Fetch Marks
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<AddCircleIcon />}
+            onClick={() => {
+              setImportToggle(true)
+            }}
+            sx={{
+              alignSelf: "center",
+              padding: 1,
+              paddingLeft: 2,
+              paddingRight: 2,
+              margin: 1,
+              marginLeft: "auto",
+            }}
+          >
+            Import Marks
           </Button>
         </Stack>
         <Stack direction="row" gap={3}>
@@ -402,6 +464,7 @@ export default function AdminMarks() {
         </Stack>
       </Stack>
 
+      {/* Datagrid to show marks*/}
       <DataGrid
         sx={{ marginTop: 1 }}
         checkboxSelection
@@ -423,6 +486,17 @@ export default function AdminMarks() {
         }}
         editMarksFunc={updateMarks}
         selectedRow={rowForEdit}
+      />
+
+      <ImportDialog
+        openToggle={importToggle}
+        closeToggleFunc={() => {
+          setImportToggle(false)
+        }}
+        dialogTitle={"Student Marks"}
+        downloadLink={"/student-marks-sample.csv"}
+        uploadFunc={uploadMarksCSV}
+        extraMsg="Please be careful with course name. It is case-sensitive."
       />
     </Box>
   )
