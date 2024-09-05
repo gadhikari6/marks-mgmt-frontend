@@ -27,6 +27,7 @@ export default function StudentDrawer() {
             button
             component={Link}
             to={item.link}
+            selected={location.pathname === item.link ? true : false}
           >
             <ListItemButton>
               <ListItemIcon>{item.icon}</ListItemIcon>

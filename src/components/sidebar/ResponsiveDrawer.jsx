@@ -22,7 +22,6 @@ import AdminDrawer from "./AdminDrawer"
 import ExamHeadDrawer from "./ExamHeadDrawer"
 import TeacherDrawer from "./TeacherDrawer"
 import SettingsIcon from "@mui/icons-material/Settings"
-
 import Select from "@mui/material/Select"
 import MenuItem from "@mui/material/MenuItem"
 import { useState } from "react"
@@ -40,6 +39,7 @@ import { Divider } from "@mui/material"
 import useProfile from "../../hooks/useProfile"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import AccountBoxIcon from "@mui/icons-material/AccountBox"
+import { useLocation } from "react-router-dom"
 
 const drawerWidth = 240
 
@@ -109,6 +109,8 @@ function ResponsiveDrawer(props) {
   // what does this do ?? need comment here!
   const container =
     window !== undefined ? () => window().document.body : undefined
+
+  const location = useLocation() // location
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -234,6 +236,7 @@ function ResponsiveDrawer(props) {
             component={Link}
             button
             to={"/profile"}
+            selected={location.pathname === "/profile" ? true : false}
           >
             <ListItemButton>
               <ListItemIcon>
@@ -249,6 +252,7 @@ function ResponsiveDrawer(props) {
             component={Link}
             button
             to={"/settings"}
+            selected={location.pathname === "/settings" ? true : false}
           >
             <ListItemButton>
               <ListItemIcon>
