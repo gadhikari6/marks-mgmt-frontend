@@ -101,7 +101,7 @@ const ListUsers = () => {
           .then((response) => {
             if (response.status === 201) {
               addUserFormik.resetForm()
-              toast.success(`User was was deleted successfully.`)
+              toast.success(`User was added successfully.`)
               fetchUserList()
             }
           })
