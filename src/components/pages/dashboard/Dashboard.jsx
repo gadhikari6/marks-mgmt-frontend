@@ -13,7 +13,8 @@ export default function Dashboard() {
     <>
       {loginState.roles.currentRole === "admin" && <AdminDashboard />}
       {loginState.roles.currentRole === "student" && <StudentDashboard />}
-      {loginState.roles.currentRole === "teacher" && <TeacherDashboard />}
+      {loginState.roles.currentRole === "teacher" && <TeacherDashboard />}{" "}
+      {loginState.roles.currentRole === "examHead" && <AdminDashboard />}
     </>
   )
 }

@@ -40,6 +40,20 @@ const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env 
 const ListUsers = () => {
   const { loginState } = useContext(LoginContext)
 
+  // check if user is admin or not
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  // check for role change
+  useEffect(() => {
+    const role = loginState.roles.currentRole
+    if (role === undefined) return
+    if (role === "examHead") {
+      setIsAdmin(false)
+    } else if (role === "admin") {
+      setIsAdmin(true)
+    }
+  }, [loginState])
+
   const { isLoading, error, data, token } = useRoleName()
 
   // state to fetch user based on role
@@ -375,6 +389,7 @@ const ListUsers = () => {
               marginRight: "8px",
             }}
             startIcon={<EditIcon />}
+            disabled={!isAdmin}
             onClick={() => handleEditUser(params.row.id)}
           >
             Edit
@@ -383,10 +398,10 @@ const ListUsers = () => {
             variant="contained"
             style={{
               marginRight: "8px",
-              color: "white",
-              backgroundColor: "red",
             }}
+            color="error"
             startIcon={<DeleteIcon />}
+            disabled={!isAdmin}
             onClick={() => handleDeleteUser(params.row.id)}
           >
             Delete
@@ -394,10 +409,9 @@ const ListUsers = () => {
           {params.row.roles.includes("student") ? null : (
             <Button
               variant="contained"
+              color="success"
               style={{
                 marginRight: "8px",
-                color: "white",
-                backgroundColor: "green",
               }}
               startIcon={<EditIcon />}
               onClick={() => {
@@ -407,6 +421,7 @@ const ListUsers = () => {
                 )
                 setSelectedUser(user)
               }}
+              disabled={!isAdmin}
             >
               Role
             </Button>
@@ -448,6 +463,7 @@ const ListUsers = () => {
             margin: 1,
             marginLeft: "auto",
           }}
+          disabled={!isAdmin}
         >
           Add Admin / ExamHead
         </Button>
