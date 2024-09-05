@@ -39,17 +39,27 @@ const validationSchema = yup.object({
   programId: yup.number().positive().required("Program is required"),
   syllabusId: yup.number().positive().required("Syllabus is required"),
   semester: yup.number().positive().required("Semester is required"),
-
   puRegNo: yup
     .string()
-    .min(6)
+    .min(8)
     .max(20)
     .required("Registration number is required"),
-
   password: yup
     .string()
     .min(5, "The minimum length of Password is 5 characters")
     .required("Password field is required"),
+
+  yearJoined: yup
+    .number()
+    .positive()
+    .min(1997)
+    .max(new Date().getFullYear())
+    .required("Year joined is required"),
+  dateOfBirth: yup
+    .string()
+    .min(10)
+    .max(10)
+    .required("Date of birth field is required"),
 })
 const AddStudentForm = () => {
   const { data } = usePrograms()
@@ -126,7 +136,7 @@ const AddStudentForm = () => {
       puRegNo: puRegNo,
       contactNo: String(contactNo),
       symbolNo: String(symbolNo),
-      yearJoined: yearJoined,
+      yearJoined: Number(yearJoined),
       dateOfBirth: dateOfBirth,
     }
 
@@ -364,7 +374,7 @@ const AddStudentForm = () => {
               <TextField
                 id="dateOfBirth"
                 name="dateOfBirth"
-                label="Date of Birth *"
+                label="Date of Birth (YYYY-MM-DD)*"
                 variant="outlined"
                 {...formik.getFieldProps("dateOfBirth")}
                 error={formik.touched.dateOfBirth && formik.errors.dateOfBirth}
