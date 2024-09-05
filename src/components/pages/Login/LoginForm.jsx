@@ -15,12 +15,17 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  Stack,
+  Divider,
 } from "@mui/material"
 import { useContext } from "react"
 import { LoginContext } from "../../../store/LoginProvider"
 import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
+import LoginIcon from "@mui/icons-material/Login"
+import CloseIcon from "@mui/icons-material/Close"
+import LiveHelpIcon from "@mui/icons-material/LiveHelp"
 
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 
@@ -41,6 +46,14 @@ const LoginForm = () => {
     email: "",
     password: "",
   }
+
+  const [loginError, setLoginError] = useState("")
+  const [loginSuccess, setLoginSuccess] = useState("")
+  const [loading, setLoading] = useState(false)
+
+  // for faq dialog toggle
+  const [showFAQ, setShowFAQ] = useState(false)
+
   const handleFAQOpen = () => {
     setShowFAQ(true)
   }
@@ -48,11 +61,6 @@ const LoginForm = () => {
   const handleFAQClose = () => {
     setShowFAQ(false)
   }
-
-  const [loginError, setLoginError] = useState("")
-  const [loginSuccess, setLoginSuccess] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [showFAQ, setShowFAQ] = useState(false)
 
   const onSubmit = async (values) => {
     setLoading(true)
@@ -161,86 +169,14 @@ const LoginForm = () => {
             textAlign="center"
             sx={{ marginTop: 2, marginBottom: 10 }}
           >
-            <Typography variant="h3">Welcome to IMMS</Typography>
-            <Box marginTop={1}>
-              <Typography variant="h8">
-                Sign in with your email and password
-              </Typography>
+            <Box sx={{ marginTop: 2 }}>
+              <Typography variant="h3">Welcome to IMMS</Typography>
+              <Box marginTop={1}>
+                <Typography variant="h8">
+                  Sign in with your email and password
+                </Typography>
+              </Box>
             </Box>
-            <Box sx={{ paddingTop: 2 }}>
-              <Link
-                href="#"
-                underline="hover"
-                title="Click here to clear your confusion"
-                onClick={handleFAQOpen}
-              >
-                {showFAQ ? "Hide FAQ" : "FAQ"}
-              </Link>
-            </Box>
-            <Dialog open={showFAQ} onClose={handleFAQClose}>
-              <DialogTitle style={{ color: "blue" }}>
-                Frequently Asked Questions
-              </DialogTitle>
-              <DialogContent
-                style={{
-                  height: 400,
-                  overflow: "auto",
-                }}
-              >
-                <DialogContentText color={"black"}>
-                  <Typography variant="body1" sx={{ marginTop: 2 }}>
-                    <strong style={{ color: "green" }}>
-                      1: How do I create an account?
-                    </strong>
-                    <br />
-                    Ans: To create an account, please click on the "Sign Up"
-                    button and follow the instructions on the registration page.
-                  </Typography>
-                  <Typography variant="body1" sx={{ marginTop: 2 }}>
-                    <strong style={{ color: "green" }}>
-                      2: how can I change my password?
-                    </strong>
-                    <br />
-                    Ans: You can change your password by navigating to the
-                    "Account Settings" page and selecting the "Change Password"
-                    option.
-                  </Typography>
-                  <Typography variant="body1" sx={{ marginTop: 2 }}>
-                    <strong style={{ color: "green" }}>
-                      3: How can I recover a forgotten password?
-                    </strong>
-                    <br />
-                    Ans: If you have forgotten your password, you can click on
-                    the "Forgot Password" link on the login page and follow the
-                    instructions to reset your password.
-                  </Typography>
-                  <Typography variant="body1" sx={{ marginTop: 2 }}>
-                    <strong style={{ color: "green" }}>
-                      4: How can I update my profile information?
-                    </strong>
-                    <br />
-                    Ans: To update your profile information, navigate to the
-                    "Account Settings" page and edit the necessary details such
-                    as name, email, or contact information.
-                  </Typography>
-                  <Typography variant="body1" sx={{ marginTop: 2 }}>
-                    <strong style={{ color: "green" }}>
-                      5: How do I delete my account?
-                    </strong>
-                    <br />
-                    Ans: To delete your account, please contact our support team
-                    and provide them with the necessary information. They will
-                    guide you through the account deletion process.
-                  </Typography>
-                  {/* Add more questions and answers here */}
-                </DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleFAQClose} color="primary">
-                  Close
-                </Button>
-              </DialogActions>
-            </Dialog>
           </Box>
           <Box
             display="flex"
@@ -262,7 +198,7 @@ const LoginForm = () => {
               <form onSubmit={formik.handleSubmit}>
                 <Box maxWidth={400} width="100%">
                   <Typography variant="h4" align="center" gutterBottom>
-                    Login {/* Add Login icon here*/}
+                    <LoginIcon /> Login {/* Add Login icon here*/}
                   </Typography>
 
                   <TextField
@@ -301,7 +237,9 @@ const LoginForm = () => {
                     disabled={loading}
                     sx={{ marginTop: 2 }}
                   >
-                    {loading ? "Logging in..." : "Submit"}
+                    <Typography sx={{ fontSize: "0.94rem" }}>
+                      {loading ? "Logging in..." : "Submit"}
+                    </Typography>
                   </Button>
 
                   {loginError && (
@@ -325,26 +263,145 @@ const LoginForm = () => {
                       {loginSuccess}
                     </Typography>
                   )}
-
-                  {/*
-            TODO: Add forgot password link logic */}
-                  <Box sx={{ paddingTop: 2 }}>
-                    <Link
-                      href="#"
-                      underline="hover"
-                      onClick={() => {
-                        toast.info(
-                          "Password reset will be added soon. Thank you for your pateince."
-                        )
-                      }}
-                    >
-                      Forgot Password?
-                    </Link>
-                  </Box>
                 </Box>
               </form>
+              <Stack direction="row" sx={{ marginTop: 3 }}>
+                {/*
+            TODO: Add forgot password link logic */}
+                {/* <Box sx={{ paddingTop: 2 }}> */}
+                <Link
+                  href="#"
+                  underline="hover"
+                  title="Click here to reset your password"
+                  onClick={() => {
+                    toast.info(
+                      "Password reset will be added soon. Thank you for your patience."
+                    )
+                  }}
+                >
+                  <Typography sx={{ fontSize: "1rem" }}>
+                    Forgot Password?
+                  </Typography>
+                </Link>
+                {/* </Box> */}
+                {/* <Box sx={{ paddingTop: 2 }}> */}
+                <Link
+                  href="#"
+                  underline="hover"
+                  title="Click here to read frequently asked questions"
+                  onClick={handleFAQOpen}
+                  sx={{ marginLeft: "auto" }}
+                >
+                  <Typography
+                    sx={{
+                      fontSize: "1rem",
+                    }}
+                  >
+                    {showFAQ ? "Hide FAQ" : "Frequently Asked Questions"}
+                  </Typography>
+                </Link>
+                {/* </Box> */}
+              </Stack>
             </Paper>
           </Box>
+
+          {/* Dialog for FAQ */}
+          <Dialog open={showFAQ} onClose={handleFAQClose}>
+            <DialogTitle
+              sx={{
+                justifyItems: "self",
+              }}
+            >
+              <LiveHelpIcon /> Frequently Asked Questions
+            </DialogTitle>
+            <Divider />
+            <DialogContent
+              sx={{
+                height: 400,
+                overflow: "auto",
+              }}
+            >
+              <DialogContentText color={"black"}>
+                <Typography variant="body1" sx={{ marginTop: 2 }}>
+                  <strong style={{ color: "green" }}>1: What is IMMS?</strong>
+                  <br />
+                  <u>Ans</u>: IMMS (Internal Marks Management System) is a web
+                  platform for managing internal examination marks of students
+                  developed as a final year project.
+                </Typography>
+                <Typography variant="body1" sx={{ marginTop: 2 }}>
+                  <strong style={{ color: "green" }}>
+                    2: Who are the project members?
+                  </strong>
+                  <br />
+                  <u>Ans</u>: The project is supervised by Er. Rajesh Kamar. The
+                  project members are students of B.E Computer.
+                  <ul>
+                    <li>Roshan Lamichhane</li>
+                    <li>Maheshwor Acharya</li>
+                    <li>Susmita Thapa</li>
+                    <li>Asbin Poudel</li>
+                  </ul>
+                </Typography>
+                <Typography variant="body1" sx={{ marginTop: 2 }}>
+                  <strong style={{ color: "green" }}>
+                    3: How do I create an account?
+                  </strong>
+                  <br />
+                  <u>Ans</u>: To create an account, please contact the
+                  administration. Adminstration will create an account for you.
+                </Typography>
+                <Typography variant="body1" sx={{ marginTop: 2 }}>
+                  <strong style={{ color: "green" }}>
+                    4: How can I change my password?
+                  </strong>
+                  <br />
+                  <u>Ans</u>: You can change your password by navigating to the
+                  "Account Settings" page and selecting the "Change Password"
+                  option.
+                </Typography>
+                <Typography variant="body1" sx={{ marginTop: 2 }}>
+                  <strong style={{ color: "green" }}>
+                    5: How can I recover a forgotten password?
+                  </strong>
+                  <br />
+                  <u>Ans</u>: If you have forgotten your password, you can click
+                  on the "Forgot Password" link on the login page and follow the
+                  instructions to reset your password.
+                </Typography>
+                <Typography variant="body1" sx={{ marginTop: 2 }}>
+                  <strong style={{ color: "green" }}>
+                    6: How can I update my profile information?
+                  </strong>
+                  <br />
+                  <u>Ans</u>: To update your profile information, navigate to
+                  the "Account Settings" page and edit the necessary details
+                  such as name, email, or contact information.
+                </Typography>
+                {/* <Typography variant="body1" sx={{ marginTop: 2 }}>
+                  <strong style={{ color: "green" }}>
+                    5: How do I delete my account?
+                  </strong>
+                  <br />
+                  <u>Ans</u>: To delete your account, please contact our support
+                  team and provide them with the necessary information. They
+                  will guide you through the account deletion process.
+                </Typography> */}
+                {/* Add more questions and answers here */}
+              </DialogContentText>
+            </DialogContent>
+            <Divider />
+            <DialogActions>
+              <Button
+                onClick={handleFAQClose}
+                color="primary"
+                startIcon={<CloseIcon />}
+                variant="outlined"
+              >
+                Close
+              </Button>
+            </DialogActions>
+          </Dialog>
         </Box>
       )}
     </>
