@@ -395,12 +395,12 @@ const ListUsers = () => {
             Edit
           </Button>
           <Button
-            variant="contained"
+            variant="outlined"
             style={{
               marginRight: "8px",
             }}
             color="error"
-            startIcon={<DeleteIcon />}
+            startIcon={<DeleteForeverIcon />}
             disabled={!isAdmin}
             onClick={() => handleDeleteUser(params.row.id)}
           >

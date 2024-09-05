@@ -120,6 +120,20 @@ export default function AcademicDivisions() {
 function Programs() {
   const { loginState } = useContext(LoginContext)
 
+  // check if user is admin or not
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  // check for role change
+  useEffect(() => {
+    const role = loginState.roles.currentRole
+    if (role === undefined) return
+    if (role === "examHead") {
+      setIsAdmin(false)
+    } else if (role === "admin") {
+      setIsAdmin(true)
+    }
+  }, [loginState])
+
   // list of departments
   const { data: departments } = useDepartments()
 
@@ -183,6 +197,7 @@ function Programs() {
                   </TableCell>
                   <TableCell>
                     <Button
+                      disabled={!isAdmin}
                       startIcon={<DeleteForever />}
                       variant="outlined"
                       onClick={() => {
@@ -212,6 +227,7 @@ function Programs() {
       width: 140,
       renderCell: (params) => (
         <Button
+          disabled={!isAdmin}
           variant="outlined"
           startIcon={<DeleteForever />}
           onClick={() => {
@@ -409,6 +425,7 @@ function Programs() {
   return (
     <Box>
       <Button
+        disabled={!isAdmin}
         startIcon={<AddIcon />}
         variant="contained"
         sx={{
@@ -856,6 +873,20 @@ function Faculties() {
 
   const { loginState } = useContext(LoginContext)
 
+  // check if user is admin or not
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  // check for role change
+  useEffect(() => {
+    const role = loginState.roles.currentRole
+    if (role === undefined) return
+    if (role === "examHead") {
+      setIsAdmin(false)
+    } else if (role === "admin") {
+      setIsAdmin(true)
+    }
+  }, [loginState])
+
   const url = `${VITE_BACKEND_URL}/public/faculties`
 
   // state to keep all faculties
@@ -893,6 +924,7 @@ function Faculties() {
         onClick={() => {
           setOpenAddDialog(true)
         }}
+        disabled={!isAdmin}
       >
         Add New Faculty And Department
       </Button>
@@ -913,6 +945,7 @@ function Faculties() {
                         {index + 1 + ". " + faculty.name}
                       </Typography>
                       <Button
+                        disabled={!isAdmin}
                         variant="outlined"
                         startIcon={<DeleteForever />}
                         sx={{ marginLeft: "auto" }}
@@ -944,6 +977,7 @@ function Faculties() {
                             <Stack direction="row">
                               <Typography variant="h7">{dept.name}</Typography>
                               <Button
+                                disabled={!isAdmin}
                                 variant="outlined"
                                 startIcon={<DeleteForever />}
                                 sx={{ marginLeft: "auto" }}
@@ -978,6 +1012,7 @@ function Faculties() {
                                         <Typography>{prog.name}</Typography>
 
                                         <Button
+                                          disabled={!isAdmin}
                                           variant="outlined"
                                           startIcon={<DeleteForever />}
                                           sx={{

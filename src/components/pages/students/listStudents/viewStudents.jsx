@@ -39,6 +39,20 @@ const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // Fetching from .env 
 export default function ViewStudents() {
   const { loginState } = useContext(LoginContext)
 
+  // check if user is admin or not
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  // check for role change
+  useEffect(() => {
+    const role = loginState.roles.currentRole
+    if (role === undefined) return
+    if (role === "examHead") {
+      setIsAdmin(false)
+    } else if (role === "admin") {
+      setIsAdmin(true)
+    }
+  }, [loginState])
+
   // list of program in system
   const { data: programs } = usePrograms()
 
@@ -125,6 +139,7 @@ export default function ViewStudents() {
             Details
           </Button>
           <Button
+            disabled={!isAdmin}
             variant="outlined"
             color="secondary"
             startIcon={<EditIcon />}
@@ -142,6 +157,7 @@ export default function ViewStudents() {
             Edit
           </Button>
           <Button
+            disabled={!isAdmin}
             variant="outlined"
             sx={{ color: "red" }}
             startIcon={<DeleteForeverIcon />}
@@ -438,6 +454,7 @@ export default function ViewStudents() {
           Add Student
         </Button>
         <Button
+          disabled={!isAdmin}
           variant="contained"
           startIcon={<AddCircleIcon />}
           onClick={() => {

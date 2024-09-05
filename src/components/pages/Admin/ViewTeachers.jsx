@@ -41,6 +41,20 @@ const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // Fetching from .env 
 export default function ViewTeachers() {
   const { loginState } = useContext(LoginContext)
 
+  // check if user is admin or not
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  // check for role change
+  useEffect(() => {
+    const role = loginState.roles.currentRole
+    if (role === undefined) return
+    if (role === "examHead") {
+      setIsAdmin(false)
+    } else if (role === "admin") {
+      setIsAdmin(true)
+    }
+  }, [loginState])
+
   // list of program in system
   const { data: programs } = usePrograms()
 
@@ -115,6 +129,7 @@ export default function ViewTeachers() {
               setCurrentTeacher(params.row.id)
               setOpenDeleteDialog(true)
             }}
+            disabled={!isAdmin}
           >
             Delete
           </Button>
