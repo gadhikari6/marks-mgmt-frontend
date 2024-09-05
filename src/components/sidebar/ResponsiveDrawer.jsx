@@ -19,6 +19,7 @@ import { useContext } from "react"
 import { LoginContext } from "../../store/LoginProvider"
 import StudentDrawer from "./StudentDrawer"
 import AdminDrawer from "./AdminDrawer"
+import ExamHeadDrawer from "./ExamHeadDrawer"
 import TeacherDrawer from "./TeacherDrawer"
 import SettingsIcon from "@mui/icons-material/Settings"
 
@@ -223,6 +224,7 @@ function ResponsiveDrawer(props) {
           {/* put drawer items here */}
           {loginState.roles.currentRole === "student" && <StudentDrawer />}
           {loginState.roles.currentRole === "admin" && <AdminDrawer />}
+          {loginState.roles.currentRole === "examHead" && <ExamHeadDrawer />}
           {loginState.roles.currentRole === "teacher" && <TeacherDrawer />}
 
           {/* Permanent settings and logout button */}
