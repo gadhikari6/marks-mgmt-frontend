@@ -430,7 +430,7 @@ function Programs() {
           pageSize={100}
           editMode="row"
           disableRowSelectionOnClick
-          rowsPerPageOptions={[100]}
+          rowsPerPageOptions={[50, 100, 250, 500]}
           resizable={true}
           components={{
             Toolbar: GridToolbar,

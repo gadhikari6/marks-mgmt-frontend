@@ -446,8 +446,8 @@ const AddModifyMarks = () => {
             columns={columns}
             pageSize={100}
             editMode="row"
-            pageSizeOptions={[5, 10, 25, 50, 100]}
-            rowsPerPageOptions={[100]}
+            pageSizeOptions={[50, 100, 250, 500]}
+            rowsPerPageOptions={[50, 100, 250, 500]}
             checkboxSelection
             disableSelectionOnClick
             loading={isLoading}

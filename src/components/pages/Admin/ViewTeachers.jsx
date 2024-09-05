@@ -363,7 +363,7 @@ export default function ViewTeachers() {
           rows={allTeachers}
           columns={columns}
           pageSize={100}
-          rowsPerPageOptions={[100]}
+          rowsPerPageOptions={[50, 100, 250, 500]}
           resizable={true}
           components={{
             Toolbar: GridToolbar,

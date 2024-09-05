@@ -470,9 +470,9 @@ export default function AdminMarks() {
         checkboxSelection
         rows={rowsData === undefined || rowsData === null ? [] : rowsData}
         columns={columns}
-        pageSizeOptions={[5, 10, 25, 50, 100]}
+        pageSizeOptions={[50, 100, 250, 500]}
         pageSize={25}
-        rowsPerPageOptions={[5, 10, 25, 50, 100]}
+        rowsPerPageOptions={[50, 100, 250, 500]}
         resizable={true}
         components={{
           Toolbar: GridToolbar,
