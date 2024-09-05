@@ -370,14 +370,23 @@ const AddModifyMarks = () => {
                       {course.course.name === selectedCourse?.course.name &&
                         "*"}
                     </Typography>
-                    <Typography
-                      sx={{ fontSize: 13 }}
-                      color="text.primary"
-                      variant="body1"
-                    >
-                      Program: {course.program.name}
-                    </Typography>
-                    <Stack direction={"row"} gap={5}>
+                    <Stack direction={"row"} gap={4}>
+                      <Typography
+                        sx={{ fontSize: 13 }}
+                        color="text.primary"
+                        variant="body1"
+                      >
+                        Program: {course.program.name}
+                      </Typography>
+                      <Typography
+                        sx={{ fontSize: 13 }}
+                        color="text.primary"
+                        variant="body1"
+                      >
+                        Course Id: {course.courseId}
+                      </Typography>
+                    </Stack>
+                    <Stack direction={"row"} gap={18}>
                       <Typography
                         sx={{ fontSize: 13 }}
                         color="text.primary"
