@@ -26,6 +26,7 @@ import { toast } from "react-toastify"
 import LoginIcon from "@mui/icons-material/Login"
 import CloseIcon from "@mui/icons-material/Close"
 import LiveHelpIcon from "@mui/icons-material/LiveHelp"
+import axios from "axios"
 
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 
@@ -137,6 +138,46 @@ const LoginForm = () => {
     initialValues,
     onSubmit,
     validationSchema,
+  })
+
+  // toggle open or close reset dialog
+  const [resetToggle, setResetToggle] = useState(false)
+  const resetSchema = yup.object({
+    email: yup
+      .string()
+      .email("Please enter a valid email address")
+      .required("Email field is required"),
+  })
+
+  // formik for reset form
+  const resetFormik = useFormik({
+    initialValues: { email: "" },
+    onSubmit: async (values) => {
+      try {
+        await axios
+          .post(`${VITE_BACKEND_URL}/login/reset`, {
+            email: values.email,
+          })
+          .then((response) => {
+            if (response.status === 200) {
+              toast.success(response.data.msg)
+              formik.resetForm()
+            }
+            resetFormik.resetForm()
+          })
+          .catch((err) => {
+            if (err.response.status === 404) {
+              toast.warn("Please provide valid email address.")
+            } else {
+              toast.warn("Something wrong went with request")
+              console.log(err) // see error on console
+            }
+          })
+      } catch (err) {
+        toast.warn("Something went wrong.Please try again.")
+      }
+    },
+    validationSchema: resetSchema,
   })
 
   return (
@@ -274,9 +315,7 @@ const LoginForm = () => {
                   underline="hover"
                   title="Click here to reset your password"
                   onClick={() => {
-                    toast.info(
-                      "Password reset will be added soon. Thank you for your patience."
-                    )
+                    setResetToggle(true)
                   }}
                 >
                   <Typography sx={{ fontSize: "1rem" }}>
@@ -394,6 +433,67 @@ const LoginForm = () => {
             <DialogActions>
               <Button
                 onClick={handleFAQClose}
+                color="primary"
+                startIcon={<CloseIcon />}
+                variant="outlined"
+              >
+                Close
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* Dialog for password reset */}
+          <Dialog
+            maxWidth="sm"
+            fullWidth
+            open={resetToggle}
+            onClose={() => {
+              setResetToggle(false)
+            }}
+          >
+            <DialogTitle
+              sx={{
+                justifyItems: "self",
+              }}
+            >
+              Password Reset Form
+            </DialogTitle>
+            <Divider />
+            <DialogContent>
+              <form onSubmit={resetFormik.handleSubmit}>
+                <TextField
+                  id="email"
+                  name="email"
+                  label="Email *"
+                  type="email"
+                  variant="outlined"
+                  {...resetFormik.getFieldProps("email")}
+                  error={resetFormik.touched.email && resetFormik.errors.email}
+                  helperText={
+                    resetFormik.touched.email && resetFormik.errors.email
+                  }
+                  fullWidth
+                  margin="normal"
+                />
+
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  disabled={loading}
+                  sx={{ marginTop: 2 }}
+                >
+                  <Typography sx={{ fontSize: "0.94rem" }}>Submit</Typography>
+                </Button>
+              </form>
+            </DialogContent>
+            <Divider />
+            <DialogActions>
+              <Button
+                onClick={() => {
+                  setResetToggle(false)
+                }}
                 color="primary"
                 startIcon={<CloseIcon />}
                 variant="outlined"
