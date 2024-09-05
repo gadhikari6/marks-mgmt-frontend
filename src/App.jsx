@@ -22,7 +22,6 @@ import Marks from "./components/pages/marks/Marks"
 import Settings from "./components/pages/settings/Settings"
 import Dashboard from "./components/pages/dashboard/Dashboard"
 import Syllabus from "./components/pages/Syllabus/Syllabus"
-import AddTeacher from "./components/pages/addTeacher/AddTeacherForm"
 import ViewStudents from "./components/pages/students/listStudents/viewStudents"
 import ViewTeacherCourses from "./components/pages/teachers/viewCourses/viewTeacherCourses"
 import AddCourses from "./components/pages/Admin/addcourses/admincourses"
@@ -33,6 +32,9 @@ import AcademicDivisions from "./components/pages/Admin/AcademicDivisions"
 import CreateBatch from "./components/pages/create-batch/CreateBatch"
 import AdminMarks from "./components/pages/Admin/marks/AdminMarks"
 import { useNavigate } from "react-router-dom"
+import OnlyStudentRoute from "./components/route-protection/OnlyStudentRoute"
+import OnlyTeacherRoute from "./components/route-protection/OnlyTeacherRoute"
+import OnlyAdminOrExamHeadRoute from "./components/route-protection/OnlyAdminorExamHeadRoute"
 
 export default function App() {
   const { loginState, dispatchLoginState } = useContext(LoginContext)
@@ -142,7 +144,9 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ResponsiveDrawer>
-                  <Marks />
+                  <OnlyStudentRoute>
+                    <Marks />
+                  </OnlyStudentRoute>
                 </ResponsiveDrawer>
               </ProtectedRoute>
             }
@@ -172,17 +176,9 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ResponsiveDrawer>
-                  <Syllabus />
-                </ResponsiveDrawer>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/addTeacher"
-            element={
-              <ProtectedRoute>
-                <ResponsiveDrawer>
-                  <AddTeacher />
+                  <OnlyStudentRoute>
+                    <Syllabus />
+                  </OnlyStudentRoute>
                 </ResponsiveDrawer>
               </ProtectedRoute>
             }
@@ -193,7 +189,9 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ResponsiveDrawer>
-                  <ViewTeacherCourses />
+                  <OnlyTeacherRoute>
+                    <ViewTeacherCourses />
+                  </OnlyTeacherRoute>
                 </ResponsiveDrawer>
               </ProtectedRoute>
             }
@@ -203,7 +201,9 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ResponsiveDrawer>
-                  <ListUsers />
+                  <OnlyAdminOrExamHeadRoute>
+                    <ListUsers />
+                  </OnlyAdminOrExamHeadRoute>
                 </ResponsiveDrawer>
               </ProtectedRoute>
             }
@@ -214,7 +214,9 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ResponsiveDrawer>
-                  <ViewStudents />
+                  <OnlyAdminOrExamHeadRoute>
+                    <ViewStudents />
+                  </OnlyAdminOrExamHeadRoute>
                 </ResponsiveDrawer>
               </ProtectedRoute>
             }
@@ -225,7 +227,9 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ResponsiveDrawer>
-                  <ViewTeachers />
+                  <OnlyAdminOrExamHeadRoute>
+                    <ViewTeachers />
+                  </OnlyAdminOrExamHeadRoute>
                 </ResponsiveDrawer>
               </ProtectedRoute>
             }
@@ -236,7 +240,9 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ResponsiveDrawer>
-                  <AddCourses />
+                  <OnlyAdminOrExamHeadRoute>
+                    <AddCourses />
+                  </OnlyAdminOrExamHeadRoute>
                 </ResponsiveDrawer>
               </ProtectedRoute>
             }
@@ -246,7 +252,9 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ResponsiveDrawer>
-                  <AddModifyMarks />
+                  <OnlyTeacherRoute>
+                    <AddModifyMarks />
+                  </OnlyTeacherRoute>
                 </ResponsiveDrawer>
               </ProtectedRoute>
             }
@@ -257,7 +265,9 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ResponsiveDrawer>
-                  <AcademicDivisions />
+                  <OnlyAdminOrExamHeadRoute>
+                    <AcademicDivisions />
+                  </OnlyAdminOrExamHeadRoute>
                 </ResponsiveDrawer>
               </ProtectedRoute>
             }
@@ -267,7 +277,9 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ResponsiveDrawer>
-                  <CreateBatch />
+                  <OnlyAdminOrExamHeadRoute>
+                    <CreateBatch />
+                  </OnlyAdminOrExamHeadRoute>
                 </ResponsiveDrawer>
               </ProtectedRoute>
             }
@@ -277,7 +289,9 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ResponsiveDrawer>
-                  <AdminMarks />
+                  <OnlyAdminOrExamHeadRoute>
+                    <AdminMarks />
+                  </OnlyAdminOrExamHeadRoute>
                 </ResponsiveDrawer>
               </ProtectedRoute>
             }
