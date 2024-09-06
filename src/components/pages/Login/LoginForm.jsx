@@ -105,10 +105,11 @@ const LoginForm = () => {
           },
         })
       } else if (response.status === 401) {
+        const data = await response.json()
         // 401 : Invalid credentails
-        setLoginError("Invalid email or password")
+        setLoginError(data.error.title || "Invalid email or password")
         // send toast
-        toast.error("Invalid email or password!")
+        toast.error(data.error.title || "Invalid email or password!")
       } else {
         console.error("Login failed:", response)
         setLoginError("An error occurred during login. Please try again.")

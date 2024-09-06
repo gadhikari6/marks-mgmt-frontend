@@ -255,7 +255,7 @@ export default function ViewStudents() {
           { headers: { Authorization: `Bearer ${loginState.token}` } }
         )
         .then((response) => {
-          toast.success(`Marks was updated successfully.`)
+          toast.success(`Student details was updated successfully.`)
           fetchStudentList(selectedProgram.id)
         })
         .catch((err) => {
@@ -428,10 +428,10 @@ export default function ViewStudents() {
                     index === 0
                       ? "st"
                       : index === 1
-                        ? "nd"
-                        : index === 2
-                          ? "rd"
-                          : "th"
+                      ? "nd"
+                      : index === 2
+                      ? "rd"
+                      : "th"
                   } Semester`}
                 </MenuItem>
               ))}
@@ -693,10 +693,10 @@ export default function ViewStudents() {
                                 index === 0
                                   ? "st"
                                   : index === 1
-                                    ? "nd"
-                                    : index === 2
-                                      ? "rd"
-                                      : "th"
+                                  ? "nd"
+                                  : index === 2
+                                  ? "rd"
+                                  : "th"
                               } Semester`}
                             </MenuItem>
                           ))}
