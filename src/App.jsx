@@ -34,7 +34,7 @@ import AdminMarks from "./components/pages/Admin/marks/AdminMarks"
 import { useNavigate } from "react-router-dom"
 import OnlyStudentRoute from "./components/route-protection/OnlyStudentRoute"
 import OnlyTeacherRoute from "./components/route-protection/OnlyTeacherRoute"
-import OnlyAdminOrExamHeadRoute from "./components/route-protection/OnlyAdminorExamHeadRoute"
+import OnlyAdminOrExamHeadRoute from "./components/route-protection/OnlyAdminOrExamHeadRoute"
 
 export default function App() {
   const { loginState, dispatchLoginState } = useContext(LoginContext)
