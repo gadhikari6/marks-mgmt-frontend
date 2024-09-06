@@ -151,6 +151,7 @@ export default function ViewStudents() {
                 semester: selectedStudent.semesterId || 0,
                 status: selectedStudent.StudentStatus[0].status || "ACTIVE",
               })
+              setEditSemester(selectedStudent.semesterId || 0)
               setOpenEditDialog(true)
             }}
           >
@@ -344,6 +345,10 @@ export default function ViewStudents() {
       console.log(err) // remove later
     }
   }
+
+  // semester value for editing student semester
+  const [editSemester, setEditSemester] = useState(0)
+
   return (
     <Box
       fontFamily={{
@@ -423,7 +428,7 @@ export default function ViewStudents() {
                     : 8
                 ).keys()
               ).map((index) => (
-                <MenuItem key={index + 1} value={index + 1}>
+                <MenuItem key={index} value={index + 1}>
                   {`${index + 1}${
                     index === 0
                       ? "st"
@@ -565,7 +570,10 @@ export default function ViewStudents() {
             setOpenEditDialog(false)
             toast.info("Request for update has been sent.", { autoClose: 500 })
 
-            updateStudentDetails(selectedStudent.id, editStudentDetails)
+            updateStudentDetails(selectedStudent.id, {
+              ...editStudentDetails,
+              semester: editSemester,
+            })
           }}
         >
           <DialogTitle>Edit Student Details</DialogTitle>
@@ -670,13 +678,10 @@ export default function ViewStudents() {
                         label="Semester"
                         fullWidth
                         margin="normal"
-                        defaultValue={selectedStudent?.semesterId}
-                        value={selectedStudent?.semesterId}
+                        defaultValue={editSemester}
+                        value={editSemester}
                         onChange={(e) => {
-                          setEditStudentDetails((prev) => ({
-                            ...prev,
-                            semester: Number(e.target.value),
-                          }))
+                          setEditSemester(Number(e.target.value))
                         }}
                         select
                       >
@@ -688,7 +693,7 @@ export default function ViewStudents() {
                                 : 8
                             ).keys()
                           ).map((index) => (
-                            <MenuItem key={index + 1} value={index + 1}>
+                            <MenuItem key={index} value={index + 1}>
                               {`${index + 1}${
                                 index === 0
                                   ? "st"
