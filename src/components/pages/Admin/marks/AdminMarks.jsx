@@ -197,8 +197,35 @@ export default function AdminMarks() {
     { field: "program", headerName: "Program", width: 150 },
     { field: "semester", headerName: "Semester", width: 100 },
     { field: "course", headerName: "Course", width: 200 },
-    { field: "theory", headerName: "Theory", width: 100 },
-    { field: "practical", headerName: "Practical", width: 100 },
+    {
+      field: "theory",
+      headerName: "Theory",
+      width: 100,
+
+      renderCell: (params) => (
+        <>
+          {(!params.row.NotQualified &&
+            !params.row.expelled &&
+            !params.row.absent &&
+            params.row.theory) ||
+            "-"}
+        </>
+      ),
+    },
+    {
+      field: "practical",
+      headerName: "Practical",
+      width: 100,
+      renderCell: (params) => (
+        <>
+          {(!params.row.NotQualified &&
+            !params.row.expelled &&
+            !params.row.absent &&
+            params.row.practical) ||
+            "-"}
+        </>
+      ),
+    },
     {
       field: "total",
       headerName: "Total",
@@ -437,10 +464,10 @@ export default function AdminMarks() {
                       index === 0
                         ? "st"
                         : index === 1
-                          ? "nd"
-                          : index === 2
-                            ? "rd"
-                            : "th"
+                        ? "nd"
+                        : index === 2
+                        ? "rd"
+                        : "th"
                     } Semester`}
                   </MenuItem>
                 ))}

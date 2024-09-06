@@ -187,13 +187,15 @@ const AddModifyMarks = () => {
       width: 100,
       editable: true,
       renderEditCell: (params) => (
-        <GridEditInputCell
-          {...params}
-          inputProps={{
-            max: selectedCourse?.course?.markWeightage?.theory,
-            min: 0,
-          }}
-        />
+        <>
+          <GridEditInputCell
+            {...params}
+            inputProps={{
+              max: selectedCourse?.course?.markWeightage?.theory,
+              min: 0,
+            }}
+          />
+        </>
       ),
     },
     {
@@ -236,7 +238,24 @@ const AddModifyMarks = () => {
     {
       field: "total",
       headerName: "Total",
-      width: 100,
+      width: 150,
+      renderCell: (params) => (
+        <>
+          <Typography color={"red"}>
+            <Stack direction={"column"}>
+              <span> {params.row.absent ? "Absent " : null}</span>
+              <span>{params.row.expelled ? "Expelled " : null}</span>
+              <span>{params.row.notQualified ? "Not-Qualified" : null}</span>
+            </Stack>
+          </Typography>
+          <Typography>
+            {!params.row.notQualified &&
+              !params.row.expelled &&
+              !params.row.absent &&
+              params.row.practical + params.row.theory}
+          </Typography>
+        </>
+      ),
     },
   ]
 
@@ -252,13 +271,33 @@ const AddModifyMarks = () => {
       type: "number",
       width: 100,
       editable: false,
+
+      renderCell: (params) => (
+        <Typography>
+          {(!params.row.notQualified &&
+            !params.row.expelled &&
+            !params.row.absent &&
+            params.row.theory) ||
+            "-"}
+        </Typography>
+      ),
     },
+
     {
       field: "practical",
       headerName: "Practical",
       type: "number",
       width: 100,
       editable: false,
+      renderCell: (params) => (
+        <Typography>
+          {(!params.row.notQualified &&
+            !params.row.expelled &&
+            !params.row.absent &&
+            params.row.practical) ||
+            "-"}
+        </Typography>
+      ),
     },
     {
       field: "notQualified",
@@ -281,7 +320,28 @@ const AddModifyMarks = () => {
       width: 80,
       editable: false,
     },
-    { field: "total", headerName: "Total", width: 100 },
+    {
+      field: "total",
+      headerName: "Total",
+      width: 150,
+      renderCell: (params) => (
+        <>
+          <Typography color={"red"}>
+            <Stack direction={"column"}>
+              <span> {params.row.absent ? "Absent " : null}</span>
+              <span>{params.row.expelled ? "Expelled " : null}</span>
+              <span>{params.row.notQualified ? "Not-Qualified" : null}</span>
+            </Stack>
+          </Typography>
+          <Typography>
+            {!params.row.notQualified &&
+              !params.row.expelled &&
+              !params.row.absent &&
+              params.row.practical + params.row.theory}
+          </Typography>
+        </>
+      ),
+    },
     {
       field: "action",
       headerName: "Action",

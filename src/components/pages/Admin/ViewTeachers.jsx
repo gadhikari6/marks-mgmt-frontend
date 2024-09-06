@@ -545,7 +545,8 @@ export default function ViewTeachers() {
                                   >
                                     Code: {item.code}, Credit: {item.credit},
                                     Elective: {item.elective ? "Yes" : "No"},
-                                    Project: {item.project ? "Yes" : "No"}
+                                    Project: {item.project ? "Yes" : "No"},
+                                    Course Id: {item.id}
                                   </Typography>
                                 </Card>
                               </MenuItem>
