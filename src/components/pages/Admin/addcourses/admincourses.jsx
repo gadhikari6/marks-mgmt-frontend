@@ -41,6 +41,7 @@ import usePrograms from "../../../../hooks/count/usePrograms"
 import GetAppIcon from "@mui/icons-material/GetApp"
 import ClearIcon from "@mui/icons-material/Clear"
 import ImportDialog from "../../ImportDialog/ImportDialog"
+import InvalidResult from "../../ImportDialog/InvalidResult"
 
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 
@@ -499,6 +500,10 @@ const Courses = () => {
   // import dialog toggle
   const [importToggle, setImportToggle] = useState(false)
 
+  // invalid dialog toggle
+  const [invalidToggle, setInvalidToggle] = useState(false)
+  const [invalidQueries, setInvalidQueries] = useState(null)
+
   // method to upload csv
   const uploadCourseCSV = async (file) => {
     try {
@@ -523,6 +528,12 @@ const Courses = () => {
             toast.success(
               `Request resulted in ${valid} valid queries and ${invalid} invalid queries.`
             )
+
+            if (invalid > 0) {
+              // set the failed queries
+              setInvalidToggle(true)
+              setInvalidQueries(response.data?.invalidQueries || null)
+            }
             queryClient.invalidateQueries(["all-courses"])
           }
         })
@@ -1183,10 +1194,10 @@ const Courses = () => {
                             index === 0
                               ? "st"
                               : index === 1
-                                ? "nd"
-                                : index === 2
-                                  ? "rd"
-                                  : "th"
+                              ? "nd"
+                              : index === 2
+                              ? "rd"
+                              : "th"
                           } Semester`}
                         </MenuItem>
                       ))}
@@ -1328,6 +1339,14 @@ const Courses = () => {
         dialogTitle={"Courses"}
         downloadLink={"/courses-sample.csv"}
         uploadFunc={uploadCourseCSV}
+      />
+
+      <InvalidResult
+        openToggle={invalidToggle}
+        closeToggleFunc={() => {
+          setInvalidToggle(false)
+        }}
+        data={invalidQueries}
       />
     </Box>
   )

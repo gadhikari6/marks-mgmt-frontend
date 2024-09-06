@@ -34,6 +34,8 @@ import { useFormik } from "formik"
 import useYearJoined from "../../../../hooks/count/useYearJoined"
 import ImportDialog from "../../ImportDialog/ImportDialog"
 import { QueryClient } from "react-query"
+import InvalidResult from "../../ImportDialog/InvalidResult"
+
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // Fetching from .env file
 
 export default function ViewStudents() {
@@ -305,6 +307,10 @@ export default function ViewStudents() {
 
   const queryClient = new QueryClient()
 
+  // invalid dialog toggle
+  const [invalidToggle, setInvalidToggle] = useState(false)
+  const [invalidQueries, setInvalidQueries] = useState(null)
+
   // method to upload csv of student bulk data
   const uploadStudentCSV = async (file) => {
     try {
@@ -329,6 +335,12 @@ export default function ViewStudents() {
             toast.success(
               `Request resulted in ${valid} valid queries and ${invalid} invalid queries.`
             )
+
+            if (invalid > 0) {
+              // set the failed queries
+              setInvalidToggle(true)
+              setInvalidQueries(response.data?.invalidQueries || null)
+            }
             fetchStudentList() // fetch student list
             queryClient.invalidateQueries(["students", "student-count"]) // invalidate other related queries
           }
@@ -834,6 +846,14 @@ export default function ViewStudents() {
         downloadLink={"/student-sample.csv"}
         uploadFunc={uploadStudentCSV}
         extraMsg="The initial password of a student will be the value placed in dob field. A student can change it later."
+      />
+
+      <InvalidResult
+        openToggle={invalidToggle}
+        closeToggleFunc={() => {
+          setInvalidToggle(false)
+        }}
+        data={invalidQueries}
       />
     </Box>
   )

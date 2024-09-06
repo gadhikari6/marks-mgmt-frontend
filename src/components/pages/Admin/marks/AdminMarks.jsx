@@ -24,6 +24,7 @@ import { LoginContext } from "../../../../store/LoginProvider"
 import { useEffect } from "react"
 import AddCircleIcon from "@mui/icons-material/AddCircle"
 import ImportDialog from "../../ImportDialog/ImportDialog"
+import InvalidResult from "../../ImportDialog/InvalidResult"
 
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 
@@ -187,6 +188,10 @@ export default function AdminMarks() {
     setSemester(0)
   }
 
+  // invalid dialog toggle
+  const [invalidToggle, setInvalidToggle] = useState(false)
+  const [invalidQueries, setInvalidQueries] = useState(null)
+
   // columns for data grid
   const columns = [
     { field: "sn", headerName: "S.N.", width: 60 },
@@ -299,6 +304,12 @@ export default function AdminMarks() {
             toast.success(
               `Request resulted in ${valid} valid queries and ${invalid} invalid queries.`
             )
+            if (invalid > 0) {
+              // set the failed queries
+              setInvalidToggle(true)
+              setInvalidQueries(response.data?.invalidQueries || null)
+            }
+
             fetchMarks(batchId || 0, year || 0, programId || 0, semester || 0)
           }
         })
@@ -522,6 +533,14 @@ export default function AdminMarks() {
         downloadLink={"/student-marks-sample.csv"}
         uploadFunc={uploadMarksCSV}
         extraMsg="Please be careful with course name. It is case-sensitive."
+      />
+
+      <InvalidResult
+        openToggle={invalidToggle}
+        closeToggleFunc={() => {
+          setInvalidToggle(false)
+        }}
+        data={invalidQueries}
       />
     </Box>
   )
