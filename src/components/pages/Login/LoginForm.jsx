@@ -17,6 +17,16 @@ import {
   DialogActions,
   Stack,
   Divider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
 } from "@mui/material"
 import { useContext } from "react"
 import { LoginContext } from "../../../store/LoginProvider"
@@ -27,6 +37,7 @@ import LoginIcon from "@mui/icons-material/Login"
 import CloseIcon from "@mui/icons-material/Close"
 import LiveHelpIcon from "@mui/icons-material/LiveHelp"
 import axios from "axios"
+import ViewMarksDialog from "./ViewMarksDialog"
 
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // fetching from .env file
 
@@ -162,9 +173,8 @@ const LoginForm = () => {
           .then((response) => {
             if (response.status === 200) {
               toast.success(response.data.msg)
-              formik.resetForm()
+              resetFormik.resetForm()
             }
-            resetFormik.resetForm()
           })
           .catch((err) => {
             if (err.response.status === 404) {
@@ -180,6 +190,18 @@ const LoginForm = () => {
     },
     validationSchema: resetSchema,
   })
+
+  // toggle of dialog for viewing marks without login
+  const [marksToggle, setMarksToggle] = useState(false)
+
+  // result toggle
+  const [resultToggle, setResultToggle] = useState(false)
+  const [result, setResult] = useState(null)
+
+  // handler for result change
+  const resultHandler = (data) => {
+    setResult(data)
+  }
 
   return (
     <>
@@ -204,7 +226,6 @@ const LoginForm = () => {
             ].join(","),
           }}
         >
-          {/* TODO: Add FAQ related to registration and other details */}
           <Box
             color="black" //box component inside outer container
             width="100%"
@@ -308,9 +329,6 @@ const LoginForm = () => {
                 </Box>
               </form>
               <Stack direction="row" sx={{ marginTop: 3 }}>
-                {/*
-            TODO: Add forgot password link logic */}
-                {/* <Box sx={{ paddingTop: 2 }}> */}
                 <Link
                   href="#"
                   underline="hover"
@@ -323,8 +341,7 @@ const LoginForm = () => {
                     Forgot Password?
                   </Typography>
                 </Link>
-                {/* </Box> */}
-                {/* <Box sx={{ paddingTop: 2 }}> */}
+
                 <Link
                   href="#"
                   underline="hover"
@@ -340,11 +357,28 @@ const LoginForm = () => {
                     {showFAQ ? "Hide FAQ" : "Frequently Asked Questions"}
                   </Typography>
                 </Link>
-                {/* </Box> */}
               </Stack>
+              <Link
+                href="#"
+                component={"button"}
+                underline="hover"
+                title="Click here to view marks without login"
+                onClick={() => {
+                  setMarksToggle(true)
+                }}
+              >
+                <Typography
+                  sx={{
+                    marginLeft: "auto",
+                    fontSize: "1rem",
+                    marginTop: "1rem",
+                  }}
+                >
+                  View marks without login
+                </Typography>
+              </Link>
             </Paper>
           </Box>
-
           {/* Dialog for FAQ */}
           <Dialog open={showFAQ} onClose={handleFAQClose}>
             <DialogTitle
@@ -418,6 +452,14 @@ const LoginForm = () => {
                   the "Account Settings" page and edit the necessary details
                   such as name, email, or contact information.
                 </Typography>
+                <Typography variant="body1" sx={{ marginTop: 2 }}>
+                  <strong style={{ color: "green" }}>
+                    7: How can an expired account view marks?
+                  </strong>
+                  <br />
+                  <u>Ans</u>: Click on the link "View marks without login" for
+                  this.
+                </Typography>
                 {/* <Typography variant="body1" sx={{ marginTop: 2 }}>
                   <strong style={{ color: "green" }}>
                     5: How do I delete my account?
@@ -442,7 +484,6 @@ const LoginForm = () => {
               </Button>
             </DialogActions>
           </Dialog>
-
           {/* Dialog for password reset */}
           <Dialog
             maxWidth="sm"
@@ -503,7 +544,196 @@ const LoginForm = () => {
               </Button>
             </DialogActions>
           </Dialog>
+          {/* dialog for marks viewing */}
+          <ViewMarksDialog
+            toggle={marksToggle}
+            closeFunc={() => {
+              setMarksToggle(false)
+            }}
+            setResult={resultHandler}
+            enableResult={() => {
+              setResultToggle(true)
+            }}
+          />
+
+          {/* dialog for showing result */}
+          <Dialog
+            open={resultToggle}
+            onClose={() => {
+              setResultToggle(false)
+            }}
+            maxWidth="md"
+            fullWidth
+          >
+            <DialogTitle
+              sx={{
+                justifyItems: "self",
+              }}
+            >
+              Marks
+            </DialogTitle>
+            <Divider />
+            <DialogContent>
+              {result !== undefined && result !== null && (
+                <Marks data={result} />
+              )}
+            </DialogContent>
+            <Divider />
+            <DialogActions>
+              <Button
+                onClick={() => {
+                  setResultToggle(false)
+                }}
+                color="primary"
+                startIcon={<CloseIcon />}
+                variant="outlined"
+              >
+                Close
+              </Button>
+            </DialogActions>
+          </Dialog>
         </Box>
+      )}
+    </>
+  )
+}
+// Marks viewing component
+const Marks = ({ data }) => {
+  const [selectedSemester, setSelectedSemester] = useState("")
+
+  const handleSemesterChange = (event) => {
+    setSelectedSemester(event.target.value)
+  }
+
+  const filterMarksBySemester = (marksData, selectedSemester) => {
+    if (selectedSemester === "") {
+      return marksData.semesters
+    } else {
+      return marksData.semesters.filter(
+        (semester) => semester.semester === selectedSemester
+      )
+    }
+  }
+
+  return (
+    <>
+      {data !== null && (
+        <div>
+          <Stack direction="column" gap={1}>
+            <Stack direction="row" gap={20}>
+              <Typography variant="body1">
+                Name: {data.student?.user?.name || "..."}
+              </Typography>
+
+              <Typography variant="body1">
+                Program: {data.student?.program?.name || "..."}
+              </Typography>
+            </Stack>
+            <Stack direction="row" gap={5}>
+              <Typography variant="body1">
+                PU Regd Number: {data.student?.puRegNo || "..."}
+              </Typography>
+              <Typography variant="body1">
+                Symbol Number: {data.student?.symbolNo || "..."}
+              </Typography>
+            </Stack>
+            <Stack direction="row" gap={12}>
+              <Typography variant="body1">
+                Email: {data.student?.user?.email || "..."}
+              </Typography>
+              <Typography variant="body1">
+                Contact Number: {data.student?.contactNo || "..."}
+              </Typography>
+            </Stack>
+          </Stack>
+          <Divider sx={{ marginBottom: 1, marginTop: 1 }} />
+          <div>
+            <FormControl variant="outlined" margin="normal" sx={{ width: 200 }}>
+              <InputLabel id="sem-label">Select Semester*</InputLabel>
+
+              <Select
+                value={selectedSemester || ""}
+                onChange={handleSemesterChange}
+                fullWidth
+                label="Select Semester*"
+              >
+                <MenuItem value="">All Semesters</MenuItem>
+                {data !== undefined &&
+                  data !== null &&
+                  data.semesters.length > 0 &&
+                  data.semesters.map((semester) => (
+                    <MenuItem value={semester.semester} key={semester.semester}>
+                      Semester {semester.semester}
+                    </MenuItem>
+                  ))}
+              </Select>
+            </FormControl>
+          </div>
+
+          {data !== undefined && data !== null && data.semesters.length > 0 ? (
+            filterMarksBySemester(data, selectedSemester).map((semester) => (
+              <div key={semester.semester}>
+                <Typography variant="h5" align="center" gutterBottom>
+                  Semester {semester.semester}
+                </Typography>
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Course Name</TableCell>
+                        <TableCell>Course Code</TableCell>
+
+                        <TableCell>Theory</TableCell>
+                        <TableCell>Practical</TableCell>
+                        <TableCell>Total</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {semester.courses.map((course) => (
+                        <TableRow key={course.courseId}>
+                          <TableCell>{course.course.name || "-"}</TableCell>
+                          <TableCell>{course.course.code || "-"}</TableCell>
+                          <TableCell>
+                            {(!course.marks.absent &&
+                              !course.marks.expelled &&
+                              !course.marks.NotQualified &&
+                              course.marks.theory) ||
+                              "-"}
+                          </TableCell>
+                          <TableCell>
+                            {(!course.marks.absent &&
+                              !course.marks.expelled &&
+                              !course.marks.NotQualified &&
+                              course.marks.practical) ||
+                              "-"}
+                          </TableCell>
+                          <TableCell>
+                            <Typography color={"red"}>
+                              {course.marks.absent ? "Absent " : null}
+                              {course.marks.expelled ? "Expelled " : null}
+                              {course.marks.NotQualified
+                                ? "Not Qualified "
+                                : null}
+                            </Typography>
+                            <Typography>
+                              {!course.marks.NotQualified &&
+                                !course.marks.expelled &&
+                                !course.marks.absent &&
+                                course.marks.practical + course.marks.theory}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                <div style={{ margin: "30px" }}></div> {/* Adding a gap */}
+              </div>
+            ))
+          ) : (
+            <Typography>No data available.</Typography>
+          )}
+        </div>
       )}
     </>
   )

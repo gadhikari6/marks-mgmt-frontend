@@ -14,11 +14,21 @@ import {
   InputLabel,
 } from "@mui/material"
 import useMarks from "../../../hooks/useMarks"
-import { red } from "@mui/material/colors"
+import { useEffect } from "react"
 
 const Marks = () => {
   const [selectedSemester, setSelectedSemester] = useState("")
-  const { isLoading, error, data } = useMarks()
+  const { isLoading, error, data: response } = useMarks()
+
+  // marks storage
+  const [data, setData] = useState(null)
+
+  // set response as data
+  useEffect(() => {
+    if (response !== undefined && response !== null) {
+      setData(response)
+    }
+  }, [response])
 
   if (isLoading) {
     return <Typography>Loading marks...</Typography>
@@ -45,17 +55,6 @@ const Marks = () => {
   return (
     <div>
       <div>
-        {/* <Select value={selectedSemester || ""} onChange={handleSemesterChange}>
-          <MenuItem value="">All Semesters</MenuItem>
-          {data &&
-            data.semesters &&
-            data.semesters.length > 0 &&
-            data.semesters.map((semester) => (
-              <MenuItem value={semester.semester} key={semester.semester}>
-                Semester {semester.semester}
-              </MenuItem>
-            ))}
-        </Select> */}
         <FormControl variant="outlined" margin="normal" sx={{ width: 200 }}>
           <InputLabel id="sem-label">Select Semester*</InputLabel>
 
@@ -63,10 +62,11 @@ const Marks = () => {
             value={selectedSemester || ""}
             onChange={handleSemesterChange}
             fullWidth
+            label="Select Semester*"
           >
             <MenuItem value="">All Semesters</MenuItem>
-            {data &&
-              data.semesters &&
+            {data !== undefined &&
+              data !== null &&
               data.semesters.length > 0 &&
               data.semesters.map((semester) => (
                 <MenuItem value={semester.semester} key={semester.semester}>
@@ -77,7 +77,7 @@ const Marks = () => {
         </FormControl>
       </div>
 
-      {data && data.semesters && data.semesters.length > 0 ? (
+      {data !== undefined && data !== null && data.semesters.length > 0 ? (
         filterMarksBySemester(data, selectedSemester).map((semester) => (
           <div key={semester.semester}>
             <Typography variant="h5" align="center" gutterBottom>
@@ -100,8 +100,20 @@ const Marks = () => {
                     <TableRow key={course.courseId}>
                       <TableCell>{course.course.name || "-"}</TableCell>
                       <TableCell>{course.course.code || "-"}</TableCell>
-                      <TableCell>{course.marks.theory || "-"}</TableCell>
-                      <TableCell>{course.marks.practical || "-"}</TableCell>
+                      <TableCell>
+                        {(!course.marks.absent &&
+                          !course.marks.expelled &&
+                          !course.marks.NotQualified &&
+                          course.marks.theory) ||
+                          "-"}
+                      </TableCell>
+                      <TableCell>
+                        {(!course.marks.absent &&
+                          !course.marks.expelled &&
+                          !course.marks.NotQualified &&
+                          course.marks.practical) ||
+                          "-"}
+                      </TableCell>
                       <TableCell>
                         <Typography color={"red"}>
                           {course.marks.absent ? "Absent " : null}
