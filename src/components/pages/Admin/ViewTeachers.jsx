@@ -377,12 +377,11 @@ export default function ViewTeachers() {
           sx={{ marginTop: 1 }}
           rows={allTeachers}
           columns={columns}
-          pageSize={100}
-          rowsPerPageOptions={[50, 100, 250, 500]}
           resizable={true}
           components={{
             Toolbar: GridToolbar,
           }}
+          checkboxSelection
         />
       )}
 

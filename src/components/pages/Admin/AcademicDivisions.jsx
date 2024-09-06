@@ -444,14 +444,13 @@ function Programs() {
           rows={rows}
           getRowHeight={() => "auto"}
           columns={columns}
-          pageSize={100}
           editMode="row"
           disableRowSelectionOnClick
-          rowsPerPageOptions={[50, 100, 250, 500]}
           resizable={true}
           components={{
             Toolbar: GridToolbar,
           }}
+          checkboxSelection
         />
       )}
 

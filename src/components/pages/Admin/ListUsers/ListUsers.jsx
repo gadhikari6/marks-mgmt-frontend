@@ -477,7 +477,7 @@ const ListUsers = () => {
               rows={getRowsWithSerialNumber(filteredUsers)}
               columns={columns}
               sortingOrder={["asc", "desc"]}
-              pageSizeOptions={[50, 100, 250, 500]}
+              pageSizeOptions={[50, 100]}
               hideFooterSelectedRowCount
               components={{
                 Toolbar: GridToolbar,

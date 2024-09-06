@@ -444,10 +444,8 @@ const AddModifyMarks = () => {
           <DataGrid
             rows={rows}
             columns={columns}
-            pageSize={100}
             editMode="row"
-            pageSizeOptions={[50, 100, 250, 500]}
-            rowsPerPageOptions={[50, 100, 250, 500]}
+            pageSizeOptions={[50, 100]}
             checkboxSelection
             disableSelectionOnClick
             loading={isLoading}
