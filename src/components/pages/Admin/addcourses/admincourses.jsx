@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
 import {
-  Container,
   Typography,
   TextField,
   Button,
@@ -30,7 +29,6 @@ import axios from "axios"
 import { useContext } from "react"
 import { LoginContext } from "../../../../store/LoginProvider"
 import { toast } from "react-toastify"
-import useAllCourses from "../../../../hooks/count/useAllCourses"
 import { DataGrid, GridToolbar } from "@mui/x-data-grid"
 import InfoIcon from "@mui/icons-material/Info"
 import CloseIcon from "@mui/icons-material/Close"
@@ -1185,10 +1183,10 @@ const Courses = () => {
                             index === 0
                               ? "st"
                               : index === 1
-                              ? "nd"
-                              : index === 2
-                              ? "rd"
-                              : "th"
+                                ? "nd"
+                                : index === 2
+                                  ? "rd"
+                                  : "th"
                           } Semester`}
                         </MenuItem>
                       ))}

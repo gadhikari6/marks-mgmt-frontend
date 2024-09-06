@@ -81,55 +81,55 @@ export const checkTokenExpiry = (decodedToken) => {
 // reducer for login
 export const LoginReducer = (state, action) => {
   switch (action.type) {
-    case "LOGIN":
-      setToken(action.payload.token)
+  case "LOGIN":
+    setToken(action.payload.token)
+    return {
+      ...state,
+      isLogged: true,
+      token: action.payload.token,
+      decodedToken: decodeToken(action.payload.token),
+      roles: action.payload.roles,
+    }
+
+  case "LOGOUT":
+    sessionStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(TOKEN_KEY)
+    return {
+      ...state,
+      isLogged: false,
+      token: null,
+      decodedToken: null,
+      roles: {
+        hasMultiRoles: false,
+        currentRole: null,
+        allRoles: [],
+      },
+    }
+
+  case "LOGOUT_NETWORK_ISSUE":
+    // this logs out user but does not remove the token.
+    return {
+      ...state,
+      isLogged: false,
+      token: null,
+      decodedToken: null,
+      roles: {
+        hasMultiRoles: false,
+        currentRole: null,
+        allRoles: [],
+      },
+    }
+
+  case "CHANGE_ROLE":
+    if (hasRole(action.payload.role, state.roles.allRoles)) {
       return {
         ...state,
-        isLogged: true,
-        token: action.payload.token,
-        decodedToken: decodeToken(action.payload.token),
-        roles: action.payload.roles,
+        roles: { ...state.roles, currentRole: action.payload.role },
       }
+    }
+    return { ...state }
 
-    case "LOGOUT":
-      sessionStorage.removeItem(TOKEN_KEY)
-      localStorage.removeItem(TOKEN_KEY)
-      return {
-        ...state,
-        isLogged: false,
-        token: null,
-        decodedToken: null,
-        roles: {
-          hasMultiRoles: false,
-          currentRole: null,
-          allRoles: [],
-        },
-      }
-
-    case "LOGOUT_NETWORK_ISSUE":
-      // this logs out user but does not remove the token.
-      return {
-        ...state,
-        isLogged: false,
-        token: null,
-        decodedToken: null,
-        roles: {
-          hasMultiRoles: false,
-          currentRole: null,
-          allRoles: [],
-        },
-      }
-
-    case "CHANGE_ROLE":
-      if (hasRole(action.payload.role, state.roles.allRoles)) {
-        return {
-          ...state,
-          roles: { ...state.roles, currentRole: action.payload.role },
-        }
-      }
-      return { ...state }
-
-    default:
-      return state
+  default:
+    return state
   }
 }

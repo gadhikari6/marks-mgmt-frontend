@@ -437,10 +437,10 @@ export default function AdminMarks() {
                       index === 0
                         ? "st"
                         : index === 1
-                        ? "nd"
-                        : index === 2
-                        ? "rd"
-                        : "th"
+                          ? "nd"
+                          : index === 2
+                            ? "rd"
+                            : "th"
                     } Semester`}
                   </MenuItem>
                 ))}
