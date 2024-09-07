@@ -36,6 +36,9 @@ import { toast } from "react-toastify"
 import AddTeacherForm from "../addTeacher/AddTeacherForm"
 import usePrograms from "../../../hooks/count/usePrograms"
 import { LoginContext } from "../../../store/LoginProvider"
+import { QueryClient } from "react-query"
+import InvalidResult from "../ImportDialog/InvalidResult"
+import ImportDialog from "../ImportDialog/ImportDialog"
 const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL // Fetching from .env file
 
 export default function ViewTeachers() {
@@ -317,6 +320,62 @@ export default function ViewTeachers() {
     }
   }
 
+  // toggle for import dialog
+  const [importDialog, setImportDialog] = useState(false)
+
+  const queryClient = new QueryClient()
+
+  // invalid dialog toggle
+  const [invalidToggle, setInvalidToggle] = useState(false)
+  const [invalidQueries, setInvalidQueries] = useState(null)
+
+  // method to upload csv of teacher bulk data
+  const uploadTeacherCSV = async (file) => {
+    try {
+      await axios
+        .post(
+          `${VITE_BACKEND_URL}/admin/teachers/import`,
+          {
+            file: file,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${loginState.token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        )
+        .then((response) => {
+          if (response.status === 201) {
+            const valid = response.data?.validQueries?.length || 0
+            const invalid = response.data?.invalidQueries?.length || 0
+
+            toast.success(
+              `Request resulted in ${valid} valid queries and ${invalid} invalid queries.`
+            )
+
+            if (invalid > 0) {
+              // set the failed queries
+              setInvalidToggle(true)
+              setInvalidQueries(response.data?.invalidQueries || null)
+            }
+            fetchTeachersList(selectedProgram.id || 0)
+            queryClient.invalidateQueries(["teacher-count"]) // invalidate other related queries
+          }
+        })
+        .catch((err) => {
+          console.log(err.response) // remove later
+          toast.warn(err.response.data.error.message)
+          toast.warn(
+            "Did you provide right csv fields? Use the sample csv as guide."
+          )
+        })
+    } catch (err) {
+      toast.warn("Something wrong went with request")
+      console.log(err) // remove later
+    }
+  }
+
   return (
     <Box
       fontFamily={{
@@ -339,6 +398,7 @@ export default function ViewTeachers() {
         <FormControl sx={{ m: 1, minWidth: "35rem" }}>
           <InputLabel>Select a Program</InputLabel>
           <Select
+            label="Select a Program"
             value={selectedProgram ? selectedProgram.id : ""}
             onChange={handleProgramChange}
           >
@@ -369,6 +429,21 @@ export default function ViewTeachers() {
           }}
         >
           Add Teacher
+        </Button>
+        <Button
+          disabled={!isAdmin}
+          variant="contained"
+          startIcon={<AddCircleIcon />}
+          onClick={() => {
+            setImportDialog(true)
+          }}
+          sx={{
+            alignSelf: "center",
+            padding: 1,
+            margin: 1,
+          }}
+        >
+          Import Teachers
         </Button>
       </Box>
 
@@ -679,6 +754,26 @@ export default function ViewTeachers() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/*  Import dialog */}
+      <ImportDialog
+        openToggle={importDialog}
+        closeToggleFunc={() => {
+          setImportDialog(false)
+        }}
+        dialogTitle={"Teachers"}
+        downloadLink={"/teachers-sample.csv"}
+        uploadFunc={uploadTeacherCSV}
+        extraMsg="The initial password of a teacher will be the value placed in contactNo field. A teacher can change it later."
+      />
+
+      <InvalidResult
+        openToggle={invalidToggle}
+        closeToggleFunc={() => {
+          setInvalidToggle(false)
+        }}
+        data={invalidQueries}
+      />
     </Box>
   )
 }
