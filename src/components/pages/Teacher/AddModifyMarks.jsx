@@ -94,11 +94,15 @@ const AddModifyMarks = () => {
 
   // change selected course from dropdown
   const handleCourseChange = (event) => {
-    const courseId = parseInt(event.target.value)
-    const selected = teacherCourses.courses.find(
-      (course) => course.courseId === courseId
-    )
-    setSelectedCourse(selected)
+    const index = parseInt(event.target.value)
+
+    // const courseId = parseInt(event.target.value)
+    // const selected = teacherCourses.courses.find(
+    //   (course) => course.courseId === courseId
+    // )
+
+    const selected = teacherCourses.courses[index]
+    setSelectedCourse({ ...selected, item: index })
   }
 
   // upload bulk marks
@@ -412,14 +416,14 @@ const AddModifyMarks = () => {
         <FormControl sx={{ m: 1, minWidth: "35rem" }}>
           <InputLabel>Select a Course</InputLabel>
           <Select
-            value={selectedCourse ? selectedCourse.courseId : ""}
+            value={selectedCourse ? selectedCourse.item : ""}
             onChange={handleCourseChange}
             label="Select a Course"
           >
             {teacherCourses !== undefined &&
               teacherCourses !== null &&
-              teacherCourses.courses.map((course) => (
-                <MenuItem key={course.courseId} value={course.courseId}>
+              teacherCourses.courses.map((course, index) => (
+                <MenuItem key={index} value={index}>
                   <Card variant="outlined" sx={{ width: "100%", padding: 1 }}>
                     <Typography
                       sx={{ fontSize: 14 }}
@@ -427,7 +431,8 @@ const AddModifyMarks = () => {
                       gutterBottom
                     >
                       Name: {course.course.name}{" "}
-                      {course.course.name === selectedCourse?.course.name &&
+                      {course.courseId === selectedCourse?.courseId &&
+                        course.programId === selectedCourse?.programId &&
                         "*"}
                     </Typography>
                     <Stack direction={"row"} gap={4}>
