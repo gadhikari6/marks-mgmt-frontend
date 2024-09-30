@@ -1,6 +1,6 @@
-DO NOT merge in the main branch.
+# MARKS MANAGEMENT SYSTEM - FRONTEND
 
-We will be working on development branch.
+The frontend for the marks managment system which is aimed to be used by universities and other educational institutes.
 
 ## NECESSARY TOOLS
 
@@ -18,10 +18,16 @@ We will be working on development branch.
    cp .env.example .env
    ```
 3. Edit `.env` file as required
-4. Run:
+4. Run in dev mode:
 
 ```bash
    pnpm run dev
+```
+
+4. Run in production mode:
+
+```bash
+   pnpm run prod
 ```
 
 _Note: Run `pnpm run lint-fix` to fix auto-fixable linting problems_
